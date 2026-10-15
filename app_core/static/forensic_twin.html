@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FORGE-VI | Forensic Twin</title>
+<link rel="stylesheet" href="css/fault_injection.css" />
+<link rel="stylesheet" href="css/forensic_twin.css" />
+</head>
+<body>
+<header class="fi-header">
+  <div class="fi-brand">
+    <div class="fi-hex">FT</div>
+    <div>
+      <h1>FORGE-VI <span>// FORENSIC TWIN</span></h1>
+      <div class="fi-sub">Expected-vs-real state per node, composed from signals already computed elsewhere -- read-only, on-demand checks only</div>
+    </div>
+  </div>
+  <div class="fi-header-stats">
+    <div class="fi-stat"><label>Scopes Tracked</label><b id="stat-scopes">0</b></div>
+    <div class="fi-stat"><label>Events (recent)</label><b id="stat-events">0</b></div>
+    <div class="fi-stat" title="Real measured cost of this watcher's own checks (objective 4: spend as little of the host's resources as possible) -- from forge_dt_metrics' monitoring_overhead."><label>Monitoring Overhead</label><b id="stat-overhead">--</b></div>
+    <a href="/monitor3d?view=digital-twin" style="align-self:center;padding:7px 14px;border:1px solid var(--cyan);color:var(--cyan);border-radius:6px;font-size:11px;font-weight:700;text-decoration:none;white-space:nowrap;">Open 3D Digital Twin View</a>
+  </div>
+</header>
+
+<main class="fi-grid">
+
+  <section class="fi-card fi-wide" id="guide-card">
+    <details>
+      <summary style="cursor:pointer;color:var(--cyan);font-size:14px;font-weight:700">Guide -- what is this, and what should I expect to see?</summary>
+      <div style="margin-top:12px">
+
+        <h3>What is this</h3>
+        <p class="fi-note">This is an automatic watcher: it continuously compares "what should be happening" in the industrial lab (the PLC, sensors, security software) against "what is actually happening right now", and flags it when something doesn't match. It is not just a screen that shows data -- it is a program that checks the system on its own, every 30 minutes, with nobody needing to come look.</p>
+
+        <h3>Objectives</h3>
+        <p class="fi-note">1. Know at any moment whether the scenario (the 5 virtual machines simulating the factory) is still exactly as deployed, without anyone checking by hand.<br>
+        2. Automatically detect 3 real kinds of problem: a security tool that disappears, a service that stops, or the PLC doing something its own program would never do.<br>
+        3. Leave a verifiable record of every problem detected -- date, what happened, why it counts as a problem -- usable as real evidence for a forensic investigation.<br>
+        4. Do all of this while spending as little of the host's resources as possible.</p>
+
+        <h3>How to use it</h3>
+        <table class="fi-table">
+          <thead><tr><th>Button</th><th>What it does</th><th>When to use it</th></tr></thead>
+          <tbody>
+            <tr><td>1 &middot; Check a Node</td><td>Checks ONE specific machine right now: installed tools, active services, clock, and (for the PLC) its control logic</td><td>When you want an exact snapshot of one node at this instant</td></tr>
+            <tr><td>2 &middot; Check Campaign Reproducibility</td><td>Checks whether an already-launched attack campaign gave consistent results across repetitions</td><td>Only after launching a Level C campaign</td></tr>
+            <tr><td>3 &middot; Check Scenario Snapshot</td><td>Compares the overall scenario state against the last one saved</td><td>To see if anything changed at the global level</td></tr>
+            <tr><td>4 &middot; Config Integrity</td><td>"Capture Baseline" saves a fingerprint of a node's Suricata/Wazuh files; "Check Integrity" compares the current fingerprint against it</td><td>Capture the baseline once, early; check integrity any time you suspect a rule or config file was tampered with</td></tr>
+            <tr><td>5 &middot; Network Exposure</td><td>"Capture Baseline" saves which ports a node is listening on; "Check Exposure" compares the current list against it, and always shows who is currently logged in</td><td>Capture the baseline once, early; check any time you suspect a new backdoor port or want to know who was logged in</td></tr>
+          </tbody>
+        </table>
+        <p class="fi-note">Beyond these 3 buttons, the system also checks all of this on its own, in the background, every 30 minutes (and every 2 hours for the more expensive checks, like the PLC and the clock) -- with nobody pressing anything.</p>
+
+        <h3>What results to expect</h3>
+        <p class="fi-note"><b>Healthy case (normal, almost always):</b> Missing tools: none &middot; Clock: synchronized &middot; PLC: diverged=false everywhere &middot; Events list: "no divergence events recorded".</p>
+        <p class="fi-note"><b>Real-problem case (what this is built to catch):</b> A tool shows up under Missing &middot; A service shows as not active &middot; The PLC shows diverged=true &middot; A new row appears under "Recent Divergence Events", with a date, a problem type, and an explanation.</p>
+        <p class="fi-note">Important: everything coming back "healthy" does not mean the system is doing nothing. It means it genuinely checked and found no problem -- that is an active confirmation, not an empty result.</p>
+
+        <h3>How to read each field</h3>
+        <table class="fi-table">
+          <thead><tr><th>Field</th><th>What it means</th><th>Healthy value</th><th>Problem value</th></tr></thead>
+          <tbody>
+            <tr><td>Tools &rarr; Missing</td><td>Security tools that should be installed</td><td>none</td><td>A list of names &rarr; something disappeared</td></tr>
+            <tr><td>Clock &rarr; degraded</td><td>Whether the node's clock is badly out of sync</td><td>false</td><td>true &rarr; the clock drifted more than 1 second</td></tr>
+            <tr><td>Control law &rarr; diverged</td><td>Whether the PLC is doing something its own program would not do</td><td>false</td><td>true &rarr; possible real manipulation of the PLC</td></tr>
+            <tr><td>Baseline comparison &rarr; diverged</td><td>Whether the PLC changed relative to a state saved earlier</td><td>false</td><td>true &rarr; something changed since the reference was captured</td></tr>
+            <tr><td>Overall reproduction ready</td><td>Whether the scenario is still valid for repeating experiments</td><td>true</td><td>false &rarr; the scenario is no longer reliable for comparison</td></tr>
+            <tr><td>Recent Divergence Events</td><td>List of real problems detected, with date and reason</td><td>empty</td><td>each row is one confirmed real problem</td></tr>
+            <tr><td>Config Integrity &rarr; diverged</td><td>Whether a Suricata/Wazuh file's content changed since the baseline was captured</td><td>false</td><td>true &rarr; a rule or config file was modified or disappeared</td></tr>
+            <tr><td>Network Exposure &rarr; diverged</td><td>Whether a NEW listening port appeared since the baseline was captured</td><td>false</td><td>true &rarr; a port is listening that wasn't before -- possible backdoor</td></tr>
+          </tbody>
+        </table>
+
+        <h3>FAQ</h3>
+        <p class="fi-note"><b>If everything comes back healthy, does that mean the digital twin isn't doing anything useful?</b><br>No. It means that, right now, there is no problem -- and that is already real information, actively verified every 30 minutes.</p>
+        <p class="fi-note"><b>Do I need to launch an attack campaign for this to work?</b><br>Not for the basics. It already watches whatever scenario is currently deployed. A campaign is only needed for the specific reproducibility check (button 2).</p>
+        <p class="fi-note"><b>Can this slow down the rest of the platform?</b><br>The automatic cycle is designed to be cheap: about 20 real seconds of work every 30 minutes.</p>
+        <p class="fi-note"><b>Why are the clock and the PLC only checked every 2 hours instead of every 30 minutes?</b><br>Because they are the most expensive checks (they need a real network connection to each machine). They run less often to avoid wasting resources, but they still run on their own, with nobody needing to ask.</p>
+
+      </div>
+    </details>
+  </section>
+
+  <section class="fi-card" id="check-card">
+    <h2>1 &middot; Check a Node</h2>
+    <p class="fi-note">Pulls fresh tool inventory and a live clock reading (plus PLC control-law state for role=plc). The clock reading is a real SSH round-trip -- a few seconds, never automatic or continuous.</p>
+    <div class="fi-field">
+      <label>Node</label>
+      <select id="node-select"><option value="">Loading...</option></select>
+    </div>
+    <button class="fi-btn-primary" id="btn-check-node">Check Now</button>
+    <div class="fi-launch-status" id="check-status"></div>
+  </section>
+
+  <section class="fi-card" id="campaign-card">
+    <h2>2 &middot; Check Campaign Reproducibility</h2>
+    <p class="fi-note">Reuses the Level C comparison_report already computed between repetitions -- never recomputes CPR/WCPR itself.</p>
+    <div class="fi-field">
+      <label>Level C job</label>
+      <select id="job-id-select"><option value="">Loading...</option></select>
+    </div>
+    <button class="fi-btn-primary" id="btn-check-campaign">Check Reproducibility</button>
+    <div class="fi-launch-status" id="campaign-status"></div>
+  </section>
+
+  <section class="fi-card" id="scenario-card">
+    <h2>3 &middot; Check Scenario Snapshot</h2>
+    <p class="fi-note">Reuses the 2 most recently captured whole-scenario snapshots already built by scenario_snapshot -- never triggers a new capture. Fires an event only on a real readiness regression (<code>overall_reproduction_ready=False</code>), not on a mere hash change (which happens between almost every pair of snapshots, since it includes platform-wide monotonic counters).</p>
+    <button class="fi-btn-primary" id="btn-check-scenario">Check Scenario</button>
+    <div class="fi-launch-status" id="scenario-status"></div>
+  </section>
+
+  <section class="fi-card" id="config-integrity-card">
+    <h2>4 &middot; Config Integrity (Suricata/Wazuh)</h2>
+    <p class="fi-note">Hashes the same Suricata rule files and Wazuh config/rule files the tooling probe already reads over SSH, and compares them against a baseline you capture explicitly. Uses the node selected above in "1 &middot; Check a Node". The PLC's own program file is not covered -- it has no confirmed remote path in this codebase yet.</p>
+    <button class="fi-btn-primary" id="btn-capture-config-baseline">Capture Baseline</button>
+    <button class="fi-btn-primary" id="btn-check-config">Check Integrity</button>
+    <div class="fi-launch-status" id="config-status"></div>
+  </section>
+
+  <section class="fi-card fi-wide" id="config-state-card">
+    <h2>Config Integrity State</h2>
+    <div id="config-state-body"><div class="fi-note">Capture a baseline, then run a check to see results.</div></div>
+  </section>
+
+  <section class="fi-card" id="network-exposure-card">
+    <h2>5 &middot; Network Exposure (ports/sessions)</h2>
+    <p class="fi-note">Live <code>ss -tulwn</code> (listening TCP/UDP ports) and <code>who</code> (logged-in sessions), reusing the same health-probe SSH session node_health already opens. Grounded in NIST SP 800-86 &sect;5.1.2 "Volatile Data" -- Network Connections and Login Sessions are two of its named volatile-evidence categories. Uses the node selected above in "1 &middot; Check a Node". A new listening port vs. the baseline is flagged as a divergence (classic backdoor/persistence indicator); login sessions are shown as real, honest context, never auto-flagged (a real admin SSHing in to administer the lab is routine here, not an anomaly).</p>
+    <button class="fi-btn-primary" id="btn-capture-network-baseline">Capture Baseline</button>
+    <button class="fi-btn-primary" id="btn-check-network">Check Exposure</button>
+    <div class="fi-launch-status" id="network-status"></div>
+  </section>
+
+  <section class="fi-card fi-wide" id="network-state-card">
+    <h2>Network Exposure State</h2>
+    <div id="network-state-body"><div class="fi-note">Capture a baseline, then run a check to see results.</div></div>
+  </section>
+
+  <section class="fi-card fi-wide" id="state-card">
+    <h2>Node State</h2>
+    <div id="node-state-body"><div class="fi-note">Run a check to see results.</div></div>
+  </section>
+
+  <section class="fi-card fi-wide" id="scenario-state-card">
+    <h2>Scenario State</h2>
+    <div id="scenario-state-body"><div class="fi-note">Run a scenario check to see results.</div></div>
+  </section>
+
+  <section class="fi-card fi-wide" id="events-card">
+    <h2>Recent Divergence Events</h2>
+    <table class="fi-table">
+      <thead><tr><th>Time</th><th>Scope</th><th>Type</th><th>Evidence</th></tr></thead>
+      <tbody id="events-table-body"></tbody>
+    </table>
+  </section>
+
+  <section class="fi-card fi-wide" id="scopes-card">
+    <h2>Known Scopes</h2>
+    <div id="scopes-body"></div>
+  </section>
+
+</main>
+
+<script type="module" src="js/forensic_twin/app.js"></script>
+</body>
+</html>

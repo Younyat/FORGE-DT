@@ -1,6 +1,9 @@
 tf_out/
 last_deployment.pid
 
+# Rotated logs (app.log.N -- not caught by the bare *.log pattern below)
+app.log.*
+
 # === Research/novelty notes -- personal, never pushed ===
 /investigacion_y_novedad/
 /investigaciones_y_implementacion/

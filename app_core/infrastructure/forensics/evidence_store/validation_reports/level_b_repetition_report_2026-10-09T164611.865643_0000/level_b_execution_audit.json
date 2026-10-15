@@ -1,0 +1,67 @@
+{
+  "audit_type": "level_b_execution_audit",
+  "generated_at": "2026-10-09T18:50:10.053166+00:00",
+  "campaign_id": "CMP-20261009-124327-0CB6",
+  "requested_repetitions": 1,
+  "attempted_repetitions": 1,
+  "not_started_repetitions": 0,
+  "completed_repetitions": 0,
+  "partial_repetitions": 1,
+  "failed_repetitions": 0,
+  "current_job_status": "running",
+  "stop_context": {
+    "current_phase": "generate_report",
+    "current_phase_label": "Generate Level B report",
+    "current_phase_detail": "Aggregating per-repetition timing, acquisition, reconstruction, warnings, blockers, and case outputs into the final Level B validation report bundle.",
+    "errors": [],
+    "warnings": [
+      "6 of 8 expected causal edges were recovered. The reconstruction is partially supported and should be presented with explicit caveats on the degraded or ambiguous edges.",
+      "At least one causal edge is temporally ambiguous under the preserved uncertainty window.",
+      "Some causal edges could not be temporally ordered because the required artifact timestamps were not available or not resolvable.",
+      "Modbus traffic is observed, but register and value precision are not confirmed by packet-level parsing.",
+      "Modbus register and value precision (declared in ground truth as register=4, expected_value=30) is not confirmed by packet-level parsing; only the presence of Modbus traffic is verified here.",
+      "This was the final repetition of the campaign -- case case-116ef95c was kept fully intact as a complete result sample instead of being reduced to the lightweight bundle."
+    ]
+  },
+  "expected_flow": {
+    "per_level_b_repetition": [
+      "execute controlled OT attack",
+      "observe eligible high-severity alert",
+      "create and preserve one fresh forensic case",
+      "run multilayer analysis and reconstruction",
+      "run nested Level A scientific repetitions over that same preserved case",
+      "clean heavy case artifacts while retaining lightweight comparison bundle"
+    ],
+    "batch_finalization": [
+      "repeat until requested repetition count is reached",
+      "compare Level B repetitions",
+      "emit final Level B JSON/CSV/Markdown report bundle"
+    ]
+  },
+  "generated_outputs": {
+    "campaign_created": true,
+    "level_b_execution_workspaces": [
+      "EXEC-0002"
+    ],
+    "forensic_cases_created": [
+      "case-116ef95c"
+    ],
+    "analysis_outputs_present_cases": [
+      "case-116ef95c"
+    ],
+    "nested_level_a_reports_completed": [
+      "CMP-20261009-180118-4425"
+    ],
+    "lightweight_cleanup_bundles_completed": [
+      "case-116ef95c"
+    ],
+    "level_b_report_bundle": true
+  },
+  "missing_or_pending_outputs": {
+    "remaining_level_b_repetitions_not_started": 0,
+    "nested_level_a_reports_missing": 0,
+    "heavy_case_cleanups_missing": 0,
+    "higher_level_comparison_ready": false
+  },
+  "last_failed_repetition": {}
+}

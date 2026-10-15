@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FORGE-VI // Control Room</title>
+  <link rel="stylesheet" href="css/control_room.css" />
+  <link rel="stylesheet" href="css/control_room_room.css" />
+  <script type="importmap">
+  { "imports": { "three": "/vendor/three/three.module.js" } }
+  </script>
+</head>
+<body>
+  <div id="viewport">
+    <main id="stage" aria-label="FORGE-VI control room dashboard">
+      <div class="city-bg" aria-hidden="true">
+        <div class="mountains"></div>
+        <div class="skyline skyline-a"></div>
+        <div class="skyline skyline-b"></div>
+        <div class="grid-horizon"></div>
+      </div>
+
+      <canvas id="three-layer" aria-hidden="true"></canvas>
+      <svg id="pipe-fallback" viewBox="0 0 1664 930" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <filter id="glowG"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <linearGradient id="metalGreen" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#caffdf"/><stop offset=".2" stop-color="#52ff9c"/><stop offset=".55" stop-color="#0b9d51"/><stop offset=".75" stop-color="#57ff9f"/><stop offset="1" stop-color="#063c28"/></linearGradient>
+          <linearGradient id="metalYellow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6a0"/><stop offset=".22" stop-color="#ffe038"/><stop offset=".58" stop-color="#c99300"/><stop offset=".8" stop-color="#ffd531"/><stop offset="1" stop-color="#5b4300"/></linearGradient>
+          <linearGradient id="metalRed" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd0d0"/><stop offset=".22" stop-color="#ff4141"/><stop offset=".58" stop-color="#aa0505"/><stop offset=".8" stop-color="#ff2525"/><stop offset="1" stop-color="#480000"/></linearGradient>
+          <linearGradient id="metalGray" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0fbff"/><stop offset=".2" stop-color="#9bb2c1"/><stop offset=".56" stop-color="#4d6171"/><stop offset=".8" stop-color="#c8d3db"/><stop offset="1" stop-color="#2b3a45"/></linearGradient>
+        </defs>
+        <g class="pipe-svg" id="pipe-svg-group">
+          <path id="pipe-openstack-core" class="pipe metal green" d="M270 246 L270 292 Q270 313 292 313 L352 313" />
+          <path id="pipe-it-core" class="pipe metal green" d="M535 246 L535 300" />
+          <path id="pipe-ot-core" class="pipe metal yellow" d="M670 246 L670 299" />
+          <path id="pipe-tools-core" class="pipe metal green" d="M1084 246 L1084 275 Q1084 299 1062 299 L980 299" />
+          <path id="pipe-openstack-core-b" class="pipe metal gray" d="M265 246 L265 315 L350 315" />
+          <path id="pipe-core-attack-a" class="pipe metal red" d="M352 352 L283 352 L283 418" />
+          <path id="pipe-core-attack-b" class="pipe metal red" d="M352 352 L193 352 L193 418" />
+          <path id="pipe-core-detect" class="pipe metal green" d="M560 406 L560 418" />
+          <path id="pipe-core-health" class="pipe metal green" d="M850 406 L850 418" />
+          <path id="pipe-health-acq" class="pipe metal green" d="M986 351 L1050 351 L1050 492 L1095 492" />
+          <path id="pipe-health-remote" class="pipe metal gray" d="M986 370 L1160 370 L1160 593" />
+          <path id="pipe-warning-bus" class="pipe metal yellow" d="M382 492 L785 492 L785 440" />
+          <path id="pipe-left-loop" class="pipe metal green" d="M42 598 L42 492 L98 492" />
+          <path id="pipe-lower-warning" class="pipe metal yellow" d="M97 568 L767 568 Q785 568 785 548" />
+          <path id="pipe-acq-evidence" class="pipe metal green" d="M284 686 L304 686" />
+          <path id="pipe-evidence-analysis" class="pipe metal green" d="M486 686 L499 686" />
+          <path id="pipe-analysis-foc" class="pipe metal green" d="M673 686 L692 686" />
+          <path id="pipe-foc-campaign" class="pipe metal gray" d="M877 686 L905 686" />
+          <path id="pipe-campaign-remote" class="pipe metal gray" d="M1107 686 L1120 686" />
+          <path id="pipe-remote-return" class="pipe metal green" d="M1150 595 L1150 493 L1095 493" />
+        </g>
+      </svg>
+
+      <header class="topbar">
+        <section class="brand">
+          <img src="images/control_room/brand_cube.png" alt="" />
+          <div>
+            <div class="brand-title"><strong>FORGE-VI</strong><span>// CONTROL ROOM</span></div>
+            <div class="brand-sub">CYBER RANGE &bull; DFIR &bull; OT/IT &bull; AUTOMATION &bull; RESEARCH</div>
+          </div>
+        </section>
+        <section class="top-metrics">
+          <article class="top-metric wide"><label>PLATFORM STATUS</label><div><i id="m-status-dot" class="dot gray"></i><b id="m-status">–</b></div></article>
+          <article class="top-metric"><label>SCENARIO NODES</label><div><span class="mini-icon">&#9638;</span><b id="m-nodes">–</b></div></article>
+          <article class="top-metric"><label>ACTIVE INSTANCES</label><div><span class="mini-icon cyan">&#11049;</span><b id="m-instances">–</b></div></article>
+          <article class="top-metric"><label>RUNNING CAMPAIGNS</label><div><span class="mini-icon">&#9655;</span><b id="m-running">–</b></div></article>
+          <article class="top-metric"><label>ALERTS</label><div><span class="warn">&#9650;</span><b id="m-alerts">–</b></div></article>
+          <article class="top-metric"><label>FORENSIC CASES</label><div><span class="mini-icon">&#9635;</span><b id="m-cases">–</b></div></article>
+          <article class="clock"><div id="date">–</div><div id="clock">–</div><small>local</small></article>
+          <button class="gear" title="Recargar ahora" id="btn-refresh">&#9881;</button>
+        </section>
+      </header>
+
+      <section class="dashboard-main">
+        <article class="module state-gray" id="openstack" data-view="node_health" style="left:40px;top:94px;width:282px;height:155px" data-title="OpenStack Infrastructure">
+          <div class="module-head"><i class="status-dot"></i><h2>OPENSTACK<br>INFRASTRUCTURE</h2><span class="corner-dot">&#9673;</span></div>
+          <img class="module-art art-openstack" src="images/control_room/openstack.png" alt="3D OpenStack infrastructure" />
+          <div class="metric-list compact" style="left:164px;top:49px;width:110px">
+            <p><span>Total nodes</span><b id="os-total">–</b></p>
+            <p><span>Active</span><b id="os-active">–</b></p>
+            <p><span>IT nodes</span><b id="os-it">–</b></p>
+            <p><span>OT nodes</span><b id="os-ot">–</b></p>
+          </div>
+          <div class="module-footer"><b id="os-footer">–</b> nodes <div class="bar"><i id="os-bar" style="width:0%"></i></div></div>
+        </article>
+
+        <article class="module state-gray" id="it-scenario" data-view="index-scenario" style="left:392px;top:94px;width:242px;height:155px" data-title="IT Scenario &amp; Topology">
+          <div class="module-head"><i class="status-dot"></i><h2>IT SCENARIO<br>&amp; TOPOLOGY</h2><span class="corner-dot">&#9673;</span></div>
+          <img class="module-art" style="left:10px;top:44px;width:123px;height:92px" src="images/control_room/it_scenario.png" alt="3D IT topology" />
+          <div class="metric-list compact" style="left:135px;top:49px;width:97px"><p><span>Instances</span><b id="it-instances">–</b></p></div>
+        </article>
+
+        <article class="module state-gray" id="ot-scenario" data-view="industrial" style="left:697px;top:94px;width:257px;height:156px" data-title="OT / Industrial Scenario">
+          <div class="module-head"><i class="status-dot"></i><h2>OT / INDUSTRIAL<br>SCENARIO</h2><span class="corner-dot">&#9673;</span></div>
+          <img class="module-art" style="left:8px;top:46px;width:142px;height:98px" src="images/control_room/ot_scenario.png" alt="3D OT industrial scene" />
+          <div class="metric-list compact" style="left:147px;top:49px;width:100px"><p><span>PLC</span><b id="ot-plc">–</b></p><p><span>Registers</span><b id="ot-registers">–</b></p><p><span>HMI views</span><b id="ot-hmi">–</b></p></div>
+        </article>
+
+        <article class="module state-gray" id="tool-deployment" data-view="index-tools" style="left:1010px;top:94px;width:234px;height:155px" data-title="Tool Deployment">
+          <div class="module-head"><i class="status-dot"></i><h2>TOOL DEPLOYMENT</h2><span class="corner-dot">&#9673;</span></div>
+          <img class="module-art" style="left:4px;top:45px;width:121px;height:98px" src="images/control_room/tool_deploy.png" alt="3D tool deployment crate" />
+          <div class="metric-list compact" style="left:114px;top:52px;width:111px"><p><span>Tools Installed</span><b id="tools-count">–</b></p><p><span>Status</span><b class="pill" id="tools-pill">–</b></p></div>
+        </article>
+
+        <article class="core" id="orchestration-core" data-view="nicscyberlab_dashboard" data-title="Orchestration Core">
+          <div class="core-cap left-cap"></div>
+          <div class="core-brain"><img src="images/control_room/brain.png" alt="" /></div>
+          <div class="core-title"><h1>ORCHESTRATION CORE</h1><span>CONTROL BUS</span></div>
+          <div class="core-list" id="core-list">&rsaquo; Job Runner<br>&rsaquo; Level A/B/C Orchestrators<br>&rsaquo; Memory Watchdog<br>&rsaquo; Job Chain Walker<br>&rsaquo; Threads: <b id="core-threads">–</b></div>
+          <div class="core-cap right-cap"></div>
+          <div class="core-scan"></div>
+        </article>
+
+        <article class="module state-gray" id="attack-lab" data-view="dashboard_especial" style="left:98px;top:418px;width:290px;height:132px" data-title="Attack Lab">
+          <div class="module-head"><i class="status-dot"></i><h2>ATTACK LAB</h2><span class="corner-dot">&#9673;</span></div>
+          <img class="module-art" style="left:7px;top:38px;width:120px;height:96px" src="images/control_room/attack.png" alt="3D attack module" />
+          <div class="metric-list" style="left:127px;top:39px;width:151px">
+            <p><span>Active now</span><b id="attack-active">–</b></p>
+            <p><span>Templates</span><b id="attack-templates">–</b></p>
+            <p><span>Recorded (all-time)</span><b id="attack-total">–</b></p>
+            <p><span>Status</span><b class="pill" id="attack-pill">–</b></p>
+          </div>
+        </article>
+
+        <article class="module state-gray" id="detection-layer" data-view="dashboard" style="left:453px;top:418px;width:270px;height:132px" data-title="Detection Layer">
+          <div class="module-head"><i class="status-dot"></i><h2>DETECTION LAYER</h2><span class="corner-dot">&#9673;</span></div>
+          <img class="module-art" style="left:11px;top:42px;width:108px;height:87px" src="images/control_room/detection.png" alt="3D detection shield" />
+          <div class="metric-list" style="left:125px;top:39px;width:136px">
+            <p><span>Alerts</span><b id="det-alerts">–</b></p>
+            <p><span>Critical</span><b id="det-critical">–</b></p>
+            <p><span>Rules</span><b class="na-text" id="det-rules">n/a</b></p>
+            <p><span>Status</span><b class="pill" id="det-pill">–</b></p>
+          </div>
+        </article>
+
+        <article class="module state-gray" id="node-health" data-view="node_health" style="left:804px;top:418px;width:291px;height:132px" data-title="Node Health">
+          <div class="module-head"><i class="status-dot"></i><h2>NODE HEALTH</h2><span class="corner-dot">&#9673;</span></div>
+          <img class="module-art" style="left:11px;top:42px;width:121px;height:87px" src="images/control_room/node_health.png" alt="3D node health monitor" />
+          <div class="metric-list" style="left:127px;top:39px;width:153px">
+            <p><span>Total Nodes</span><b id="nh-total">–</b></p>
+            <p><span>Active</span><b class="green-text" id="nh-active">–</b></p>
+            <p><span>Down</span><b class="red-text" id="nh-down">–</b></p>
+          </div>
+        </article>
+
+        <article class="module state-gray" id="forensic-acquisition" data-view="forensics" style="left:29px;top:595px;width:256px;height:191px" data-title="Forensic Acquisition">
+          <div class="module-head"><i class="status-dot"></i><h2>FORENSIC ACQUISITION</h2><span class="corner-dot">&#9673;</span></div>
+          <img class="module-art" style="left:8px;top:48px;width:79px;height:80px" src="images/control_room/forensic.png" alt="3D forensic disk acquisition" />
+          <div class="metric-list forensic-list" style="left:88px;top:43px;width:155px">
+            <p><span>Memory (RAM)</span><b><i class="radio" id="acq-radio-memory"></i> <span id="acq-memory">–</span></b></p>
+            <p><span>Disk</span><b><i class="radio" id="acq-radio-disk"></i> <span id="acq-disk">–</span></b></p>
+            <p><span>Network</span><b><i class="radio" id="acq-radio-network"></i> <span id="acq-network">–</span></b></p>
+            <p><span>Live Response</span><b class="na-text">n/a</b></p>
+          </div>
+          <div class="stepper" id="acq-stepper"><b>1</b><span></span><b>2</b><span></span><b>3</b></div>
+          <div class="progress-track"><i id="acq-bar" style="width:0%"></i></div><small class="progress-label" id="acq-label">Sin caso activo</small>
+        </article>
+
+        <article class="module state-gray" id="evidence-store" data-view="foc_scientific_evidence_lifecycle" style="left:304px;top:595px;width:183px;height:180px" data-title="Evidence Store">
+          <div class="module-head"><i class="status-dot"></i><h2>EVIDENCE STORE</h2><span class="corner-dot">&#9673;</span></div>
+          <img class="module-art" style="left:6px;top:50px;width:82px;height:82px" src="images/control_room/evidence.png" alt="3D evidence storage" />
+          <div class="metric-list" style="left:86px;top:58px;width:87px"><p><span>Artifacts</span><b id="ev-artifacts">–</b></p><p><span>Size</span><b id="ev-size">–</b></p><p><span>Cases</span><b id="ev-cases">–</b></p></div>
+          <div class="bottom-status">All-time <b class="pill gray-pill">HISTORIC</b></div>
+        </article>
+
+        <article class="module state-gray" id="forensic-analysis" data-view="forensic_report_analysis" style="left:499px;top:595px;width:175px;height:180px" data-title="Forensic Analysis">
+          <div class="module-head"><i class="status-dot"></i><h2>FORENSIC ANALYSIS</h2></div>
+          <img class="module-art" style="left:5px;top:52px;width:73px;height:82px" src="images/control_room/analysis.png" alt="3D forensic analysis" />
+          <div class="metric-list" style="left:79px;top:60px;width:87px"><p><span>Phases</span><b id="an-phases">–</b></p><p><span>Done</span><b id="an-done">–</b></p></div>
+          <div class="bottom-status">Case <b id="an-case" style="font-family:var(--font-mono);font-size:10px">–</b></div>
+        </article>
+
+        <article class="module state-gray" id="foc-reconstruction" data-view="foc_reconstruction" style="left:692px;top:595px;width:186px;height:180px" data-title="FOC Reconstruction">
+          <div class="module-head"><i class="status-dot"></i><h2>FOC RECONSTRUCTION</h2></div>
+          <img class="module-art" style="left:5px;top:51px;width:85px;height:84px" src="images/control_room/foc.png" alt="3D causal reconstruction graph" />
+          <div class="metric-list" style="left:88px;top:61px;width:89px"><p><span>CPR</span><b id="foc-cpr">–</b></p><p><span>Nodes</span><b id="foc-nodes">–</b></p><p><span>Edges</span><b id="foc-edges">–</b></p></div>
+          <div class="bottom-status">Status <b class="pill" id="foc-pill">–</b></div>
+        </article>
+
+        <article class="module state-gray" id="campaign-repetitions" data-view="foc_repetition_manager" style="left:905px;top:595px;width:202px;height:192px" data-title="Campaign Repetitions">
+          <div class="split-half top-half"><div class="module-head"><i class="status-dot"></i><h2>CAMPAIGN REPETITIONS</h2></div><img class="module-art" style="left:5px;top:41px;width:74px;height:65px" src="images/control_room/campaign.png" alt="3D repetition cycle" /><div class="metric-list mini" style="left:88px;top:38px;width:101px"><p><span>Total Runs</span><b id="camp-total">–</b></p><p><span>Completed</span><b id="camp-completed">–</b></p><p><span>Running</span><b id="camp-running">–</b></p><p><span>Failed</span><b class="red-text" id="camp-failed">–</b></p></div></div>
+          <div class="split-half bottom-half" id="comparisons-half" data-view="foc_reconstruction_comparability"><div class="module-head"><i class="status-dot green-force"></i><h2>COMPARISONS</h2></div><img class="module-art" style="left:3px;top:29px;width:73px;height:57px" src="images/control_room/comparison.png" alt="3D comparison scales" /><div class="metric-list mini" style="left:88px;top:25px;width:101px"><p><span>Compared</span><b id="comp-count">–</b></p><p><span>Reproducibility</span><b id="comp-repro">–</b></p><p><span>Status</span><b id="comp-status">–</b></p></div></div>
+        </article>
+
+        <article class="module state-gray" id="remote-lab" data-view="honeyv" style="left:1120px;top:595px;width:139px;height:192px" data-title="Remote Lab Exchange">
+          <div class="module-head"><i class="status-dot"></i><h2>REMOTE LAB<br>EXCHANGE</h2></div>
+          <img class="module-art" style="left:17px;top:47px;width:91px;height:83px" src="images/control_room/remote.png" alt="3D remote lab globe" />
+          <div class="metric-list mini" style="left:10px;top:125px;width:118px"><p><span>Status</span><b class="na-text">n/a</b></p></div>
+        </article>
+      </section>
+
+      <aside class="right-rail">
+        <section class="side-card current-process">
+          <div class="side-head"><span class="play-ring">&#9654;</span><h2>CURRENT PROCESS</h2></div>
+          <div class="campaign-line"><strong id="cp-title">No active campaign</strong><b class="run-pill gray-run" id="cp-pill">IDLE</b></div>
+          <div class="kv" id="cp-kv"></div>
+        </section>
+
+        <section class="side-card live-nodes">
+          <h2>SCENARIO NODES (LIVE)</h2>
+          <div class="node-table-head"><span></span><span>Node</span><span style="text-align:right">CPU</span><span style="text-align:right">RAM</span><span style="text-align:right">DISK</span></div>
+          <div id="node-rows"><span class="na-text">cargando…</span></div>
+          <div class="node-metrics-note" id="node-metrics-note"></div>
+        </section>
+
+        <section class="side-card pipe-legend">
+          <h2>PIPE STATUS LEGEND</h2>
+          <div class="legend-row"><span class="sample-pipe green-s"></span><div><b>Active / Healthy</b><small>Process running correctly</small></div></div>
+          <div class="legend-row"><span class="sample-pipe yellow-s"></span><div><b>Warning / Anomaly</b><small>Unusual activity detected</small></div></div>
+          <div class="legend-row"><span class="sample-pipe red-s"></span><div><b>Error / Blocked</b><small>Process failed or blocked</small></div></div>
+          <div class="legend-row"><span class="sample-pipe gray-s" style="background:linear-gradient(#eef3f5,#8a9aa3 45%,#c7d0d5 66%,#5c6b73)"></span><div><b>Inactive</b><small>Service stopped or not in use</small></div></div>
+        </section>
+      </aside>
+
+      <section class="timeline">
+        <div class="timeline-head"><h2>LIVE EVENT TIMELINE</h2><label style="margin-left:auto">Auto-refresh <span class="toggle on"></span></label></div>
+        <div class="events" id="events">
+          <span class="na-text" style="padding:14px">cargando…</span>
+        </div>
+      </section>
+
+    </main>
+
+    <section id="pipeline-view" class="pv-root hidden" aria-label="All in One: sala de control real, reconstruccion fiel del control room de referencia">
+      <div class="room-viewport">
+        <div class="room-stage" id="room-stage">
+
+          <div class="ceiling" aria-hidden="true">
+            <div class="ceiling-grid"></div>
+            <div class="light l1"></div><div class="light l2"></div><div class="light l3"></div>
+            <div class="light l4"></div><div class="light l5"></div><div class="light l6"></div>
+          </div>
+
+          <section class="back-wall">
+            <div class="side-motto left">ISOLATED<br>REALISTIC<br>REPEATABLE<br>TRUSTED</div>
+            <div class="brand-wall">
+              <div class="forge-mark" aria-hidden="true"><span class="cube c1"></span><span class="cube c2"></span><span class="cube c3"></span></div>
+              <h1>FORGE-VI <span>CONTROL ROOM</span></h1>
+              <p>CYBER RANGE<br>FORENSIC RESEARCH<br>EXPERIMENTATION PLATFORM</p>
+            </div>
+            <div class="side-motto right">BUILD<br>EXECUTE<br>OBSERVE<br>INVESTIGATE<br>RECONSTRUCT<br>COMPARE<br>SHARE</div>
+          </section>
+
+          <section class="upper-bank" aria-label="Upper control panels" id="upper-bank"></section>
+
+          <section class="rear-console" aria-hidden="true">
+            <div class="rear-desk"></div>
+            <div id="rear-controls" class="control-strip"></div>
+            <div class="rear-screen rs1"></div><div class="rear-screen rs2"></div><div class="rear-screen rs3"></div><div class="rear-screen rs4"></div><div class="rear-screen rs5"></div><div class="rear-screen rs6"></div>
+          </section>
+
+          <section class="foreground-console" aria-label="Main operator console">
+            <div class="front-shell"></div>
+            <div class="front-bezel"></div>
+            <div class="front-monitor-row" id="front-monitor-row"></div>
+            <div id="front-controls" class="front-controls"></div>
+            <div class="desk-edge"></div>
+          </section>
+
+          <div class="floor" aria-hidden="true"></div>
+          <div class="room-vignette" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <section class="ops-strip" id="ops-strip" aria-label="Real control of the platform's host and processes"></section>
+    </section>
+  </div>
+
+  <!-- Deliberately outside #viewport/#stage: #stage has transform:scale(...),
+       and a position:fixed element inside a transformed ancestor stops
+       positioning against the real viewport (it becomes relative to that
+       ancestor instead). Living here, as a direct child of <body>, the
+       Visual/All in One switch stays always visible no matter which mode is
+       active -- it used to live inside #stage and disappeared entirely when
+       entering "All in One", with no way back (a real reported bug). -->
+  <div class="mode-switch" id="mode-switch">
+    <button data-mode="visual" class="active" title="Visual panel (mission control)">Visual</button>
+    <button data-mode="pipeline" title="Full control room: forensic investigation, SOC, SCADA/OT, IT infrastructure, and digital twin, all with real data">All in One</button>
+  </div>
+
+  <div id="quick-preview" class="qp-overlay hidden" role="dialog" aria-modal="true">
+    <div class="qp-backdrop" id="qp-backdrop"></div>
+    <div class="qp-panel">
+      <div class="qp-head">
+        <span id="qp-title">Module</span>
+        <div class="qp-head-actions">
+          <button id="qp-fullscreen" title="Abrir a pantalla completa">&#8599;</button>
+          <button id="qp-close" title="Cerrar (Esc)">&times;</button>
+        </div>
+      </div>
+      <div class="qp-summary" id="qp-summary"></div>
+      <iframe id="qp-frame" src="about:blank" title="Vista en vivo del dashboard real"></iframe>
+    </div>
+  </div>
+
+  <script type="module" src="js/control_room/app.js"></script>
+</body>
+</html>

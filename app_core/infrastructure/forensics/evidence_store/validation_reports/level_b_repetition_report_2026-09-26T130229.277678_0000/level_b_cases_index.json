@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-09-26T18:08:40.727150+00:00",
+  "cases": [
+    {
+      "repetition_number": 1,
+      "execution_id": "EXEC-0058",
+      "case_id": "case-662f99fc",
+      "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-130320",
+      "forensic_result_card": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0058/forensic_result_card.json",
+      "forensic_comparison_profile": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0058/forensic_comparison_profile.json",
+      "nested_level_a_campaign_id": "CMP-20260926-132934-E2D3",
+      "nested_level_a_report_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-662f99fc/CMP-20260926-132934-E2D3/level_A_2026-09-26T132934.784468_0000"
+    },
+    {
+      "repetition_number": 2,
+      "execution_id": "EXEC-0059",
+      "case_id": "case-601eda86",
+      "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-144041",
+      "forensic_result_card": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0059/forensic_result_card.json",
+      "forensic_comparison_profile": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0059/forensic_comparison_profile.json",
+      "nested_level_a_campaign_id": "CMP-20260926-151254-FD4B",
+      "nested_level_a_report_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-601eda86/CMP-20260926-151254-FD4B/level_A_2026-09-26T151254.521925_0000"
+    },
+    {
+      "repetition_number": 3,
+      "execution_id": "EXEC-0060",
+      "case_id": "case-66dc197c",
+      "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-163256",
+      "forensic_result_card": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0060/forensic_result_card.json",
+      "forensic_comparison_profile": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0060/forensic_comparison_profile.json",
+      "nested_level_a_campaign_id": "CMP-20260926-170501-DD55",
+      "nested_level_a_report_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-66dc197c/CMP-20260926-170501-DD55/level_A_2026-09-26T170501.527667_0000"
+    }
+  ]
+}

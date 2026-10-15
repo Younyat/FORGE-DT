@@ -422,6 +422,135 @@ def _build_live_hosts(job_phase: str | None) -> list[dict]:
     return hosts
 
 
+def get_live_attack_feed(since_iso: str | None) -> dict:
+    """NEW events since `since_iso` for the "Live Attack View" mode: only
+    just-started attacks, new node_health alerts, and new forensic cases --
+    meant for drawing a transient arrow/notification, not for reconstructing
+    the full state. Each event is resolved against the nodes LIVE right now
+    (by IP) so the arrow can be drawn at that host's real 3D box position; if
+    an attack can't be mapped to a live host (a historical IP that no longer
+    exists), it is still returned with `attacker_host`/`target_host` as null
+    instead of being hidden, honestly."""
+    now = _now()
+    # With no `since`, "starting from now" is assumed -- the full historical
+    # backlog (653 historical attacks seen this session) is never dumped all
+    # at once the first time this mode is entered.
+    since = _parse_ts(since_iso) if since_iso else now
+
+    try:
+        nodes = node_health_api._list_nodes()
+    except Exception:
+        nodes = []
+    ip_to_host = {}
+    for n in nodes:
+        for ip in (n.get("ip_private"), n.get("ip_floating")):
+            if ip:
+                ip_to_host[ip] = {"instance_id": n.get("id"), "name": n.get("name"), "role": n.get("role")}
+
+    attacks: list[dict] = []
+    try:
+        data = _load_json(ATTACK_ATTESTATION_PATH) or {}
+        for record in data.get("attacks") or []:
+            execution = (record or {}).get("execution") or {}
+            started = _parse_ts(execution.get("started_at"))
+            if not started or (since and started <= since) or started > now:
+                continue
+            attacker_ip = ((record or {}).get("attacker") or {}).get("ip")
+            target_ip = ((record or {}).get("target") or {}).get("target_ip")
+            attacks.append({
+                "kind": "attack",
+                "attack_id": record.get("attack_id"),
+                "attack_name": record.get("attack_name") or record.get("display_name"),
+                "mitre_technique": ((record.get("mitre") or {}).get("technique_id")),
+                "attacker_ip": attacker_ip,
+                "target_ip": target_ip,
+                "attacker_host": ip_to_host.get(attacker_ip),
+                "target_host": ip_to_host.get(target_ip),
+                "started_at": execution.get("started_at"),
+                "completed_at": execution.get("completed_at"),
+                "execution_status": record.get("execution_status"),
+            })
+    except Exception:
+        pass
+
+    alerts: list[dict] = []
+    try:
+        cache_path = node_health_api.HEALTH_SUMMARY_CACHE_PATH
+        if cache_path.is_file():
+            health = json.loads(cache_path.read_text(encoding="utf-8"))
+            for a in health.get("alerts") or []:
+                gen = _parse_ts(a.get("generated_at"))
+                if not gen or (since and gen <= since):
+                    continue
+                alerts.append({
+                    "kind": "alert",
+                    "alert_id": a.get("alert_id"),
+                    "severity": a.get("severity"),
+                    "scope": a.get("scope"),
+                    "target": a.get("target"),
+                    "title": a.get("title"),
+                    "detail": a.get("detail"),
+                    "generated_at": a.get("generated_at"),
+                    "target_host": ip_to_host.get(a.get("target")) or next(
+                        (h for h in ip_to_host.values() if h.get("name") == a.get("target")), None
+                    ),
+                })
+    except Exception:
+        pass
+
+    faults: list[dict] = []
+    try:
+        from ..forensic_twin.service import list_recent_events
+        id_to_host = {n.get("id"): {"instance_id": n.get("id"), "name": n.get("name"), "role": n.get("role")} for n in nodes}
+        for ev in list_recent_events(limit=100):
+            event_type = str(ev.get("event_type") or "")
+            if not event_type.startswith("fault_injection_"):
+                continue
+            gen = _parse_ts(ev.get("generated_at_utc"))
+            if not gen or (since and gen <= since) or gen > now:
+                continue
+            scope_id = ev.get("scope_id") or ""
+            node_id = scope_id[len("node:"):] if scope_id.startswith("node:") else None
+            faults.append({
+                "kind": "fault_injection",
+                "event_type": event_type,
+                "phase": "reverted" if event_type.endswith("_reverted") else "applied",
+                "fault_id": ev.get("fault_id"),
+                "injection_id": ev.get("injection_id"),
+                "node_id": node_id,
+                "target_host": id_to_host.get(node_id),
+                "evidence": ev.get("evidence"),
+                "generated_at": ev.get("generated_at_utc"),
+            })
+    except Exception:
+        pass
+
+    new_cases: list[dict] = []
+    try:
+        from ..foc_experimentation.config import EVIDENCE_STORE_ROOT
+        for p in EVIDENCE_STORE_ROOT.iterdir():
+            if not p.is_dir() or not p.name.startswith("CASE-"):
+                continue
+            try:
+                ts_part = p.name[len("CASE-"):]
+                created = datetime.strptime(ts_part, "%Y%m%d-%H%M%S").replace(tzinfo=timezone.utc)
+            except Exception:
+                continue
+            if (since and created <= since) or created > now:
+                continue
+            new_cases.append({"kind": "case_created", "case_id": p.name, "created_at": created.isoformat()})
+    except Exception:
+        pass
+
+    return {
+        "generated_at": _utc_now_iso(),
+        "attacks": attacks,
+        "alerts": alerts,
+        "faults": faults,
+        "new_cases": new_cases,
+    }
+
+
 # ---------------------------------------------------------------------------
 # Single-campaign focus assembly.
 # ---------------------------------------------------------------------------
@@ -657,6 +786,48 @@ def _beat(kind: str, rep_num: int | None, *, seq: int, available: bool = True, s
     }
 
 
+_PHASE_TOTAL_STAGE_KEYS = ("memory_acquisition", "disk_acquisition", "ot_export", "network_context_import")
+
+
+def _stage_phase_totals(stage_timeline: list[dict]) -> list[dict]:
+    """Real combined duration per acquisition phase, summed across every
+    host that went through it -- each `preservation_step` beat already
+    shows one host's own real elapsed time (e.g. "Memory acquisition: 3m
+    3s"), which is accurate but reads as misleadingly short when a case
+    actually has 3+ hosts going through the same phase one after another.
+    Built from the same already-computed `stage_timeline` entries, zero new
+    I/O, zero new timestamps -- purely a group-and-sum over real
+    `elapsed_seconds`/`started_at`/`finished_at` fields that already exist.
+    User explicitly asked (2026-10-11) to re-verify these durations; this is
+    the real total that was missing, not a correction of a wrong number."""
+    groups: dict[str, dict] = {}
+    for entry in stage_timeline or []:
+        key = entry.get("stage_key")
+        if key not in _PHASE_TOTAL_STAGE_KEYS:
+            continue
+        g = groups.setdefault(key, {
+            "stage_key": key, "label": entry.get("label"), "host_count": 0,
+            "total_elapsed_seconds": 0.0, "span_started_at": None, "span_finished_at": None,
+        })
+        g["host_count"] += 1
+        g["total_elapsed_seconds"] += entry.get("elapsed_seconds") or 0.0
+        started = entry.get("started_at")
+        finished = entry.get("finished_at")
+        if started and (g["span_started_at"] is None or started < g["span_started_at"]):
+            g["span_started_at"] = started
+        if finished and (g["span_finished_at"] is None or finished > g["span_finished_at"]):
+            g["span_finished_at"] = finished
+    for g in groups.values():
+        g["total_elapsed_seconds"] = round(g["total_elapsed_seconds"], 1)
+        # The real wall-clock span this phase occupied (first host's start to
+        # last host's finish) -- can exceed the summed per-host time if hosts
+        # ran sequentially with gaps, or be close to it if they overlapped;
+        # both are real, honest numbers, never reconciled into one guess.
+        g["span_seconds"] = _iso_diff_seconds(g["span_started_at"], g["span_finished_at"])
+    # Stable order matching the chronological pipeline, not dict insertion order.
+    return [groups[k] for k in _PHASE_TOTAL_STAGE_KEYS if k in groups]
+
+
 def _frozen_hosts_for_repetition(lc_detail: dict, role_lookup: dict) -> list[dict]:
     """A snapshot.hosts-shaped list built from THIS repetition's own real
     snapshot_infrastructure (real per-repetition IP/status/tools) instead of
@@ -756,8 +927,74 @@ def _repetition_beats(job: dict, rep_num: int, role_lookup: dict, base_repetitio
                 payload={"instance": inst, "tool": tool},
             ))
 
+    # 1.5) Real interventions (Intervention Ledger, M1) recorded against any
+    # of this repetition's own real hosts -- reuses the exact same
+    # phase-timeline build already verified live in Digital Twin View
+    # (intervention_ledger/timeline.py::build_phase_timeline), so the
+    # frontend renders this beat with the SAME phase_timeline.js widget,
+    # not a second one. Scoped by instance_id, which is correct here
+    # specifically because each repetition redeploys fresh VMs with their
+    # own real instance_ids -- an intervention only matches the repetition
+    # whose live host it was really applied against. Zero or more per
+    # repetition, honestly: most repetitions run before this session's
+    # Ledger existed have none, and this never invents one.
+    from ..intervention_ledger.service import get_ledger_entries
+    from ..intervention_ledger.timeline import build_phase_timeline
+
+    intervention_attempts = []
+    for h in hosts:
+        if not h.get("instance_id"):
+            continue
+        for entry in get_ledger_entries(node_id=h["instance_id"], limit=5000):
+            if entry.get("phase") in ("applied", "executed"):
+                intervention_attempts.append(entry)
+    intervention_attempts.sort(key=lambda e: e.get("applied_at") or e.get("recorded_at_utc") or "")
+    for entry in intervention_attempts:
+        timeline = _safe(lambda e=entry: build_phase_timeline(e["intervention_id"]))
+        if not timeline or not timeline.get("ok"):
+            continue
+        done_phases = [p for p in timeline["phases"] if p.get("status") == "done"]
+        beats.append(_beat(
+            "intervention", rep_num, seq=next_seq(), available=True,
+            started_at=entry.get("applied_at") or entry.get("requested_at"),
+            finished_at=entry.get("rollback_at"),
+            title=f"Intervention: {entry.get('type')} on {entry.get('target_node_name') or entry.get('target_node_id')}",
+            detail_lines=[f"{len(done_phases)}/{len(timeline['phases'])} phases completed (real)"],
+            nav_level="overview", focus_ids=campaign_focus_ids + [f"host:{entry.get('target_node_id')}"],
+            payload={"phase_timeline": timeline},
+        ))
+
     # 2) Attack
+    # `detection` is computed here (not after, as step "3" below used to
+    # read) purely so its real `trigger_alert_severity` can already ride
+    # along on the attack beat's own payload -- reconstruction mode replays
+    # ALREADY-KNOWN history, so showing the real outcome severity right on
+    # the attack arc itself (not just two beats later) is honest, not a
+    # spoiler invented for effect. `detection` itself is unchanged below.
     attack = level_b.get("attack") or {}
+    detection = level_b.get("detection") or {}
+
+    # This repetition genuinely never started -- no real attack was ever
+    # launched and no real case was ever created. True for every repetition
+    # after the one where a FAILED campaign actually died (e.g. reps 4-10
+    # of a 10-rep campaign that failed in rep 3). Previously this still
+    # built 6 more "(no data)"/"not available" placeholder beats per such
+    # repetition -- each one individually honest, but together a real UX
+    # bug the user flagged (2026-10-12): after the real "campaign failed
+    # here" moment (see build_reconstruction_timeline), the replay kept
+    # going through dozens of beats for repetitions that never happened.
+    # Skipping them here means the replay correctly ends where the real
+    # story actually ends; the repetition's own box in the 3D foundation
+    # still exists and correctly shows "pending" -- that comes from
+    # base_repetitions/marked_repetitions below, a separate, real, honest
+    # data source unaffected by this early return.
+    if not attack.get("attack_name") and not case:
+        return {
+            "repetition_number": rep_num, "case": case, "level_b": level_b, "hosts": hosts,
+            "snapshot_infrastructure": lc_detail.get("snapshot_infrastructure"),
+            "snapshot": None, "beats": beats,
+        }
+
     beats.append(_beat(
         "attack", rep_num, seq=next_seq(), available=bool(attack.get("attack_name")),
         started_at=attack.get("started_at"), finished_at=attack.get("completed_at"),
@@ -766,11 +1003,10 @@ def _repetition_beats(job: dict, rep_num: int, role_lookup: dict, base_repetitio
                                    f"register {attack.get('register')}" if attack.get("register") else None,
                                    f"value {attack.get('value')}" if attack.get("value") else None] if x],
         nav_level="overview", focus_ids=campaign_focus_ids + ([f"host:{h['instance_id']}" for h in hosts if h.get("name") == attack.get("target_node")]),
-        payload={"attack": attack},
+        payload={"attack": attack, "known_severity": detection.get("trigger_alert_severity")},
     ))
 
     # 3) Detection
-    detection = level_b.get("detection") or {}
     beats.append(_beat(
         "detection", rep_num, seq=next_seq(), available=bool(detection.get("outcome")),
         started_at=detection.get("trigger_alert_timestamp"),
@@ -789,8 +1025,12 @@ def _repetition_beats(job: dict, rep_num: int, role_lookup: dict, base_repetitio
         started_at=(case or {}).get("case_created_utc"),
         title=f"Case created: {(case or {}).get('case_id') or 'not available'}",
         detail_lines=[(case or {}).get("case_real_name")] if case else ["No case was created for this repetition."],
+        # `hosts` (already built above for the attack beat) lets the frontend
+        # request a Reality Gap check for this case's own real nodes BY NAME
+        # (stable across redeployments) -- see forensic_twin.compute_reality_gap's
+        # own docstring for why name, not instance_id.
         nav_level="overview", focus_ids=campaign_focus_ids + ([f"case:{case['case_id']}"] if case else []),
-        payload={"case": case},
+        payload={"case": case, "phase_totals": _stage_phase_totals(stage_timeline), "hosts": hosts},
     ))
 
     case_focus = [f"case:{case['case_id']}"] if case else campaign_focus_ids
@@ -827,12 +1067,22 @@ def _repetition_beats(job: dict, rep_num: int, role_lookup: dict, base_repetitio
     # 7) Causal reconstruction
     metrics = (causal_status or {}).get("metrics_preview") or {}
     edges = (causal_graph or {}).get("edges") or []
+    # C3 CPR (forge_dt_metrics, M6/2026-10-10): re-scores the SAME two
+    # upstream edges using independent corroboration from the Intervention
+    # Ledger + post-hoc Linker + Evidence Bridge, never touching C0's own
+    # fields above -- reused here unchanged so Reconstruction View shows the
+    # same number already verified live in forge_dt_metrics.html, instead of
+    # requiring a separate dashboard visit to see it.
+    c3 = None
+    if case and case.get("case_id") and case_dir:
+        from ..forge_dt_metrics.service import compute_c3_cpr_for_case
+        c3 = _safe(lambda: compute_c3_cpr_for_case(case["case_id"], case_dir))
     beats.append(_beat(
         "reconstruction", rep_num, seq=next_seq(), available=bool(causal_status),
         title="Causal reconstruction" + (f" — CPR {metrics.get('causal_path_recoverability')}" if metrics.get("causal_path_recoverability") is not None else ""),
         detail_lines=[f"{len(edges)} edges evaluated"] if edges else ["Reconstruction not available for this repetition."],
         nav_level="drilled_case", focus_ids=case_focus,
-        payload={"causal_status": causal_status, "edges": edges},
+        payload={"causal_status": causal_status, "edges": edges, "c3": c3},
     ))
 
     # 8) Seal
@@ -880,6 +1130,27 @@ def _repetition_beats(job: dict, rep_num: int, role_lookup: dict, base_repetitio
         "hosts": hosts,
     }
 
+    # 2026-10-15: a global chronological sort was tried here and reverted
+    # the same day -- user-reported regression, confirmed real: this
+    # repetition's own beats are built in deliberate STRUCTURAL blocks
+    # (per-host deployment+tools grouped together, so the replay finishes
+    # one machine before moving to the next -- see the per-host loop above,
+    # "keeps the construction story... before moving to the next machine"),
+    # and a blanket sort-by-`started_at` also reshuffled THAT intentional
+    # grouping, interleaving different hosts' tool_install beats by raw
+    # time. Worse, `intervention_attempts` here is scoped by `instance_id`
+    # across ALL time (get_ledger_entries has no campaign/job scope), so a
+    # real instance reused weeks later by an unrelated later campaign (e.g.
+    # a gap_validation run) pulls in THAT campaign's own interventions too,
+    # with real timestamps far outside this repetition's actual window --
+    # sorting globally let those foreign, unrelated interventions scramble
+    # into the middle of this repetition's real narrative. A correct fix
+    # needs to either scope interventions to this repetition's own real time
+    # window or keep them as their own block while only reordering block
+    # 1.5 itself in time relative to the surrounding blocks -- not attempted
+    # here again without the user's go-ahead, given the first attempt's
+    # blast radius was wider than intended.
+
     return {
         "repetition_number": rep_num,
         "case": case,
@@ -910,8 +1181,41 @@ def build_reconstruction_timeline(job_id: str) -> dict | None:
             "repetition_number": rep_num, "case": None, "level_b": None, "hosts": [], "beats": [], "snapshot": None,
         })
 
+    # A failed campaign gets one more real beat, chronologically last,
+    # exactly where it actually died -- not shown up front disconnected from
+    # the replay (the user's own correction, 2026-10-12: watching the replay
+    # should build up normally, phase by phase, and ONLY when playback
+    # genuinely reaches the failure moment should the "here it stopped, and
+    # here is why" account appear, like a video reaching the exact frame of
+    # the incident rather than a spoiler shown before pressing play).
+    # Reuses campaign_failure_forensics.reconstruct_failure() unchanged --
+    # same real evidence, same real explanation, just placed at its correct
+    # point in time instead of in an always-visible side panel.
+    if job.get("status") == "failed":
+        failed_rep_num = job.get("current_repetition") or total_reps
+        target_rep = next((r for r in repetitions if r.get("repetition_number") == failed_rep_num), None)
+        if target_rep is not None:
+            from ..campaign_failure_forensics.service import reconstruct_failure as _reconstruct_failure
+            failure_report = _safe(lambda: _reconstruct_failure(job_id))
+            if failure_report and failure_report.get("ok"):
+                fail_ts = failure_report.get("last_real_activity", {}).get("ts") or failure_report.get("declared_failed_at")
+                target_rep["beats"].append(_beat(
+                    "campaign_failed", failed_rep_num, seq=10_000, available=True,
+                    started_at=fail_ts, finished_at=failure_report.get("declared_failed_at"),
+                    title=f"Campaign failed here — {(failure_report.get('probable_cause') or 'undetermined').replace('_', ' ')}",
+                    detail_lines=[failure_report.get("declared_error") or ""],
+                    nav_level="overview", focus_ids=[f"rep:{failed_rep_num}"],
+                    payload={"failure_report": failure_report},
+                ))
+
     comparison_report = _safe(lambda: level_c_service.get_comparison_report(job_id))
-    finale_beat = _beat(
+    # A failed campaign never has a real comparison report (that needs every
+    # repetition to actually finish) -- rather than end the replay on an
+    # empty, honest-but-pointless "No comparison report available" anticlimax
+    # right after the real "campaign failed here" moment, this beat is
+    # skipped entirely for a failed job. The campaign_failed beat is already
+    # the real, correct ending for that story.
+    finale_beat = None if (job.get("status") == "failed" and not comparison_report) else _beat(
         "campaign_finale", None, seq=0, available=bool(comparison_report),
         title=(comparison_report or {}).get("verdict") or "No comparison report available",
         detail_lines=[

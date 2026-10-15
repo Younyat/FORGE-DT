@@ -27,6 +27,54 @@ logger = logging.getLogger("app_logger")
 SCRIPT_PATH = os.path.abspath("app_core/infrastructure/monitor/scripts/monitor_ataques.sh")
 SSH_KEY_PATH = os.path.expanduser("~/.ssh/my_key")
 
+# Cada intervalo de este tamano, generate() comprueba si ha empezado una campana Level B/C
+# mientras el stream ya estaba abierto (ver _is_repetition_campaign_active mas abajo).
+CAMPAIGN_GUARD_CHECK_INTERVAL_SECONDS = 60
+
+
+def _is_repetition_campaign_active() -> bool:
+    """True si hay una campana de repeticiones Level B o Level C corriendo AHORA MISMO.
+
+    Motivo (confirmado en vivo 2026-09-22/23, ver
+    investigacion_y_novedad/06_implementacion_forge_dt.md): este endpoint mantiene un worker de
+    gunicorn sincrono ocupado leyendo una conexion SSH via `iter(process.stdout.readline, "")` --
+    literalmente todo el tiempo que la pestana del navegador este abierta (EventSource se
+    reconecta solo). Con `-w 4` y `--timeout 20000` (~5h33min), en cuanto ese stream lleva mas de
+    ese tiempo abierto, gunicorn declara "WORKER TIMEOUT" y mata el worker con SIGKILL -- si ese
+    worker resulta ser el mismo que ejecuta el hilo de fondo de una campana Level B/C real (pura
+    coincidencia de reparto entre los 4 workers), la campana muere con el, con el mensaje generico
+    "no active worker exists anymore" que nada tiene que ver con el codigo de la campana en si.
+
+    Con solo 4 workers compartidos por TODO el trafico de la plataforma, la proteccion mas segura
+    -- sin tocar la invocacion de gunicorn en si (`-w`/`--timeout`), que queda fuera de alcance --
+    es simplemente no dejar que este streaming ocupe un worker mientras una campana real este en
+    marcha. Nunca lanza: un fallo al consultar cualquiera de los dos niveles se trata como "no hay
+    campana activa" (falla abierto hacia el comportamiento de siempre, no hacia bloquear sin razon
+    el streaming)."""
+    try:
+        from app_core.infrastructure.foc_experimentation.level_b_repetition_runner import find_active_level_b_job
+
+        if find_active_level_b_job():
+            return True
+    except Exception:
+        pass
+    try:
+        from app_core.infrastructure.level_c_orchestrator.service import list_jobs
+
+        if any(str(job.get("status") or "").lower() == "running" for job in list_jobs()):
+            return True
+    except Exception:
+        pass
+    return False
+
+
+_CAMPAIGN_PROTECTION_MESSAGE = (
+    "[PROTECTED] Streaming en vivo desactivado temporalmente: hay una campana de repeticiones "
+    "(Level B o Level C) en curso. Esta conexion ocupa uno de los 4 workers del servidor de forma "
+    "indefinida, y si eso coincide con el worker que ejecuta la campana, puede interrumpirla. "
+    "Vuelve a intentarlo cuando la campana termine."
+)
+
 
 def _alert_kind_and_summary(normalized: dict) -> tuple[str, str]:
     signature = str(normalized.get("signature") or "").strip()
@@ -62,6 +110,12 @@ def live_wazuh_stream():
     if not monitor_ip:
         return Response("data: [ERROR] IP ausente\n\n", mimetype="text/event-stream")
 
+    if _is_repetition_campaign_active():
+        # Respuesta cerrada de inmediato (no un stream abierto) -- nunca llega a ocupar un worker.
+        # El frontend (dashboard_especial.html) ya cierra el EventSource en su propio onerror en
+        # cuanto la conexion termina, asi que no hay riesgo de reintento en bucle.
+        return Response(f"data: {_CAMPAIGN_PROTECTION_MESSAGE}\n\n", mimetype="text/event-stream")
+
     def generate():
         yield "data: [SYSTEM] STREAM OPENED\n\n"
         yield f"data: [SYSTEM] Lanzando monitor Wazuh para {monitor_ip}\n\n"
@@ -84,9 +138,25 @@ def live_wazuh_stream():
                 universal_newlines=True
             )
 
+            last_campaign_check = time.time()
+
             for line in iter(process.stdout.readline, ""):
                 if not line:
                     continue
+
+                # Si una campana Level B/C arranca MIENTRAS este stream ya estaba abierto (el caso
+                # real que interrumpio dos campanas esta semana), cerrarlo con gracia aqui en vez
+                # de dejarlo ocupando el worker hasta que gunicorn lo mate por --timeout.
+                now = time.time()
+                if now - last_campaign_check >= CAMPAIGN_GUARD_CHECK_INTERVAL_SECONDS:
+                    last_campaign_check = now
+                    if _is_repetition_campaign_active():
+                        yield f"data: {_CAMPAIGN_PROTECTION_MESSAGE}\n\n"
+                        try:
+                            process.terminate()
+                        except Exception:
+                            pass
+                        return
 
                 raw_line = line.rstrip()
 

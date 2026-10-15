@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-10-10T13:10:03.456520+00:00",
+  "warnings": [
+    "7 of 8 expected causal edges were recovered. The reconstruction is mostly supported by preserved evidence, but it still does not establish absolute causality.",
+    "At least one causal edge is temporally ambiguous under the preserved uncertainty window.",
+    "Some causal edges could not be temporally ordered because the required artifact timestamps were not available or not resolvable.",
+    "Modbus traffic is observed, but register and value precision are not confirmed by packet-level parsing.",
+    "Modbus register and value precision (declared in ground truth as register=4, expected_value=30) is not confirmed by packet-level parsing; only the presence of Modbus traffic is verified here.",
+    "Heavy generated case artifacts were cleaned after nested Level A reporting so the next Level B repetition could create a fresh case without accumulating heavy storage."
+  ],
+  "blockers": []
+}

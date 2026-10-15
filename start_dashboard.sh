@@ -82,33 +82,77 @@ warn () { echo " [WARN] $1"; }
 info () { echo " [INFO] $1"; }
 err ()  { echo " [ERR]  $1"; }
 
+CLEANUP_DONE=0
 cleanup() {
+    # Bug real encontrado 2026-10-15: `trap cleanup EXIT INT TERM` ejecutaba
+    # cleanup() DOS VECES por cada Ctrl+C -- una vez de inmediato vía el trap
+    # INT, y OTRA VEZ vía el trap EXIT en cuanto gunicorn (que recibe su
+    # propio SIGINT directo del terminal, al estar en el mismo grupo de
+    # procesos en primer plano) terminaba su propio apagado y el script
+    # llegaba a su `exit "$GUNICORN_RC"` final. La segunda pasada volvía a
+    # pedir la contraseña de sudo justo cuando la terminal ya estaba en un
+    # estado confuso por la primera, dejando el `read` de sudo bloqueado
+    # para siempre -- la terminal "se quedaba parada" sin aceptar ninguna
+    # entrada más, ni siquiera otro Ctrl+C. Idempotente ahora: como mucho se
+    # ejecuta una vez real, sea cual sea la combinación de traps que la
+    # dispare. Además se desarma el propio trap INT/TERM nada más entrar,
+    # para que un segundo Ctrl+C impaciente mientras cleanup() ya está
+    # pidiendo la contraseña no reentre a mitad de la limpieza.
+    trap '' INT TERM
+    if [ "$CLEANUP_DONE" = "1" ]; then
+        return
+    fi
+    CLEANUP_DONE=1
     echo
     info "Ejecutando limpieza final..."
 
-    if [[ -n "${SCENARIO_CAPTURE_PID:-}" ]]; then
-        if ps -p "$SCENARIO_CAPTURE_PID" > /dev/null 2>&1; then
-            info "Deteniendo nics_scenario_captures.sh (PID=$SCENARIO_CAPTURE_PID)..."
+    # Deliberadamente NO depende de "$SCENARIO_CAPTURE_PID" (bug real
+    # encontrado 2026-10-13, segunda vuelta): nics_scenario_captures.sh tiene
+    # su propio candado por mkdir (acquire_lock) y, si otra instancia ya
+    # estaba corriendo (p.ej. una de hace semanas que nunca se llegó a matar),
+    # la instancia que ACABA de lanzar esta ejecución de start_dashboard.sh
+    # detecta el candado, imprime "Refusing to start" y sale casi al
+    # instante -- dejando "$SCENARIO_CAPTURE_PID" apuntando a un proceso que
+    # ya llevaba muerto desde el principio. El "if ps -p ... ; then" de
+    # antes comprobaba justo ESE PID y, al estar ya muerto, se saltaba TODO
+    # el bloque de limpieza sin ni intentarlo -- el huérfano real (otro PID
+    # distinto) seguía vivo sin que nadie lo tocara. Ahora se busca por
+    # patrón (pgrep -f), no por ese PID concreto, así que encuentra y para
+    # el huérfano real sea cual sea su PID.
+    if pgrep -f nics_scenario_captures.sh > /dev/null 2>&1 || pgrep -f "tcpdump -i tap" > /dev/null 2>&1; then
+        info "Deteniendo nics_scenario_captures.sh y sus capturas tcpdump en curso..."
 
-            sudo -n kill -TERM "$SCENARIO_CAPTURE_PID" 2>/dev/null || true
+        # Sin -n a propósito (bug real encontrado 2026-10-13, primera
+        # vuelta): con -n ("non-interactive"), si el ticket de sudo de esta
+        # terminal ya había caducado (este script puede llevar corriendo
+        # semanas, muy por encima de los ~15 min que dura un ticket de
+        # sudo), el kill fallaba en SILENCIO -- el "|| true" se tragaba el
+        # error -- y dejaba todo huérfano corriendo indefinidamente, sin
+        # ningún aviso real de que la limpieza no había funcionado. Ahora,
+        # si hace falta, pregunta la contraseña aquí mismo, en esta misma
+        # terminal; si no se proporciona, el resultado es el mismo de
+        # siempre -- se quedan corriendo -- pero ya nunca de forma
+        # silenciosa/engañosa.
+        sudo -p "[sudo] contraseña para detener la captura de red (nics_scenario_captures.sh): " \
+            bash -c 'pkill -TERM -f nics_scenario_captures.sh; pkill -TERM -f "tcpdump -i tap"' 2>/dev/null || true
 
-            for _ in {1..10}; do
-                if ! ps -p "$SCENARIO_CAPTURE_PID" > /dev/null 2>&1; then
-                    break
-                fi
-                sleep 1
-            done
-
-            if ps -p "$SCENARIO_CAPTURE_PID" > /dev/null 2>&1; then
-                warn "El proceso sigue vivo. Forzando parada..."
-                sudo -n kill -KILL "$SCENARIO_CAPTURE_PID" 2>/dev/null || true
+        for _ in {1..10}; do
+            if ! pgrep -f nics_scenario_captures.sh > /dev/null 2>&1 && ! pgrep -f "tcpdump -i tap" > /dev/null 2>&1; then
+                break
             fi
+            sleep 1
+        done
 
-            if ! ps -p "$SCENARIO_CAPTURE_PID" > /dev/null 2>&1; then
-                ok "nics_scenario_captures.sh detenido correctamente."
-            else
-                warn "No se pudo detener completamente nics_scenario_captures.sh."
-            fi
+        if pgrep -f nics_scenario_captures.sh > /dev/null 2>&1 || pgrep -f "tcpdump -i tap" > /dev/null 2>&1; then
+            warn "El proceso sigue vivo. Forzando parada (reutiliza el ticket de sudo recién dado, no vuelve a pedir contraseña)..."
+            sudo -n bash -c 'pkill -KILL -f nics_scenario_captures.sh; pkill -KILL -f "tcpdump -i tap"' 2>/dev/null || true
+            sleep 1
+        fi
+
+        if ! pgrep -f nics_scenario_captures.sh > /dev/null 2>&1 && ! pgrep -f "tcpdump -i tap" > /dev/null 2>&1; then
+            ok "nics_scenario_captures.sh y sus capturas tcpdump detenidos correctamente."
+        else
+            warn "No se pudo detener completamente nics_scenario_captures.sh (sigue corriendo -- probablemente no se dio la contraseña)."
         fi
     fi
 }
@@ -230,6 +274,62 @@ SUDOERS_BLOCK
         warn "  Cmnd_Alias NICS_DFIR_DISK_HELPER = /bin/bash ${DISK_ACQ_SCRIPT} *"
         warn "  ${DISK_SUDOERS_USER} ALL=(root) NOPASSWD: NICS_DFIR_DISK_HELPER"
         warn "  EOF) $DISK_SUDOERS_DEST"
+    fi
+fi
+
+# -----------------------------
+# [2.9/6] NODE HEALTH – LIBERAR MEMORIA DEL HOST – PRIVILEGIOS PERMANENTES
+# -----------------------------
+section "[2.9/6] Privilegios para liberar memoria del host (Node Health)"
+
+FREE_MEM_SCRIPT="$APP_PATH/app_core/infrastructure/node_health/scripts/free_host_memory.sh"
+FREE_MEM_SUDOERS_DEST="/etc/sudoers.d/nicscyberlab-free-host-memory"
+FREE_MEM_SUDOERS_USER="$(whoami)"
+
+if [ ! -f "$FREE_MEM_SCRIPT" ]; then
+    warn "Script de liberación de memoria no encontrado: $FREE_MEM_SCRIPT"
+    warn "El botón 'Free Host Memory' de Node Health no podrá liberar cache de kernel (drop_caches)."
+elif sudo -n /bin/bash "$FREE_MEM_SCRIPT" __nics_probe__ >/dev/null 2>&1; then
+    ok "Regla NOPASSWD para liberar memoria del host ya activa — no se pedirá contraseña."
+else
+    info "Liberar memoria del host (drop_caches) requiere contraseña actualmente (o el timestamp ha expirado)."
+    info "Instalando regla sudoers permanente para $FREE_MEM_SUDOERS_USER ..."
+    info "Se pedirá la contraseña UNA SOLA VEZ. Las próximas ejecuciones no la requerirán."
+
+    _FREE_MEM_TMP="$(mktemp /tmp/.nicscyberlab-free-mem-sudoers.XXXXXX)"
+    cat > "$_FREE_MEM_TMP" << SUDOERS_BLOCK
+# nicscyberlab_v3 -- Node Health: free host memory (drop_caches)
+# Auto-generado por start_dashboard.sh -- NO editar manualmente
+# Permite al usuario del servidor web liberar page cache/dentries/inodes
+# del host (nunca swap, nunca borra datos) desde el botón de Node Health.
+Defaults!NICS_FREE_HOST_MEMORY !requiretty
+Cmnd_Alias NICS_FREE_HOST_MEMORY = /bin/bash ${FREE_MEM_SCRIPT} *
+
+${FREE_MEM_SUDOERS_USER} ALL=(root) NOPASSWD: NICS_FREE_HOST_MEMORY
+SUDOERS_BLOCK
+
+    set +e
+    sudo install -m 440 -o root -g root "$_FREE_MEM_TMP" "$FREE_MEM_SUDOERS_DEST"
+    _INSTALL_RC=$?
+    set -e
+    rm -f "$_FREE_MEM_TMP"
+
+    if [ "$_INSTALL_RC" -eq 0 ]; then
+        ok "Regla instalada en $FREE_MEM_SUDOERS_DEST"
+        if sudo -n /bin/bash "$FREE_MEM_SCRIPT" __nics_probe__ >/dev/null 2>&1; then
+            ok "Verificación OK — el botón 'Free Host Memory' funcionará sin contraseña."
+        else
+            warn "Regla instalada pero la verificación aún falla. Intenta relanzar start_dashboard.sh."
+        fi
+    else
+        warn "Instalación de regla sudoers cancelada o fallida (contraseña incorrecta o permisos)."
+        warn "El botón 'Free Host Memory' solo hará gc.collect() en memoria de Python hasta que instales la regla."
+        warn "Para instalarlo manualmente ejecuta:"
+        warn "  sudo install -m 440 -o root -g root <(cat <<EOF"
+        warn "  Defaults!NICS_FREE_HOST_MEMORY !requiretty"
+        warn "  Cmnd_Alias NICS_FREE_HOST_MEMORY = /bin/bash ${FREE_MEM_SCRIPT} *"
+        warn "  ${FREE_MEM_SUDOERS_USER} ALL=(root) NOPASSWD: NICS_FREE_HOST_MEMORY"
+        warn "  EOF) $FREE_MEM_SUDOERS_DEST"
     fi
 fi
 

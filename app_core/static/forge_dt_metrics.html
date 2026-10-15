@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FORGE-VI | FORGE-DT Metrics</title>
+<link rel="stylesheet" href="css/fault_injection.css" />
+<link rel="stylesheet" href="css/forge_dt_metrics.css" />
+</head>
+<body>
+<header class="fi-header">
+  <div class="fi-brand">
+    <div class="fi-hex">DT</div>
+    <div>
+      <h1>FORGE-VI <span>// FORGE-DT METRICS</span></h1>
+      <div class="fi-sub">Does a real fault/attack really happen, does the digital twin notice it on its own, and can it be proven afterwards -- measured from real data, never guessed</div>
+    </div>
+  </div>
+  <div class="fi-header-stats">
+    <div class="fi-stat"><label>Ledger Entries</label><b id="stat-ledger-count">0</b></div>
+    <div class="fi-stat"><label>Evidence Links</label><b id="stat-evidence-count">0</b></div>
+    <div class="fi-stat"><label>Chain Integrity</label><b id="stat-chain-ok">--</b></div>
+  </div>
+</header>
+<div class="fi-note" style="padding:4px 24px;background:#0c1218;border-bottom:1px solid var(--border)">
+  <b>Ledger Entries</b> = how many real interventions are on record. <b>Evidence Links</b> = how many of the twin's alerts have real proof attached. <b>Chain Integrity</b> = "OK" means nobody quietly edited the record afterwards -- checked two ways: re-verifying every hash link, AND cross-checking against separately-stored checkpoints (hover for details), which catches a tampering trick hash-chaining alone would miss (deleting or replacing the whole record). "BROKEN" means either check found tampering.
+</div>
+
+<main class="fi-grid">
+
+  <section class="fi-card fi-wide">
+    <h2>What this page shows, in plain words</h2>
+    <p class="fi-note">The lab can apply a real fault or launch a real attack (Fault Injection / Attack Lab). The digital twin (<a href="forensic_twin" style="color:var(--cyan)">Forensic Twin</a>) watches the real nodes on its own, without being told what was tried. This page answers 4 real questions about that relationship, with real numbers instead of a single "detected / not detected" label -- and names every new building block it's built from, always explained below, never hidden behind a click.</p>
+    <div class="dtm-glossary">
+      <div class="dtm-term"><b>Intervention Ledger</b><span>A tamper-evident record of every real fault/attack applied in the lab -- what was tried, when, and whether it really worked. Chained with hashes so nobody can quietly edit history.</span></div>
+      <div class="dtm-term"><b>Effect Verifier</b><span>Confirms a fault/attack really changed something real (a packet count, a file hash, a PLC value) -- never just "the script exited with code 0".</span></div>
+      <div class="dtm-term"><b>Experimental Window</b><span>A short, bounded burst of faster checks, started on purpose -- it never knows which fault/attack triggered it, so the twin's detection stays honest and blind.</span></div>
+      <div class="dtm-term"><b>Post-hoc Linker</b><span>After the fact, matches a real intervention to whatever the digital twin noticed on its own. Only used to grade the twin afterwards -- never consulted while it's detecting.</span></div>
+      <div class="dtm-term"><b>Evidence Bridge</b><span>Links a digital-twin alert to the real proof behind it -- a real file hash, a real new network port, a real PLC value. Never invents proof; links to it or says there isn't any yet.</span></div>
+      <div class="dtm-term"><b>CPR (Causal Path Recoverability)</b><span>An existing platform score (0 to 1) for how much of the real attack's cause-and-effect chain could be rebuilt from forensic evidence after the fact. 1.0 = the whole chain was rebuilt; lower = some steps are missing.</span></div>
+      <div class="dtm-term"><b>WCPR (Weighted CPR)</b><span>The same idea as CPR, but the more important steps of the chain count more -- missing a critical step hurts this score more than missing a minor one.</span></div>
+    </div>
+
+    <h2 style="margin-top:18px">What "C0 → C3" means (shown further down this page)</h2>
+    <p class="fi-note">These are NOT 4 different tests -- they're the SAME real campaign, looked at with 4 increasingly complete pairs of glasses. Each one is the previous one plus one more real thing added:</p>
+    <div class="dtm-glossary">
+      <div class="dtm-term"><b>C0 -- just what already existed</b><span>The forensic reconstruction the platform already did before any of this work -- no digital twin involved at all. The starting point everything else builds on.</span></div>
+      <div class="dtm-term"><b>C1 -- C0 + the digital twin</b><span>Same campaign, plus: every alert the digital twin raised on its own, without being told what was tried.</span></div>
+      <div class="dtm-term"><b>C2 -- C1 + the honest record</b><span>Same campaign, plus: compared against the real, tamper-evident record of what was actually applied and when (the Intervention Ledger) -- this is what lets us measure whether the twin really noticed it (IRR, TOR below).</span></div>
+      <div class="dtm-term"><b>C3 -- C2 + the real proof</b><span>Same campaign, plus: each twin alert cross-checked against real preserved proof (a file hash, a new port, a PLC value) that confirms it's trustworthy (IER, ESR below).</span></div>
+    </div>
+  </section>
+
+  <section class="fi-card fi-wide">
+    <h2>Look at: everything, or just one campaign/case?</h2>
+    <p class="fi-note">By default this whole page shows EVERYTHING ever recorded. Pick a campaign or case below only if you want to zoom into just that one -- the dropdowns are filled in automatically from what's really in the Ledger, you never need to type or know an ID yourself.</p>
+    <div class="fi-field-row">
+      <div class="fi-field"><label>Only faults, only attacks, or both?</label>
+        <select id="scope-source">
+          <option value="">Both</option>
+          <option value="fault_injection">Only faults</option>
+          <option value="attack_lab">Only attacks</option>
+        </select>
+      </div>
+      <div class="fi-field"><label>Campaign</label><select id="scope-campaign"><option value="">All campaigns</option></select></div>
+      <div class="fi-field"><label>Case</label><select id="scope-case"><option value="">All cases</option></select></div>
+    </div>
+    <button class="fi-btn-primary" id="btn-refresh" style="width:auto;padding:9px 18px">Refresh metrics</button>
+    <span class="fi-note" id="refresh-status" style="margin-left:10px"></span>
+  </section>
+
+  <section class="fi-card fi-wide">
+    <h2>Live metrics (computed right now, from the real Ledger + real twin events + real evidence links)</h2>
+    <div id="scope-empty-banner" class="fi-note" style="display:none;background:var(--panel2);border-left:3px solid var(--yellow);padding:10px 12px;margin-bottom:10px;border-radius:0 6px 6px 0"></div>
+    <div class="dtm-metric-grid" id="metrics-grid"></div>
+  </section>
+
+  <section class="fi-card fi-wide">
+    <h2>Monitoring overhead</h2>
+    <div id="monitoring-overhead-box"></div>
+  </section>
+
+  <section class="fi-card fi-wide">
+    <h2>Metrics not computed yet -- and exactly why (nothing is silently skipped)</h2>
+    <div id="unavailable-list"></div>
+  </section>
+
+  <section class="fi-card fi-wide">
+    <h2>Reconstruction quality for one campaign (C0 baseline, reused directly from the platform's own existing calculation)</h2>
+    <p class="fi-note">Pick a real, already-run Level C campaign from the list below -- filled in automatically, newest first. Each one identifies one real Level C campaign run (a full deploy → attack → teardown → redeploy cycle, repeated). <b>Reproducibility index</b> = how similar the CPR/WCPR scores were across every repetition of that campaign (closer to 1.0 = more consistent). <b>Max ΔWCPR</b> = the biggest WCPR difference seen between any two repetitions. <b>Acceptable?</b> = whether that difference is small enough to call the campaign reproducible (today's threshold: 0.1).</p>
+    <div class="fi-field-row">
+      <div class="fi-field"><label>Level C campaign run</label><select id="cpr-job-id"><option value="">Loading real campaigns...</option></select></div>
+    </div>
+    <button class="fi-btn-primary" id="btn-load-cpr" style="width:auto;padding:9px 18px">Load</button>
+    <div id="cpr-result"></div>
+  </section>
+
+  <section class="fi-card fi-wide">
+    <h2>Same campaign, 4 richer views (C0 → C3 ablation)</h2>
+    <p class="fi-note">Uses whichever campaign is picked above.</p>
+    <button class="fi-btn-primary" id="btn-load-ablation" style="width:auto;padding:9px 18px">Load ablation view</button>
+    <div id="ablation-result"></div>
+  </section>
+
+  <section class="fi-card fi-wide">
+    <h2>Recent interventions (Intervention Ledger, most recent first)</h2>
+    <table class="fi-table" id="ledger-table">
+      <thead><tr><th>When (UTC)</th><th>Type</th><th>Class</th><th>Phase</th><th>Target</th><th>Really worked?</th></tr></thead>
+      <tbody id="ledger-rows"><tr><td colspan="6" class="fi-note">Loading...</td></tr></tbody>
+    </table>
+  </section>
+
+</main>
+<script src="js/forge_dt_metrics/app.js"></script>
+</body>
+</html>

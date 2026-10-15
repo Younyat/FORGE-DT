@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-10-10T16:14:07.619038+00:00",
+  "warnings": [
+    "5 of 8 expected causal edges were recovered. The reconstruction is partially supported and should be presented with explicit caveats on the degraded or ambiguous edges.",
+    "One or more expected causal edges remain missing because required preserved evidence is unavailable or not linked.",
+    "Some causal edges could not be temporally ordered because the required artifact timestamps were not available or not resolvable.",
+    "Modbus traffic is observed, but register and value precision are not confirmed by packet-level parsing.",
+    "33605 alert correlation record(s) matched this attack TYPE, but none fell within 3600s of this case's own real intervention trigger time -- not citing an unrelated historical correlation as if it were this case's.",
+    "This was the final repetition of the campaign -- case case-9c310aa4 was kept fully intact as a complete result sample instead of being reduced to the lightweight bundle."
+  ],
+  "blockers": []
+}

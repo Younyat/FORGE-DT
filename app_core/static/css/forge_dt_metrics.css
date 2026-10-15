@@ -1,0 +1,37 @@
+/* Reuses fault_injection.css's design system (variables, .fi-*/.lamp/.pill
+   classes) wholesale -- this file only adds what's genuinely specific to
+   this page. Every explanation on this page is meant to stay always
+   visible (no hover-only tooltip, no collapsed <details>) -- that's a
+   deliberate choice, not an oversight, so keep new blocks following the
+   same "explanation printed right next to the number" shape. */
+
+.dtm-glossary{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:8px}
+.dtm-term{background:var(--panel2);border:1px solid var(--border);border-left:3px solid var(--cyan);border-radius:0 6px 6px 0;padding:8px 10px}
+.dtm-term b{display:block;font-size:11.5px;color:var(--text);margin-bottom:3px}
+.dtm-term span{display:block;font-size:10.5px;color:var(--dim);line-height:1.4}
+
+.dtm-metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:10px}
+.dtm-metric-card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.dtm-metric-value{font-size:30px;font-weight:900;line-height:1}
+.dtm-metric-value.unknown{color:var(--dim);font-size:20px}
+.dtm-metric-name{font-size:12px;font-weight:700;color:var(--cyan);margin-top:4px;letter-spacing:.04em}
+.dtm-metric-full-name{font-size:9.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.03em;margin-top:2px}
+.dtm-metric-explain{font-size:10.5px;color:var(--text);margin-top:8px;line-height:1.4;text-align:left}
+.dtm-metric-raw{font-size:9.5px;color:var(--dim);margin-top:6px;border-top:1px dashed var(--border);padding-top:6px}
+.dtm-metric-verdict{font-size:11px;font-weight:600;margin-top:8px;padding:7px 9px;border-radius:6px;text-align:left;line-height:1.4;background:var(--panel)}
+.dtm-metric-verdict.good{color:var(--green);border-left:3px solid var(--green)}
+.dtm-metric-verdict.mixed{color:var(--yellow);border-left:3px solid var(--yellow)}
+.dtm-metric-verdict.bad{color:var(--red);border-left:3px solid var(--red)}
+
+.dtm-unavailable-row{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #1a242c;font-size:11px}
+.dtm-unavailable-row b{color:var(--dim);min-width:170px;flex:none}
+.dtm-unavailable-row span{color:var(--dim);opacity:.85}
+
+.dtm-cpr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:10px}
+.dtm-cpr-cell{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:10px;text-align:center}
+.dtm-cpr-cell b{display:block;font-size:20px}
+.dtm-cpr-cell label{display:block;font-size:9.5px;color:var(--dim);text-transform:uppercase;margin-top:3px}
+
+.dtm-ablation-layer{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-top:8px}
+.dtm-ablation-layer b{color:var(--cyan);font-size:11.5px}
+.dtm-ablation-layer p{font-size:10.5px;color:var(--dim);margin:4px 0 0}

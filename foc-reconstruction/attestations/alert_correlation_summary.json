@@ -1,23 +1,23 @@
 {
-  "generated_at": "2026-09-16T05:38:23.916161+00:00",
+  "generated_at": "2026-10-10T15:26:31.378530+00:00",
   "scenario_id": "scn-b83dbbfb",
   "scenario_name": "industrial_file",
-  "total_correlation_records": 12447,
-  "total_alerts": 6995,
-  "relevant_alerts": 5846,
-  "correlated_alerts": 12386,
-  "confirmed_correlations": 12386,
+  "total_correlation_records": 33701,
+  "total_alerts": 95602,
+  "relevant_alerts": 94385,
+  "correlated_alerts": 33605,
+  "confirmed_correlations": 33605,
   "weak_correlations": 0,
   "unresolved_alerts": 0,
   "noise_alerts": 0,
   "false_positive_candidates": 0,
-  "missing_expected_alerts_total": 61,
+  "missing_expected_alerts_total": 96,
   "bucket_counts": {
-    "correlated": 12386,
-    "uncorrelated": 5824,
-    "noise": 1149,
+    "correlated": 33605,
+    "uncorrelated": 94330,
+    "noise": 1217,
     "false_positive_candidate": 0,
-    "missing_expected_alert": 61,
+    "missing_expected_alert": 96,
     "weak_candidate": 0,
     "inferred_low": 0,
     "inferred_medium": 0
@@ -25,44 +25,31 @@
   "top_signatures": [
     {
       "label": "NICS CyberLab ICS Modbus write multiple registers",
-      "count": 12386
+      "count": 33605
     }
   ],
   "top_rule_ids": [
     {
       "label": "86601",
-      "count": 12386
+      "count": 33605
     }
   ],
-  "top_nodes": [
-    {
-      "label": "node-4e09b076",
-      "count": 563
-    },
-    {
-      "label": "node-53087541",
-      "count": 563
-    }
-  ],
+  "top_nodes": [],
   "severity_distribution": [
     {
-      "label": "MEDIUM",
-      "count": 4368
+      "label": "HIGH",
+      "count": 75747
     },
     {
-      "label": "HIGH",
-      "count": 1478
+      "label": "MEDIUM",
+      "count": 18638
     },
     {
       "label": "LOW",
-      "count": 1149
+      "count": 1217
     }
   ],
   "alerts_by_node": [
-    {
-      "label": "node-4e09b076",
-      "count": 1
-    },
     {
       "label": "node-53087541",
       "count": 1
@@ -71,31 +58,31 @@
   "alerts_by_mitre_technique": [
     {
       "label": "T1692.001",
-      "count": 22
+      "count": 70
     },
     {
       "label": "T0836",
-      "count": 22
+      "count": 70
     }
   ],
   "alerts_by_original_sensor": [
     {
       "label": "wazuh",
-      "count": 5824
+      "count": 94315
     },
     {
       "label": "suricata",
-      "count": 1171
+      "count": 1287
     }
   ],
   "alerts_by_collector": [
     {
       "label": "wazuh",
-      "count": 6995
+      "count": 95602
     }
   ],
-  "unique_confirmed_attack_pairs": 3,
-  "unique_correlation_candidates": 28,
+  "unique_confirmed_attack_pairs": 1,
+  "unique_correlation_candidates": 26,
   "confirmed_attack_ids": 1,
   "weak_attack_ids": 0,
   "observable_attack_ids": 1,
@@ -423,7 +410,7 @@
   ],
   "uncorrelated_alert_samples": [
     {
-      "alert_id": "alr-ce670406",
+      "alert_id": "alr-8ff04815",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -432,7 +419,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-dbddc341",
+      "alert_id": "alr-2d078322",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -441,7 +428,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-5f560c76",
+      "alert_id": "alr-d49ce4c5",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -450,7 +437,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-d590195e",
+      "alert_id": "alr-25613518",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -459,7 +446,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-5649605a",
+      "alert_id": "alr-a41c65bc",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -468,7 +455,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-a53077e0",
+      "alert_id": "alr-2b262b41",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -477,7 +464,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-f7c89b7f",
+      "alert_id": "alr-1215d033",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -486,7 +473,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-454dded8",
+      "alert_id": "alr-bf16f3c4",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -495,7 +482,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-93caee9b",
+      "alert_id": "alr-0d83f3f3",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -504,7 +491,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-8c18edc0",
+      "alert_id": "alr-ad38bb29",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -513,7 +500,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-a65a1646",
+      "alert_id": "alr-1afd99b8",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -522,7 +509,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-1f45e7a1",
+      "alert_id": "alr-21d155c7",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -531,7 +518,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-4fb685a1",
+      "alert_id": "alr-4759628b",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -540,7 +527,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-aef5c968",
+      "alert_id": "alr-e3b0dceb",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -549,7 +536,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-3e079974",
+      "alert_id": "alr-baa18784",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -558,7 +545,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-16776b07",
+      "alert_id": "alr-0a6e667a",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -567,7 +554,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-886295d1",
+      "alert_id": "alr-2fb848aa",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -576,7 +563,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-855b6888",
+      "alert_id": "alr-65818c6a",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -585,7 +572,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-9b7ee532",
+      "alert_id": "alr-47d9d7f8",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -594,7 +581,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-bcba1f7b",
+      "alert_id": "alr-a64a4ed2",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -603,7 +590,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-2e816137",
+      "alert_id": "alr-890bc5f3",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -612,7 +599,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-87ee1540",
+      "alert_id": "alr-a4125260",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -621,7 +608,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-77e239e0",
+      "alert_id": "alr-b1b6404a",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -630,7 +617,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-6849e41f",
+      "alert_id": "alr-d8d9620e",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",
@@ -639,7 +626,7 @@
       "status": "noise"
     },
     {
-      "alert_id": "alr-937d1501",
+      "alert_id": "alr-ce24e513",
       "signature": "ALERTA: Ping Detectado",
       "rule_id": "86601",
       "severity": "LOW",

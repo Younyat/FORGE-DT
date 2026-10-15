@@ -1,0 +1,20 @@
+{
+  "instance_id": "24d86b0d-9a34-40ee-9b7c-cf93edbda33d",
+  "instance_name": "PLC_Instance",
+  "installed_tools": {
+    "suricata": "2026-10-08T16:15:03.870779+00:00",
+    "wazuh_agent": "2026-10-08T16:17:25.159915+00:00",
+    "rollback_suricata_ping_detection": "2026-10-08T16:21:19.014824+00:00",
+    "rollback_suricata_modbus_register_detection": "2026-10-08T16:21:41.095257+00:00",
+    "rollback_wazuh_suricata_integration": "2026-10-08T16:22:09.174919+00:00",
+    "wazuh_fim_realtime": "2026-10-08T16:22:35.267296+00:00"
+  },
+  "install_started_utc": {
+    "suricata": "2026-10-08T16:14:19.781911+00:00",
+    "wazuh_agent": "2026-10-08T16:15:03.876818+00:00",
+    "rollback_suricata_ping_detection": "2026-10-08T16:21:02.904511+00:00",
+    "rollback_suricata_modbus_register_detection": "2026-10-08T16:21:19.019452+00:00",
+    "rollback_wazuh_suricata_integration": "2026-10-08T16:21:41.098844+00:00",
+    "wazuh_fim_realtime": "2026-10-08T16:22:09.180713+00:00"
+  }
+}

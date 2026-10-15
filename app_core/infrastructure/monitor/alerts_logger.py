@@ -39,6 +39,186 @@ def _append_jsonl(path: str, obj: Dict[str, Any]) -> None:
         f.write(json.dumps(obj, ensure_ascii=False) + "\n")
 
 
+def _load_runtime_asset_inventory() -> list:
+    """Inventario REAL de todas las instancias desplegadas para el escenario actual.
+    `industrial_runtime_assets.json` (generado por `discover_runtime_assets()`, OpenStack SDK real,
+    no inventado) es la UNICA fuente que trae, para cada maquina -- PLC, FUXA, atacante, victima,
+    monitor -- tanto su IP privada como su IP flotante. Es deliberadamente mejor fuente que
+    consultar OpenStack en vivo por SSH/API en cada alerta: es un fichero ya persistido, no depende
+    de una conexion en vivo (que en este entorno de desarrollo falla: "Auth plugin requires
+    parameters"), y ya incluye la IP PRIVADA de cada rol -- la que de verdad ve un sensor de red
+    dentro de la subred OT (net_private_01), no solo la flotante de acceso externo."""
+    try:
+        from app_core.infrastructure.attack.industrial_resolver import RUNTIME_ASSETS_PATH
+
+        data = json.loads(RUNTIME_ASSETS_PATH.read_text(encoding="utf-8"))
+        return data.get("inventory_candidates") or []
+    except Exception:
+        return []
+
+
+def _infer_role_from_instance_name(name: Optional[str]) -> str:
+    n = (name or "").lower()
+    if "plc" in n:
+        return "industrial_plc"
+    if "fuxa" in n or "scada" in n:
+        return "industrial_scada"
+    if n.startswith("attack") or "attacker" in n:
+        return "attacker_vm"
+    if n.startswith("victim"):
+        return "victim_host"
+    if n.startswith("monitor"):
+        return "monitor_host"
+    return "unrecognized_role"
+
+
+def resolve_ip_to_asset(ip: Optional[str]) -> Dict[str, Any]:
+    """Resuelve una IP (privada o flotante) contra el inventario REAL de instancias ya desplegadas
+    para el escenario actual. No infiere ni supone nada sobre IPs que no aparecen literalmente en
+    el inventario -- esas quedan sin resolver (matched=False), nunca se les asigna un rol al azar."""
+    if not ip:
+        return {"matched": False, "reason": "no_ip"}
+    for asset in _load_runtime_asset_inventory():
+        candidates = {asset.get("private_ip"), asset.get("floating_ip")}
+        for net in asset.get("networks") or []:
+            if isinstance(net, dict):
+                candidates.add(net.get("ip"))
+        candidates.discard(None)
+        if ip in candidates:
+            matched_as = (
+                "private" if ip == asset.get("private_ip")
+                else "floating" if ip == asset.get("floating_ip")
+                else "network_entry"
+            )
+            return {
+                "matched": True,
+                "role": _infer_role_from_instance_name(asset.get("name")),
+                "instance_name": asset.get("name"),
+                "instance_id": asset.get("instance_id"),
+                "ip_matched_as": matched_as,
+            }
+    return {"matched": False, "reason": "ip_not_in_current_scenario_inventory"}
+
+
+def classify_alert_origin(src_ip: Optional[str]) -> Dict[str, Any]:
+    """Clasifica el origen real de una alerta (tipicamente una escritura Modbus) resolviendo su
+    src.ip -- ya presente en cada alerta via monitor_ataques.sh's `data.src_ip` -- contra el
+    inventario REAL y completo de instancias del escenario actual (PLC, FUXA, atacante, victima,
+    monitor; ambas IPs de cada una -- ver resolve_ip_to_asset()). Puramente informativo: NO decide
+    severidad (eso sigue siendo compute_severity() sin cambios). Responde con el nombre e id real
+    de la instancia cuando se identifica, no solo una categoria generica -- para que sirva
+    directamente en una investigacion, no solo como una etiqueta. Nunca lanza -- cualquier fallo de
+    resolucion cae en 'unknown', nunca en una suposicion."""
+    if not src_ip or src_ip in {"", "Interno", "0.0.0.0"}:
+        return {"origin": "unknown", "origin_reason": "no_src_ip_available"}
+    try:
+        resolved = resolve_ip_to_asset(src_ip)
+    except Exception:
+        resolved = {"matched": False, "reason": "resolution_error"}
+    if resolved.get("matched"):
+        return {
+            "origin": resolved["role"],
+            "origin_reason": f"src_ip_matches_{resolved['ip_matched_as']}_ip_of_{resolved.get('instance_name') or 'unknown_instance'}",
+            "origin_instance_name": resolved.get("instance_name"),
+            "origin_instance_id": resolved.get("instance_id"),
+        }
+    return {"origin": "unknown", "origin_reason": "src_ip_does_not_match_any_known_asset_in_current_scenario"}
+
+
+def _parse_alert_ts(value: Optional[str]):
+    """Las alertas reales traen ts_utc en mas de un formato segun la fuente (Wazuh/Suricata usan
+    sufijo 'Z'; el resto del proyecto usa 'datetime.isoformat()' con '+00:00') -- se normalizan
+    ambos aqui en vez de asumir uno solo."""
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except Exception:
+        return None
+
+
+def find_alerts_in_range(lower_ts: str, upper_ts: str, base_dir: str = FORENSICS_ALERTS_BASE) -> list:
+    """Busca, en TODAS las sesiones ya guardadas de alerts_store, las alertas reales cuyo ts_utc
+    cae dentro de [lower_ts, upper_ts] -- y les añade el origen real (classify_alert_origin). Base
+    compartida de find_alerts_near() (ventana simetrica) y de compute_corroboration_verdict()
+    (ventana real de un ataque, attack_started_at/attack_completed_at). Nunca lanza -- una sesion
+    con datos corruptos o un fichero inaccesible simplemente se salta."""
+    lower = _parse_alert_ts(lower_ts)
+    upper = _parse_alert_ts(upper_ts)
+    if lower is None or upper is None:
+        return []
+    if lower > upper:
+        lower, upper = upper, lower
+
+    from datetime import timedelta
+
+    matches: list = []
+    try:
+        session_dirs = sorted(os.listdir(base_dir))
+    except Exception:
+        return matches
+
+    for session_id in session_dirs:
+        session_path = os.path.join(base_dir, session_id)
+        alerts_path = os.path.join(session_path, "alerts.jsonl")
+        if not os.path.isfile(alerts_path):
+            continue
+        try:
+            # Descarte barato antes de parsear linea a linea: si la ultima escritura de esta
+            # sesion es muy anterior al rango buscado, o la sesion se creo muy despues de que
+            # termine el rango, no puede contener nada relevante.
+            mtime = datetime.fromtimestamp(os.path.getmtime(alerts_path), tz=timezone.utc)
+            if mtime < lower - timedelta(hours=1):
+                continue
+        except Exception:
+            pass
+
+        try:
+            with open(alerts_path, "r", encoding="utf-8") as fh:
+                for line in fh:
+                    try:
+                        primary = json.loads(line)
+                    except Exception:
+                        continue
+                    alert_ts = _parse_alert_ts(primary.get("ts_utc"))
+                    if alert_ts is None or not (lower <= alert_ts <= upper):
+                        continue
+                    origin = classify_alert_origin((primary.get("src") or {}).get("ip"))
+                    matches.append(
+                        {
+                            "session_id": session_id,
+                            "event_id": primary.get("event_id"),
+                            "ts_utc": primary.get("ts_utc"),
+                            "signature": primary.get("signature"),
+                            "rule_id": primary.get("rule_id"),
+                            "rule_level": primary.get("rule_level"),
+                            "src_ip": (primary.get("src") or {}).get("ip"),
+                            **origin,
+                        }
+                    )
+        except Exception:
+            continue
+
+    matches.sort(key=lambda m: m.get("ts_utc") or "")
+    return matches
+
+
+def find_alerts_near(ts_utc: str, window_seconds: float = 30.0, base_dir: str = FORENSICS_ALERTS_BASE) -> list:
+    """Busca alertas reales dentro de +/- window_seconds de un instante dado. Pensado para
+    responder "que mas paso justo cuando el gemelo detecto esta divergencia/violacion de ley de
+    control", cruzando dos piezas de evidencia ya existentes (el estado del PLC y las alertas de
+    red) sin inventar ninguna nueva."""
+    target = _parse_alert_ts(ts_utc)
+    if target is None:
+        return []
+    from datetime import timedelta
+
+    window = timedelta(seconds=abs(window_seconds))
+    return find_alerts_in_range(
+        (target - window).isoformat(), (target + window).isoformat(), base_dir=base_dir
+    )
+
+
 class AlertsLogger:
     """
     Pre-case detection log:
@@ -207,6 +387,11 @@ class AlertsLogger:
 
         # 5) Guardar DERIVED triage
         triage = self.compute_severity(primary)
+        # Campo informativo aparte, no toca compute_severity()/severidad: de donde vino realmente
+        # esta escritura (VM atacante ya desplegada vs. FUXA), usando el src.ip que la alerta ya
+        # trae de origen -- ver classify_alert_origin(). Fusionado dentro de `triage` (no solo en
+        # `derived`) para que tambien llegue al valor de retorno y a la notificacion FOC de abajo.
+        triage.update(classify_alert_origin((primary.get("src") or {}).get("ip")))
         derived = {
             "event_id": event_id,
             "ts_utc": _utc_now_iso(),
@@ -239,6 +424,8 @@ class AlertsLogger:
                 "rule_level": primary.get("rule_level"),
                 "severity": triage.get("severity"),
                 "recommend_forensics": triage.get("recommend_forensics"),
+                "origin": triage.get("origin"),
+                "origin_reason": triage.get("origin_reason"),
                 "case_rel": case_rel,
             },
         )

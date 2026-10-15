@@ -122,21 +122,35 @@ function repTreeBuildLevelATree(detail) {
     root.children.push(repTreeStageToNode(stage));
   }
 
+  // 2026-10-09: was reading `per_dry_run_reconstruction`, which the backend
+  // itself only ever populates for ALREADY-COMPLETED dry-runs (see
+  // campaign_repetitions/service.py::_la_dry_run_history's own docstring) --
+  // so this node showed nothing at all for the one dry-run actually in
+  // progress, the exact thing a reader watching a live campaign most wants
+  // to see. `dry_run_history` is the full chronological list (completed AND
+  // in-progress) the dedicated Level A report page already renders
+  // correctly; switched to the same source here so the SAME embedded tree
+  // the Level C report uses shows it too, not a second, poorer copy.
   const dr = detail.dry_run_repetitions || {};
+  const history = detail.dry_run_history || [];
   const dryRunNode = repTreeNode(
     `Dry-run repetitions (${repTreeUnk(dr.completed, "0")}/${repTreeUnk(dr.requested, "?")} completed)`,
     dr.completed >= dr.requested && dr.requested ? "completed" : "running",
     { children: [] }
   );
-  for (const run of detail.per_dry_run_reconstruction || []) {
+  for (const run of history) {
+    const cprText = run.cpr != null ? `CPR ${(run.cpr * 100).toFixed(1)}%` : null;
+    const wcprText = run.weighted_cpr != null ? `Weighted CPR ${(run.weighted_cpr * 100).toFixed(1)}%` : null;
+    const label = `Dry-run ${repTreeUnk(run.dry_run_index)}` + (cprText ? ` — ${cprText}` : "");
+    const detailParts = [wcprText, run.status === "running" ? run.current_phase_detail || run.current_phase_label : null].filter(Boolean);
     dryRunNode.children.push(repTreeNode(
-      `${repTreeUnk(run.execution_id)} — CPR ${run.cpr != null ? (run.cpr * 100).toFixed(1) + "%" : "unknown"}`,
+      label,
       run.status,
       {
         started_at: run.started_at,
         finished_at: run.finished_at,
         elapsed_seconds: run.elapsed_seconds,
-        detail: run.weighted_cpr != null ? `Weighted CPR: ${(run.weighted_cpr * 100).toFixed(1)}%` : null,
+        detail: detailParts.length ? detailParts.join(" — ") : null,
       }
     ));
   }
@@ -331,12 +345,22 @@ async function repTreeBuildLevelCTree(detail) {
       }
     }
     if (stage.stage_key === "lc.waiting_level_b" && detail.level_b_job_id) {
-      const repNum = detail.level_b_live?.repetition_number || 1;
-      const lbDetail = await repTreeGetJson(`/api/campaign-repetitions/level-b/${encodeURIComponent(detail.level_b_job_id)}/${repNum}`);
-      if (lbDetail) {
-        extra.push(await repTreeBuildLevelBTree(lbDetail));
-      } else {
-        extra.push(repTreeNode(`Level B job ${detail.level_b_job_id}`, "unknown", { detail: "Detail could not be resolved for this job." }));
+      // 2026-10-09: was only ever fetching the single "live" repetition
+      // number, so a Level C repetition configured with level_b_repetitions
+      // > 1 silently hid every earlier Level B repetition's own tree (attack/
+      // detection/case/nested Level A) the moment the job moved on to the
+      // next one. User explicitly asked for "todas las repeticiones de nivel
+      // B" here -- loop over every repetition this Level B job was actually
+      // asked to run, not just whichever one happens to be live right now.
+      const liveRepNum = detail.level_b_live?.repetition_number || 1;
+      const totalLbReps = detail.level_b_requested_repetitions || liveRepNum;
+      for (let repNum = 1; repNum <= totalLbReps; repNum++) {
+        const lbDetail = await repTreeGetJson(`/api/campaign-repetitions/level-b/${encodeURIComponent(detail.level_b_job_id)}/${repNum}`);
+        if (lbDetail) {
+          extra.push(await repTreeBuildLevelBTree(lbDetail));
+        } else {
+          extra.push(repTreeNode(`Level B repetition ${repNum} (job ${detail.level_b_job_id})`, "unknown", { detail: "Detail could not be resolved for this repetition yet." }));
+        }
       }
     }
     root.children.push(repTreeStageToNode(stage, extra));

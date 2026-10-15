@@ -1,3 +1,4 @@
+import gc
 import json
 import logging
 import time
@@ -168,6 +169,13 @@ def regenerate_foc(bootstrap_mode: bool = False, force: bool = False) -> dict:
     _write_json(GENERATED_FILES["relationships_index"], indexes["relationships_index"])
     _write_json(GENERATED_FILES["cases_index"], indexes["cases_index"])
 
+    # `attestations` ya esta completamente escrita en disco a estas alturas (todos los
+    # GENERATED_FILES[...] de mas arriba) y no se vuelve a leer en el resto de la funcion -- a
+    # diferencia de scenario_bom/tools_bom/timeline/sources_bundle/indexes, que si hacen falta mas
+    # abajo para construir `manifest` (lifecycle_state, warnings, hashes de sha256). Liberarla aqui
+    # reduce algo el pico de memoria sin arriesgarse a un NameError sobre las demas.
+    del attestations
+
     hashes_payload = {
         "generated_at": utc_now(),
         "hashes": {
@@ -208,6 +216,17 @@ def regenerate_foc(bootstrap_mode: bool = False, force: bool = False) -> dict:
         + warnings
     )
     manifest["generation_status"] = "warnings" if manifest["warnings"] else "ok"
+
+    # Esta es la ultima linea que usa scenario_bom/tools_bom/timeline/sources_bundle/indexes --
+    # todas ya escritas en disco hace tiempo, y de aqui en adelante `manifest` es autosuficiente.
+    # Liberarlas aqui (en vez de esperar a que la funcion termine) reduce el pico real de memoria
+    # durante el resto de regenerate_foc() -- motivado por un fallo real (2026-09-23) donde una
+    # prueba aislada de esta misma funcion crecio de 1GB a 3.3GB de RSS en ~4 minutos, en un
+    # entorno con cientos de casos acumulados en el almacen de evidencia. No cambia ningun dato ya
+    # escrito ni el resultado final -- solo libera memoria que ya no hace falta.
+    del scenario_bom, tools_bom, timeline, sources_bundle, indexes
+    gc.collect()
+
     manifest["source_indexes"] = {
         "sources": generated_relative_paths()["sources_index"],
         "artifacts": generated_relative_paths()["artifacts_index"],

@@ -1,0 +1,21 @@
+{
+  "deleted_cases": [
+    "case-a764ecad"
+  ],
+  "deleted_paths": [
+    "app_core/infrastructure/forensics/evidence_store/CASE-20260929-215246"
+  ],
+  "freed_bytes_estimated": 1274079,
+  "freed_bytes_actual": 1274079,
+  "preserved_metadata": [
+    {
+      "case_id": "case-a764ecad",
+      "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260929-215246",
+      "size_bytes": 1274079,
+      "lightweight_bundle_path": "runtime/level_b_repetitions/exp-6c463ec32b80/retained_case_lightweight_bundle/case-a764ecad",
+      "lightweight_bundle_copied_files": 37
+    }
+  ],
+  "cleanup_status": "completed",
+  "warnings": []
+}

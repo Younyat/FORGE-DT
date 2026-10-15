@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from flask import Blueprint, jsonify, request, send_from_directory
 
-from .service import build_reconstruction_timeline, get_host_vitals, get_repetition_detail, get_sensor_coverage, get_snapshot
+from .service import build_reconstruction_timeline, get_host_vitals, get_live_attack_feed, get_repetition_detail, get_sensor_coverage, get_snapshot
 from ..foc_reconstruction.foc_config import PROJECT_ROOT
 
 monitor3d_bp = Blueprint("monitor3d", __name__)
@@ -44,6 +44,12 @@ def api_repetition_detail(rep_num: int):
     if not row:
         return jsonify({"error": "not_found"}), 404
     return jsonify(row), 200
+
+
+@monitor3d_bp.route("/api/monitor3d/live-events", methods=["GET"])
+def api_live_attack_feed():
+    since = request.args.get("since")
+    return jsonify(get_live_attack_feed(since)), 200
 
 
 @monitor3d_bp.route("/api/monitor3d/reconstruction/<job_id>", methods=["GET"])

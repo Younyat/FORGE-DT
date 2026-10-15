@@ -1,0 +1,116 @@
+:root{--bg:#0a0f14;--panel:#121a22;--panel2:#182430;--border:#26343f;--cyan:#22d3ee;--green:#34d399;--yellow:#f59e0b;--red:#ef4444;--text:#dfeef5;--dim:#7d95a3}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Segoe UI',Inter,Arial,sans-serif;font-size:13px}
+
+.fi-header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:linear-gradient(180deg,#141d26,#0c1218);border-bottom:1px solid var(--border)}
+.fi-brand{display:flex;align-items:center;gap:12px}
+.fi-hex{width:38px;height:38px;display:grid;place-items:center;background:linear-gradient(145deg,#1c2830,#0a1116);border:1px solid var(--cyan);border-radius:8px;color:var(--cyan);font-weight:900}
+.fi-brand h1{margin:0;font-size:18px}
+.fi-brand h1 span{color:var(--cyan);font-size:13px;font-weight:700;margin-left:6px}
+.fi-sub{font-size:11px;color:var(--dim);margin-top:2px}
+.fi-header-stats{display:flex;gap:16px}
+.fi-stat{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:6px 14px;text-align:center}
+.fi-stat label{display:block;font-size:9px;color:var(--dim);text-transform:uppercase}
+.fi-stat b{font-size:18px}
+
+.fi-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px 24px;max-width:1500px;margin:0 auto}
+.fi-wide{grid-column:1/-1}
+.fi-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 18px}
+.fi-card h2{margin:0 0 10px;font-size:14px;color:var(--cyan)}
+.fi-card h3{margin:0 0 8px;font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.04em}
+.fi-note{font-size:11px;color:var(--dim);margin:0 0 12px;line-height:1.5}
+
+.fi-level-tabs{display:flex;gap:6px;margin-bottom:10px}
+.fi-level-tab{flex:1;padding:8px;background:var(--panel2);border:1px solid var(--border);color:var(--dim);border-radius:6px;cursor:pointer;font-weight:600}
+.fi-level-tab.active{background:linear-gradient(180deg,#0f5f7a,#0a3c50);color:#fff;border-color:var(--cyan)}
+.fi-level-explain{background:var(--panel2);border-left:3px solid var(--cyan);padding:8px 12px;font-size:11.5px;color:var(--dim);margin-bottom:12px;border-radius:0 4px 4px 0}
+
+.fi-field-row{display:flex;gap:16px;margin-bottom:10px;font-size:12px}
+.fi-field{margin-bottom:10px}
+.fi-field label{display:block;font-size:11px;color:var(--dim);margin-bottom:3px}
+.fi-field input[type=number],.fi-field input[type=text],.fi-field select,select#existing-campaign-select{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:4px;font-size:12px}
+
+.fi-btn-primary{width:100%;padding:10px;background:linear-gradient(180deg,#1a8f5a,#0d5c38);border:1px solid #2ce97e;color:#fff;font-weight:700;border-radius:6px;cursor:pointer;margin-top:8px}
+.fi-btn-primary:hover{filter:brightness(1.1)}
+.fi-btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.fi-launch-status{margin-top:10px;font-size:11.5px;color:var(--dim);white-space:pre-wrap}
+
+.fault-item{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin-bottom:10px}
+.fault-item-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.fault-item-head b{font-size:12.5px}
+.fault-tag{font-size:8.5px;padding:2px 7px;border-radius:999px;background:#1c2a35;color:var(--cyan);text-transform:uppercase;letter-spacing:.03em}
+.fault-tag.on-demand{color:var(--yellow)}
+.fault-ref{font-size:10px;color:var(--dim);margin-top:4px;font-style:italic}
+.fault-desc{font-size:11px;color:var(--dim);margin-top:4px}
+.fault-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;align-items:center}
+.fault-controls select,.fault-controls input{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:5px 7px;border-radius:4px;font-size:11px;width:90px}
+.fault-controls label{font-size:10.5px;color:var(--dim)}
+.lamp{display:inline-block;width:16px;height:16px;border-radius:50%;flex:none;background:#2a3944;box-shadow:inset 0 0 3px rgba(0,0,0,.6)}
+.lamp-off{background:#2a3944}
+.lamp-green{background:radial-gradient(circle at 35% 30%,#8ff7c8,var(--green));box-shadow:0 0 9px rgba(52,211,153,.85)}
+.lamp-red{background:radial-gradient(circle at 35% 30%,#ffb3b3,var(--red));box-shadow:0 0 9px rgba(239,68,68,.9)}
+.fi-mini-btn{background:#1c2a35;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:4px;cursor:pointer;font-size:11px}
+.fi-mini-btn.danger{background:#3a1414;border-color:#5c2323;color:#ffb3b3}
+.fi-mini-btn:hover{filter:brightness(1.2)}
+.fi-mini-btn:disabled{opacity:.4;cursor:not-allowed}
+
+.fi-monitor-grid{display:grid;grid-template-columns:1fr 1.6fr;gap:20px}
+table.fi-table{width:100%;border-collapse:collapse;font-size:11px}
+table.fi-table th{text-align:left;color:var(--dim);font-size:9.5px;text-transform:uppercase;padding:5px 6px;border-bottom:1px solid var(--border)}
+table.fi-table td{padding:5px 6px;border-bottom:1px solid #1a242c}
+.pill{padding:2px 8px;border-radius:999px;font-size:9.5px;font-weight:700}
+.pill.active{background:#123a26;color:var(--green)}
+.pill.reverted{background:#1c2a35;color:var(--dim)}
+.pill.failed{background:#3a1414;color:var(--red)}
+.pill.applying{background:#3a2c0c;color:var(--yellow)}
+.pill.yes{color:var(--green);font-weight:700}
+.pill.no{color:var(--red);font-weight:700}
+.pill.na{color:var(--dim)}
+.campaign-row{padding:8px 0;border-bottom:1px solid #1a242c;font-size:11.5px}
+.campaign-row .cr-title{font-weight:600}
+.campaign-row .cr-meta{color:var(--dim);font-size:10.5px;margin-top:2px}
+
+/* Reusable hover-info icon for any method/technique label (alternating
+   treatments design, MITRE ATT&CK techniques, cited papers, ...) -- native
+   title= tooltip on hover/focus, no JS, no extra markup needed. */
+.info-icon{display:inline-block;color:var(--cyan);cursor:help;font-size:13px;margin-left:3px}
+.info-icon:hover,.info-icon:focus{color:var(--text)}
+
+/* Gap-validation verdict pills -- same .pill base as the injection-status
+   pills above, 4 new states matching report.py's own 4-state verdict
+   exactly (never a 5th "closed"/"proven" state). */
+.pill.not_evaluated{background:#1c2a35;color:var(--dim)}
+.pill.not_supported{background:#3a1414;color:var(--red)}
+.pill.partially_supported{background:#3a2c0c;color:var(--yellow)}
+.pill.supported_under_tested_conditions{background:#123a26;color:var(--green)}
+
+.gv-gap-row{padding:9px 0;border-bottom:1px solid #1a242c;font-size:11.5px}
+.gv-gap-row .gv-gap-title{font-weight:600;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.gv-gap-row .gv-gap-meta{color:var(--dim);font-size:10px;margin-top:2px}
+/* Plain-language reading -- always visible, never a tooltip (platform-wide rule: every metric/verdict carries a non-technical interpretation inline, for a reader without a technical background). */
+.gv-plain{color:var(--text);font-size:11px;margin-top:4px;line-height:1.5;border-left:2px solid var(--border);padding-left:8px}
+
+/* Purpose-first framing -- every section/subsection states WHY it exists
+   before any technical note about HOW it works. Distinct from .fi-note
+   (which stays for "how"/implementation detail) by color and weight so the
+   two never blend together visually. */
+.fi-purpose{font-size:11.5px;color:var(--text);background:var(--panel2);border-left:3px solid var(--green);padding:7px 10px;margin:0 0 10px;border-radius:0 4px 4px 0;line-height:1.5}
+.fi-purpose-sm{font-size:10.5px;padding:5px 8px;margin-bottom:8px}
+
+.fi-campaign-requirement-banner{font-size:11px;color:var(--text);background:#0f2a1f;border:1px solid #1d4a34;border-radius:6px;padding:10px 12px;margin-bottom:14px;line-height:1.6}
+.fi-campaign-requirement-banner b{color:var(--green)}
+.fi-campaign-requirement-banner ol{margin:6px 0 0;padding-left:18px}
+
+.fault-group-head{font-size:12px;color:var(--text);font-weight:700;margin:16px 0 4px;display:flex;align-items:center;gap:8px}
+.fault-group-head:first-child{margin-top:0}
+.fault-group-purpose{font-size:10.5px;color:var(--dim);margin:0 0 10px;line-height:1.5}
+
+.fault-purpose{font-size:11px;color:var(--text);margin-top:6px;line-height:1.45}
+.fault-purpose b{color:var(--green);font-weight:700}
+
+.campaign-badge{font-size:8.5px;padding:2px 7px;border-radius:999px;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+.campaign-badge.not-required{background:#0f2a1f;color:var(--green)}
+.campaign-badge.optional{background:#2a2410;color:var(--yellow)}
+
+.fault-item.level-mismatch{opacity:.5}
+.fault-level-note{font-size:10px;color:var(--yellow);margin-top:4px}

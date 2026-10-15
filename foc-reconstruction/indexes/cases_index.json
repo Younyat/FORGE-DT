@@ -1,17 +1,17 @@
 {
-  "generated_at": "2026-09-16T05:38:23.907553+00:00",
+  "generated_at": "2026-10-10T15:26:31.321816+00:00",
   "cases": [
     {
-      "case_id": "case-18fe976a",
-      "source_case_name": "CASE-20260916-050912",
-      "path": "app_core/infrastructure/forensics/evidence_store/CASE-20260916-050912",
-      "artifacts_count": 698,
-      "manifest_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260916-050912/manifest.json",
-      "pipeline_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260916-050912/metadata/pipeline_events.jsonl",
-      "custody_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260916-050912/chain_of_custody.log",
+      "case_id": "case-5a366cf2",
+      "source_case_name": "CASE-20261010-140414",
+      "path": "app_core/infrastructure/forensics/evidence_store/CASE-20261010-140414",
+      "artifacts_count": 775,
+      "manifest_path": "app_core/infrastructure/forensics/evidence_store/CASE-20261010-140414/manifest.json",
+      "pipeline_path": "app_core/infrastructure/forensics/evidence_store/CASE-20261010-140414/metadata/pipeline_events.jsonl",
+      "custody_path": "app_core/infrastructure/forensics/evidence_store/CASE-20261010-140414/chain_of_custody.log",
       "target_node_ids": [],
       "target_instance_ids": [],
-      "trigger_alert_id": "alr-28e52977",
+      "trigger_alert_id": "alr-c23e7284",
       "trigger_type": "alert",
       "trigger_selection_score": 370,
       "trigger_selection_reason": "confirmed_correlation,ot_write_signal,forensics_recommended"

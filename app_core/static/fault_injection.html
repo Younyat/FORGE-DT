@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FORGE-VI | Fault Injection</title>
+<link rel="stylesheet" href="css/fault_injection.css" />
+</head>
+<body>
+<header class="fi-header">
+  <div class="fi-brand">
+    <div class="fi-hex">FI</div>
+    <div>
+      <h1>FORGE-VI <span>// FAULT INJECTION</span></h1>
+      <div class="fi-sub">Scientifically-grounded reversible fault injection -- Level A/B/C campaigns</div>
+    </div>
+  </div>
+  <div class="fi-header-stats">
+    <div class="fi-stat"><label>Injections Active</label><b id="stat-active">0</b></div>
+    <div class="fi-stat"><label>Injections Total</label><b id="stat-total">0</b></div>
+    <div class="fi-stat"><label>Effective</label><b id="stat-effective">0</b></div>
+  </div>
+</header>
+
+<main class="fi-grid">
+
+  <section class="fi-card" id="launcher-card">
+    <h2>1 &middot; Campaigns</h2>
+    <p class="fi-purpose">Purpose: start a real, repeatable experimental run (Level A/B/C). This is the foundation the rest of the page builds on -- but note: almost nothing below actually requires one running (see section 2).</p>
+    <p class="fi-note">Reuses the same real endpoints as the FOC Paper Evidence dashboard -- no new orchestration, the injection config is simply attached at launch time.</p>
+
+    <div class="fi-level-tabs">
+      <button class="fi-level-tab active" data-level="A">Level A</button>
+      <button class="fi-level-tab" data-level="B">Level B</button>
+      <button class="fi-level-tab" data-level="C">Level C</button>
+    </div>
+
+    <div class="fi-level-explain" id="level-explain"></div>
+
+    <div id="campaign-picker-block" hidden>
+      <div class="fi-field">
+        <label>Level B campaign (new or existing -- same as FOC Paper Evidence)</label>
+        <select id="existing-campaign-select"><option value="">Loading...</option></select>
+      </div>
+      <button type="button" class="fi-mini-btn" id="btn-create-campaign">Create New Level B Campaign</button>
+      <div class="fi-launch-status" id="create-campaign-status"></div>
+    </div>
+
+    <div id="level-fields"></div>
+
+    <div id="alternating-design-block" hidden>
+      <div class="fi-field">
+        <label>
+          <input type="checkbox" id="f-use-alternating" />
+          Use Alternating Treatments Design
+          <span class="info-icon" tabindex="0" title="Barlow, D.H. &amp; Hayes, S.C. (1979). &quot;Alternating treatments design: One strategy for comparing the effects of two treatments in a single subject.&quot; Journal of Applied Behavior Analysis, 12, 199-210. DOI: 10.1901/jaba.1979.12-199. Control and treatment repetitions alternate within this SAME campaign (strict alternation, a simplified variant of the original paper's preferred random/semi-random alternation), so the final comparison measures the fault's real effect directly: control-repetitions mean vs. treatment-repetitions mean.">&#9432;</span>
+        </label>
+      </div>
+      <div id="alternating-design-fields" hidden>
+        <div class="fi-field">
+          <label>Fault(s) applied on treatment repetitions only</label>
+          <div id="alternating-fault-checkboxes" class="fi-note">loading catalog...</div>
+        </div>
+        <div class="fi-field">
+          <label>Target node role</label>
+          <select id="f-alt-target-role">
+            <option value="plc">plc</option>
+            <option value="scada">scada</option>
+            <option value="victim">victim</option>
+            <option value="monitor">monitor</option>
+            <option value="attacker">attacker</option>
+          </select>
+        </div>
+        <div class="fi-field">
+          <label>Start with</label>
+          <select id="f-alt-start-with">
+            <option value="control">control (odd repetitions clean, even faulted)</option>
+            <option value="treatment">treatment (odd repetitions faulted, even clean)</option>
+          </select>
+        </div>
+        <p class="fi-note">Applied and reverted automatically, once per treatment repetition, reusing the exact same apply/revert used by the on-demand buttons below -- no new injection mechanism.</p>
+      </div>
+    </div>
+
+    <button class="fi-btn-primary" id="btn-launch">Launch campaign</button>
+    <div class="fi-launch-status" id="launch-status"></div>
+  </section>
+
+  <section class="fi-card fi-wide" id="injection-card">
+    <h2>2 &middot; Fault &amp; Experiment Catalog</h2>
+    <p class="fi-purpose">Purpose: for every fault type below, know two things before clicking anything -- WHY it exists (what real question it answers) and WHETHER you need a campaign running at all to use it.</p>
+    <div class="fi-campaign-requirement-banner">
+      <b>None of the faults below require an active campaign.</b> Every single one applies directly to an
+      already-deployed, live node via its own Apply/Revert buttons -- a campaign running or not makes no
+      difference. Campaigns only connect to faults in two specific, optional ways:
+      <ol>
+        <li>The 2 faults in <b>"Attached to a campaign at launch"</b> can ALSO be pre-configured to apply
+          automatically the moment a NEW campaign launches, as a convenience -- or just applied directly
+          below like everything else.</li>
+        <li>The <b>"Use Alternating Treatments Design"</b> option in section 1 ties ANY one fault to
+          automatic apply/revert on every other repetition of a Level C campaign -- a separate, opt-in
+          configuration, not a requirement.</li>
+      </ol>
+    </div>
+    <div id="fault-catalog-list">Loading catalog...</div>
+  </section>
+
+  <section class="fi-card fi-wide" id="monitoring-card">
+    <h2>3 &middot; Live Monitoring</h2>
+    <p class="fi-purpose">Purpose: see what's actually running right now, and whether a fault that was applied earlier actually had the measured, real effect it was supposed to have.</p>
+    <div class="fi-monitor-grid">
+      <div>
+        <h3>Campaign progress</h3>
+        <div class="fi-note">Reuses the snapshot already computed by Control Room -- nothing is recomputed.</div>
+        <div id="campaign-progress-list"></div>
+      </div>
+      <div>
+        <h3>Injections -- real effectiveness</h3>
+        <table class="fi-table">
+          <thead><tr><th>Date / Time</th><th>Type</th><th>Node</th><th>Status</th><th>Effective</th><th>Evidence</th><th></th></tr></thead>
+          <tbody id="injections-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="fi-card fi-wide" id="gap-validation-card">
+    <h2>4 &middot; Scientific Validation (Gap-Experiment-Evidence)</h2>
+    <p class="fi-purpose">Purpose: answer, with real measured evidence instead of a prose claim, whether each documented scientific gap this platform says it closes actually holds up when tested with real repetitions.</p>
+    <p class="fi-note">Every experiment below names exactly which documented scientific gap it tests -- this is not a generic attack/fault collection. A validation campaign runs in its own isolated "gapval-" space, reusing the exact same apply/revert/check mechanisms as section 2 above; it never reads or alters a real Level C campaign's results.</p>
+    <div class="fi-monitor-grid">
+      <div>
+        <h3>Gap Registry -- current verdict</h3>
+        <p class="fi-purpose fi-purpose-sm">Purpose: at a glance, which claims are backed by real test results right now, and which still need a test run.</p>
+        <div id="gap-registry-list">Loading gap registry...</div>
+      </div>
+      <div>
+        <h3>Launch a validation experiment</h3>
+        <p class="fi-purpose fi-purpose-sm">Purpose: run a new, controlled test (with an automatic control/treatment comparison) for one specific claim.</p>
+        <div class="fi-field">
+          <label>Experiment</label>
+          <select id="gv-experiment-select"><option value="">loading catalog...</option></select>
+        </div>
+        <div class="fi-field" id="gv-experiment-detail"></div>
+        <div class="fi-field">
+          <label>Repetitions (control/treatment alternate automatically)</label>
+          <input type="number" id="gv-repetitions" value="4" min="2" />
+        </div>
+        <button class="fi-btn-primary" id="gv-launch-btn">Launch validation campaign</button>
+        <div class="fi-launch-status" id="gv-launch-status"></div>
+        <h3 style="margin-top:16px">Running / recent validation campaigns</h3>
+        <p class="fi-purpose fi-purpose-sm">Purpose: review what has actually been tested so far, and inspect any individual run's real result.</p>
+        <div id="gv-campaigns-list" class="fi-note">no campaigns yet</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script type="module" src="js/fault_injection/app.js"></script>
+<script type="module" src="js/fault_injection/gap_validation.js"></script>
+</body>
+</html>

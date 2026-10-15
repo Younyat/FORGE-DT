@@ -40,7 +40,14 @@ export function createScene(container) {
   camera.position.set(0, 34, 78);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  // Capped at 1.5, not 2 -- on a HiDPI/Retina display (devicePixelRatio=2)
+  // this cuts the number of pixels actually shaded by (2/1.5)^2 ~= 1.8x,
+  // a real, broad win across every pixel this scene renders (independent
+  // of and additive with the per-model triangle-count fixes elsewhere
+  // this session), for a barely-perceptible softness trade-off. Left
+  // antialiasing on (unlike pixelRatio, MSAA isn't the dominant cost here,
+  // and this dashboard's clean wireframe-edge look depends on it more).
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   renderer.setSize(container.clientWidth, container.clientHeight);
   container.appendChild(renderer.domElement);
 

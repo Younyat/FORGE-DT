@@ -1,50 +1,26 @@
 {
   "schema": "forge_vi_cpr_aggregate_v1",
-  "generated_at_utc": "2026-09-16T05:55:40Z",
-  "n_executions": 10,
+  "generated_at_utc": "2026-10-10T16:14:53Z",
+  "n_executions": 2,
   "cpr_stable": false,
   "cpr_values": [
-    0.75,
     0.875,
-    0.875,
-    0.75,
-    0.875,
-    0.75,
-    0.875,
-    0.875,
-    0.75,
-    0.75
+    0.625
   ],
-  "cpr_mean": 0.8125,
-  "cpr_std": 0.0659,
+  "cpr_mean": 0.75,
+  "cpr_std": 0.1768,
   "wcpr_values": [
-    0.7808,
     0.8767,
-    0.8767,
-    0.7808,
-    0.8767,
-    0.7808,
-    0.8767,
-    0.8767,
-    0.7808,
-    0.7808
+    0.6233
   ],
-  "wcpr_mean": 0.8288,
+  "wcpr_mean": 0.75,
   "recoverability_labels": [
-    "partially_recoverable",
     "mostly_recoverable",
-    "mostly_recoverable",
-    "partially_recoverable",
-    "mostly_recoverable",
-    "partially_recoverable",
-    "mostly_recoverable",
-    "mostly_recoverable",
-    "partially_recoverable",
     "partially_recoverable"
   ],
   "expected_edges": 8,
-  "aggregate_recovered": 6,
-  "aggregate_degraded": 1,
+  "aggregate_recovered": 7,
+  "aggregate_degraded": 0,
   "aggregate_missing": 0,
   "aggregate_ambiguous": 1,
   "edge_aggregate": {
@@ -52,7 +28,7 @@
       "edge_id": "edge_attack_execution_to_ot_write",
       "name": "Attack Execution → OT Modbus Write",
       "state_counts": {
-        "recovered": 10
+        "recovered": 2
       },
       "dominant_state": "recovered",
       "consistent_across_runs": true
@@ -61,7 +37,7 @@
       "edge_id": "edge_ot_write_to_network_modbus_write",
       "name": "OT Modbus Write → Observable Network Traffic",
       "state_counts": {
-        "recovered": 10
+        "recovered": 2
       },
       "dominant_state": "recovered",
       "consistent_across_runs": true
@@ -70,44 +46,46 @@
       "edge_id": "edge_network_modbus_write_to_detection_surface",
       "name": "Network Modbus Write → Detection Surface",
       "state_counts": {
-        "recovered": 10
+        "recovered": 1,
+        "ambiguous": 1
       },
       "dominant_state": "recovered",
-      "consistent_across_runs": true
+      "consistent_across_runs": false
     },
     "edge_ot_write_to_plc_state_observation": {
       "edge_id": "edge_ot_write_to_plc_state_observation",
       "name": "OT Modbus Write → PLC State Observation",
       "state_counts": {
-        "degraded": 5,
-        "recovered": 5
+        "recovered": 2
       },
-      "dominant_state": "degraded",
-      "consistent_across_runs": false
+      "dominant_state": "recovered",
+      "consistent_across_runs": true
     },
     "edge_detection_surface_to_alert_observation": {
       "edge_id": "edge_detection_surface_to_alert_observation",
       "name": "Detection Surface → Alert Observation",
       "state_counts": {
-        "ambiguous": 10
+        "ambiguous": 1,
+        "missing": 1
       },
       "dominant_state": "ambiguous",
-      "consistent_across_runs": true
+      "consistent_across_runs": false
     },
     "edge_alert_observation_to_forensic_case": {
       "edge_id": "edge_alert_observation_to_forensic_case",
       "name": "Alert Observation → Forensic Case",
       "state_counts": {
-        "recovered": 10
+        "recovered": 1,
+        "missing": 1
       },
       "dominant_state": "recovered",
-      "consistent_across_runs": true
+      "consistent_across_runs": false
     },
     "edge_forensic_case_to_preserved_case_evidence": {
       "edge_id": "edge_forensic_case_to_preserved_case_evidence",
       "name": "Forensic Case → Preserved Case Evidence",
       "state_counts": {
-        "recovered": 10
+        "recovered": 2
       },
       "dominant_state": "recovered",
       "consistent_across_runs": true
@@ -116,7 +94,7 @@
       "edge_id": "edge_preserved_case_evidence_to_multilayer_analysis",
       "name": "Preserved Case Evidence → Multilayer Analysis",
       "state_counts": {
-        "recovered": 10
+        "recovered": 2
       },
       "dominant_state": "recovered",
       "consistent_across_runs": true

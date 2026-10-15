@@ -1,0 +1,11 @@
+{
+  "generated_at": "2026-10-05T18:00:54.188060+00:00",
+  "warnings": [
+    "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+    "Semantic reconstruction has not been generated.",
+    "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+    "Integrity and custody validation supports evidentiary trust in the preserved artifacts; it does not by itself confirm the causal hypothesis.",
+    "Heavy generated case artifacts were cleaned after nested Level A reporting so the next Level B repetition could create a fresh case without accumulating heavy storage."
+  ],
+  "blockers": []
+}

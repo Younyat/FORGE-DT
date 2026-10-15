@@ -1,56 +1,56 @@
 \begin{table}[ht]
 \centering
-\caption{FORGE-VI Level C Workflow Verification Summary ($N_C = 118$ accepted redeployment-aware executions)}
+\caption{FORGE-VI Level C Workflow Verification Summary ($N_C = 132$ accepted redeployment-aware executions)}
 \label{tab:forge-vi-workflow}
 \begin{tabular}{llr}
 \hline
 \textbf{Phase} & \textbf{Verified Condition} & \textbf{Result} \\
 \hline
 \multirow{3}{*}{\textbf{Deploy/Redeploy}} & Teardown completed & \textit{N/A} (Level~B, standing scenario) \\
- & Same topology instantiated & 118/118$^{\dagger}$ \\
- & Effective inventory recorded & 118/118$^{\dagger}$ \\
+ & Same topology instantiated & 132/132$^{\dagger}$ \\
+ & Effective inventory recorded & 132/132$^{\dagger}$ \\
 \hline
-\multirow{5}{*}{\textbf{Validate}} & Validation gate passed$^{\dagger}$ & 117/118 \\
- & Segmentation verified$^{\dagger}$ & 98/118 \\
- & Sensor liveness verified$^{\dagger}$ & 118/118 \\
- & PLC/SCADA reachable$^{\dagger}$ & 118/118 \\
- & Time reference coherent & 112/118 \\
+\multirow{5}{*}{\textbf{Validate}} & Validation gate passed$^{\dagger}$ & 131/132 \\
+ & Segmentation verified$^{\dagger}$ & 111/132 \\
+ & Sensor liveness verified$^{\dagger}$ & 132/132 \\
+ & PLC/SCADA reachable$^{\dagger}$ & 132/132 \\
+ & Time reference coherent & 126/132 \\
 \hline
-\multirow{3}{*}{\textbf{Execute}} & Attack profile executed & 118/118 \\
- & Ground truth available & 118/118 \\
- & Attack duration & 21~s \pm 5~s \\
+\multirow{3}{*}{\textbf{Execute}} & Attack profile executed & 132/132 \\
+ & Ground truth available & 132/132 \\
+ & Attack duration & 25~s \pm 38~s \\
 \hline
-\multirow{3}{*}{\textbf{Detect}} & Alert observed & 118/118 \\
- & Trigger alert bound & 118/118 \\
- & Attack-to-alert latency & 15~s \pm 17~s \\
+\multirow{3}{*}{\textbf{Detect}} & Alert observed & 132/132 \\
+ & Trigger alert bound & 132/132 \\
+ & Attack-to-alert latency & 16~s \pm 24~s \\
 \hline
-\multirow{5}{*}{\textbf{Acquire}} & Memory acquired first & 118/118 \\
- & Acquisition order valid (mem$\to$net$\to$disk) & 118/118 \\
- & Alert-to-memory-start (neg.=preemptive) & 21~s \pm 20~s \\
- & Alert-to-memory-sealed & 618~s \pm 151~s \\
- & Alert-to-case-sealed (all artifacts) & 1737~s \pm 588~s \\
+\multirow{5}{*}{\textbf{Acquire}} & Memory acquired first & 132/132 \\
+ & Acquisition order valid (mem$\to$net$\to$disk) & 132/132 \\
+ & Alert-to-memory-start (neg.=preemptive) & 27~s \pm 38~s \\
+ & Alert-to-memory-sealed & 626~s \pm 157~s \\
+ & Alert-to-case-sealed (all artifacts) & 1727~s \pm 566~s \\
 \hline
-\multirow{5}{*}{\textbf{Preserve}} & Required artifacts preserved & 118/118 \\
- & Manifest verified & 118/118 \\
- & Custody chain present & 118/118 \\
- & Memory (LiME) & 7.52~GiB \pm 1.36~GiB \\
- & Disk (RAW) & 65.85~GiB \pm 12.96~GiB \\
- & Network (PCAP) & 1.50~GiB \pm 1.30~GiB \\
+\multirow{5}{*}{\textbf{Preserve}} & Required artifacts preserved & 132/132 \\
+ & Manifest verified & 132/132 \\
+ & Custody chain present & 132/132 \\
+ & Memory (LiME) & 7.57~GiB \pm 1.29~GiB \\
+ & Disk (RAW) & 66.29~GiB \pm 12.32~GiB \\
+ & Network (PCAP) & 1.46~GiB \pm 1.26~GiB \\
 \hline
 \multirow{5}{*}{\textbf{Analyze}} & Layers completed / expected & 9--12/14 \\
- & Layers partial (output present, caveated) & 29 (total layer-run instances) \\
+ & Layers partial (output present, caveated) & 30 (total layer-run instances) \\
  & Useful layers (completed + partial) & 11--12/14 \\
- & Memory analysis status & completed (110/118), partial (7/118), skipped_no_memory_dump (1/118) \\
- & Timeline generated & 118/118 \\
- & Cross-layer findings & 118/118 \\
+ & Memory analysis status & completed (123/132), partial (8/132), skipped_no_memory_dump (1/132) \\
+ & Timeline generated & 132/132 \\
+ & Cross-layer findings & 132/132 \\
 \hline
 \multirow{3}{*}{\textbf{Reconstruct (CPR)}} & CPR (diagnostic only) & 0.5 \\
  & Edge state & R=4, D=2, M=2, A=0 \\
  & Recoverability & partially_recoverable \\
 \hline
-\multirow{3}{*}{\textbf{Compare}} & FSR invariants stable & 0/118 \\
- & CPR stable & 0/118 \\
- & Edge-state pattern stable & 0/118 \\
+\multirow{3}{*}{\textbf{Compare}} & FSR invariants stable & 0/132 \\
+ & CPR stable & 0/132 \\
+ & Edge-state pattern stable & 0/132 \\
 \hline
 \end{tabular}
 \begin{flushleft}

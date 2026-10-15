@@ -66,8 +66,8 @@
         "x": 1200,
         "y": 280
       },
-      "ip_floating": "10.0.2.37",
-      "ip_private": "192.168.100.207"
+      "ip_floating": "10.0.2.101",
+      "ip_private": "192.168.100.245"
     },
     {
       "id": "scada1",
@@ -77,8 +77,8 @@
         "x": 1200,
         "y": 160
       },
-      "ip_floating": "10.0.2.24",
-      "ip_private": "192.168.100.145"
+      "ip_floating": "10.0.2.88",
+      "ip_private": "192.168.100.224"
     }
   ],
   "edges": [
@@ -136,17 +136,17 @@
   "deployment": {
     "plc_instance": {
       "state": "created",
-      "instance_id": "1c047b30-ebf3-4637-acd1-be6b0d5098b5",
+      "instance_id": "2e9af11f-48f4-4785-bad4-851343ba6a65",
       "name": "PLC_Instance",
-      "ip_floating": "10.0.2.37",
-      "ip_private": "192.168.100.207"
+      "ip_floating": "10.0.2.101",
+      "ip_private": "192.168.100.245"
     },
     "scada_instance": {
       "state": "created",
-      "instance_id": "7d8adec8-50dd-40a9-adcb-ecaea76d53fb",
+      "instance_id": "8394164f-01c4-41fd-ad0a-21581c818520",
       "name": "FUXA_Instance",
-      "ip_floating": "10.0.2.24",
-      "ip_private": "192.168.100.145"
+      "ip_floating": "10.0.2.88",
+      "ip_private": "192.168.100.224"
     }
   }
 }

@@ -1,140 +1,140 @@
 {
-  "generated_at_utc": "2026-09-17T09:20:39.052074+00:00",
+  "generated_at_utc": "2026-10-15T14:23:12.503954+00:00",
   "inventory_candidates": [
     {
       "flavor": "",
-      "floating_ip": "10.0.2.37",
+      "floating_ip": "10.0.2.101",
       "image": "ubuntu-22.04",
-      "instance_id": "1c047b30-ebf3-4637-acd1-be6b0d5098b5",
+      "instance_id": "2e9af11f-48f4-4785-bad4-851343ba6a65",
       "name": "PLC_Instance",
       "networks": [
         {
-          "ip": "192.168.100.207",
+          "ip": "192.168.100.245",
           "network": "net_private_01",
           "type": "fixed"
         },
         {
-          "ip": "10.0.2.37",
+          "ip": "10.0.2.101",
           "network": "net_private_01",
           "type": "floating"
         }
       ],
-      "private_ip": "192.168.100.207",
+      "private_ip": "192.168.100.245",
       "source": "openstack_sdk",
       "status": "ACTIVE"
     },
     {
       "flavor": "",
-      "floating_ip": "10.0.2.24",
+      "floating_ip": "10.0.2.88",
       "image": "ubuntu-22.04",
-      "instance_id": "7d8adec8-50dd-40a9-adcb-ecaea76d53fb",
+      "instance_id": "8394164f-01c4-41fd-ad0a-21581c818520",
       "name": "FUXA_Instance",
       "networks": [
         {
-          "ip": "192.168.100.145",
+          "ip": "192.168.100.224",
           "network": "net_private_01",
           "type": "fixed"
         },
         {
-          "ip": "10.0.2.24",
+          "ip": "10.0.2.88",
           "network": "net_private_01",
           "type": "floating"
         }
       ],
-      "private_ip": "192.168.100.145",
+      "private_ip": "192.168.100.224",
       "source": "openstack_sdk",
       "status": "ACTIVE"
     },
     {
       "flavor": "",
-      "floating_ip": "10.0.2.111",
+      "floating_ip": "10.0.2.201",
       "image": "debian-12",
-      "instance_id": "99a186ae-d736-412a-9c83-33bfb698a912",
+      "instance_id": "9b82391c-0a8f-4b48-a770-5608b22adf19",
       "name": "victim 33",
       "networks": [
         {
-          "ip": "192.168.100.248",
+          "ip": "192.168.100.134",
           "network": "net_private_01",
           "type": "fixed"
         },
         {
-          "ip": "10.0.2.111",
+          "ip": "10.0.2.201",
           "network": "net_private_01",
           "type": "floating"
         }
       ],
-      "private_ip": "192.168.100.248",
+      "private_ip": "192.168.100.134",
       "source": "openstack_sdk",
       "status": "ACTIVE"
     },
     {
       "flavor": "",
-      "floating_ip": "10.0.2.155",
+      "floating_ip": "10.0.2.205",
       "image": "debian-12",
-      "instance_id": "9208f5fa-6bf7-4c31-b1bb-8552d3fba984",
+      "instance_id": "3568a517-98d6-48c6-bd93-4cf487748871",
       "name": "attack 22",
       "networks": [
         {
-          "ip": "192.168.100.56",
+          "ip": "192.168.100.244",
           "network": "net_private_01",
           "type": "fixed"
         },
         {
-          "ip": "10.0.2.155",
+          "ip": "10.0.2.205",
           "network": "net_private_01",
           "type": "floating"
         }
       ],
-      "private_ip": "192.168.100.56",
+      "private_ip": "192.168.100.244",
       "source": "openstack_sdk",
       "status": "ACTIVE"
     },
     {
       "flavor": "",
-      "floating_ip": "10.0.2.114",
+      "floating_ip": "10.0.2.150",
       "image": "ubuntu-22.04",
-      "instance_id": "3da727c3-327d-4855-9cdc-53f5e785e901",
+      "instance_id": "3cfac491-0b3c-46fb-b4a9-36322cbd31c2",
       "name": "monitor 11",
       "networks": [
         {
-          "ip": "192.168.100.7",
+          "ip": "192.168.100.80",
           "network": "net_private_01",
           "type": "fixed"
         },
         {
-          "ip": "10.0.2.114",
+          "ip": "10.0.2.150",
           "network": "net_private_01",
           "type": "floating"
         }
       ],
-      "private_ip": "192.168.100.7",
+      "private_ip": "192.168.100.80",
       "source": "openstack_sdk",
       "status": "ACTIVE"
     }
   ],
   "plc": {
     "flavor": "",
-    "floating_ip": "10.0.2.37",
+    "floating_ip": "10.0.2.101",
     "image": "ubuntu-22.04",
-    "instance_id": "1c047b30-ebf3-4637-acd1-be6b0d5098b5",
+    "instance_id": "2e9af11f-48f4-4785-bad4-851343ba6a65",
     "instance_status": "created",
-    "ip": "10.0.2.37",
+    "ip": "10.0.2.101",
     "last_error": null,
     "name": "PLC_Instance",
     "networks": [
       {
-        "ip": "192.168.100.207",
+        "ip": "192.168.100.245",
         "network": "net_private_01",
         "type": "fixed"
       },
       {
-        "ip": "10.0.2.37",
+        "ip": "10.0.2.101",
         "network": "net_private_01",
         "type": "floating"
       }
     ],
     "port": 502,
-    "private_ip": "192.168.100.207",
+    "private_ip": "192.168.100.245",
     "role": "industrial_plc",
     "source": "openstack_sdk",
     "status": "ACTIVE",
@@ -144,26 +144,26 @@
   },
   "scada": {
     "flavor": "",
-    "floating_ip": "10.0.2.24",
+    "floating_ip": "10.0.2.88",
     "image": "ubuntu-22.04",
-    "instance_id": "7d8adec8-50dd-40a9-adcb-ecaea76d53fb",
+    "instance_id": "8394164f-01c4-41fd-ad0a-21581c818520",
     "instance_status": "created",
-    "ip": "10.0.2.24",
+    "ip": "10.0.2.88",
     "last_error": null,
     "name": "FUXA_Instance",
     "networks": [
       {
-        "ip": "192.168.100.145",
+        "ip": "192.168.100.224",
         "network": "net_private_01",
         "type": "fixed"
       },
       {
-        "ip": "10.0.2.24",
+        "ip": "10.0.2.88",
         "network": "net_private_01",
         "type": "floating"
       }
     ],
-    "private_ip": "192.168.100.145",
+    "private_ip": "192.168.100.224",
     "role": "industrial_scada",
     "service_reachable": true,
     "source": "openstack_sdk",

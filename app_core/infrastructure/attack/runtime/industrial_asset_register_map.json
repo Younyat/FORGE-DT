@@ -1,9 +1,9 @@
 {
-  "generated_at_utc": "2026-09-17T09:20:39.054464+00:00",
+  "generated_at_utc": "2026-10-15T14:23:12.515081+00:00",
   "plc": {
-    "ip": "10.0.2.37",
+    "ip": "10.0.2.101",
     "name": "PLC_Instance",
-    "openstack_instance_id": "1c047b30-ebf3-4637-acd1-be6b0d5098b5",
+    "openstack_instance_id": "2e9af11f-48f4-4785-bad4-851343ba6a65",
     "port": 502,
     "program": "TankSimple",
     "protocol": "modbus_tcp"
@@ -219,20 +219,20 @@
     }
   ],
   "scada": {
-    "ip": "10.0.2.24",
+    "ip": "10.0.2.88",
     "name": "FUXA_Instance",
-    "openstack_instance_id": "7d8adec8-50dd-40a9-adcb-ecaea76d53fb",
+    "openstack_instance_id": "8394164f-01c4-41fd-ad0a-21581c818520",
     "type": "fuxa"
   },
   "scenario": "tank_control",
   "scenario_id": "scn-831ff01b",
   "validation": {
-    "configured_endpoint": "10.0.2.37:502",
+    "configured_endpoint": "10.0.2.101:502",
     "method": "live_modbus_read",
     "notes": [],
     "status": "pending",
     "visual_endpoints": [
-      "10.0.2.37:502"
+      "10.0.2.101:502"
     ]
   }
 }

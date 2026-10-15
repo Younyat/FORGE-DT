@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-09-25T14:31:21.480093+00:00",
+  "campaign_id": "CMP-20260925-143116-0112",
+  "execution_id": "EXEC-0008",
+  "generated_execution_ids": [
+    "EXEC-0001",
+    "EXEC-0002",
+    "EXEC-0003",
+    "EXEC-0004",
+    "EXEC-0005",
+    "EXEC-0006",
+    "EXEC-0007",
+    "EXEC-0008"
+  ],
+  "requested_repetitions": 10,
+  "completed_repetitions": 8,
+  "case_id": "case-3969aad7",
+  "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260925-130146",
+  "report_type": "level_a_scientific_report",
+  "report_scope": "consolidated_level_a_dry_run_repetitions",
+  "level": "A",
+  "job_id": "exp-3b343815f282",
+  "report_markdown_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-3969aad7/CMP-20260925-143116-0112/level_A_2026-09-25T143121.480093_0000/SCIENTIFIC_LEVEL_A_REPORT.md",
+  "report_output_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-3969aad7/CMP-20260925-143116-0112/level_A_2026-09-25T143121.480093_0000",
+  "status": "completed_with_degradation",
+  "comparison_status": "Comparable With Degradation",
+  "comparison_type": "direct_level_a_repeatability_comparison",
+  "source_files_index_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-3969aad7/CMP-20260925-143116-0112/level_A_2026-09-25T143121.480093_0000/source_files_index.json",
+  "evidence_to_claim_map_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-3969aad7/CMP-20260925-143116-0112/level_A_2026-09-25T143121.480093_0000/evidence_to_claim_map.json",
+  "generation_log_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-3969aad7/CMP-20260925-143116-0112/level_A_2026-09-25T143121.480093_0000/generation_log.jsonl",
+  "report_summary_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-3969aad7/CMP-20260925-143116-0112/level_A_2026-09-25T143121.480093_0000/report_summary.json"
+}

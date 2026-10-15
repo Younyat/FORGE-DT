@@ -2822,6 +2822,76 @@ try:
 except Exception:
     pass
 
+try:
+    from app_core.infrastructure.control_room.api import control_room_bp
+    api_bp.register_blueprint(control_room_bp)
+    print("[OK] Control Room Blueprint cargado correctamente")
+except Exception:
+    pass
+
+try:
+    from app_core.infrastructure.fault_injection.api import fault_injection_bp
+    api_bp.register_blueprint(fault_injection_bp)
+    print("[OK] Fault Injection Blueprint cargado correctamente")
+except Exception:
+    pass
+
+try:
+    from app_core.infrastructure.ot_state_twin.api import ot_state_twin_bp
+    api_bp.register_blueprint(ot_state_twin_bp)
+    print("[OK] OT State Twin Blueprint cargado correctamente")
+except Exception:
+    pass
+
+try:
+    from app_core.infrastructure.forensic_twin.api import forensic_twin_bp
+    api_bp.register_blueprint(forensic_twin_bp)
+    print("[OK] Forensic Twin Blueprint cargado correctamente")
+except Exception:
+    pass
+
+try:
+    from app_core.infrastructure.host_metrics.api import host_metrics_bp
+    api_bp.register_blueprint(host_metrics_bp)
+    print("[OK] Host Metrics Blueprint cargado correctamente")
+except Exception:
+    pass
+
+try:
+    from app_core.infrastructure.intervention_ledger.api import intervention_ledger_bp
+    api_bp.register_blueprint(intervention_ledger_bp)
+    print("[OK] Intervention Ledger Blueprint cargado correctamente")
+except Exception:
+    pass
+
+try:
+    from app_core.infrastructure.evidence_bridge.api import evidence_bridge_bp
+    api_bp.register_blueprint(evidence_bridge_bp)
+    print("[OK] Evidence Bridge Blueprint cargado correctamente")
+except Exception:
+    pass
+
+try:
+    from app_core.infrastructure.forge_dt_metrics.api import forge_dt_metrics_bp
+    api_bp.register_blueprint(forge_dt_metrics_bp)
+    print("[OK] FORGE-DT Metrics Blueprint cargado correctamente")
+except Exception:
+    pass
+
+try:
+    from app_core.infrastructure.campaign_failure_forensics.api import campaign_failure_forensics_bp
+    api_bp.register_blueprint(campaign_failure_forensics_bp)
+    print("[OK] Campaign Failure Forensics Blueprint cargado correctamente")
+except Exception:
+    pass
+
+try:
+    from app_core.infrastructure.gap_validation.api import gap_validation_bp
+    api_bp.register_blueprint(gap_validation_bp)
+    print("[OK] Gap Validation Blueprint cargado correctamente")
+except Exception:
+    pass
+
 
 #-------------------------------------------Forensics new one  end----------------------------------------------------
 

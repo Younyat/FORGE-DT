@@ -1,9 +1,9 @@
 # FORGE-VI Level C — CPR Edge Matrix Interpretation
 
-**Campaign:** `CMP-20260915-091322-A273`  
+**Campaign:** `CMP-20261010-101053-B301`  
 **Paper level:** Level C (provisional — using Level B standing-scenario repetitions)  
-**Executions accepted:** 10/6  
-**Generated:** 2026-09-16T05:55:40Z
+**Executions accepted:** 2/6  
+**Generated:** 2026-10-10T16:14:53Z
 
 ---
 
@@ -12,15 +12,15 @@
 | Metric | Value |
 |--------|-------|
 | Expected causal edges | 8 |
-| Recovered edges | 6 |
-| Degraded edges | 1 |
+| Recovered edges | 7 |
+| Degraded edges | 0 |
 | Missing edges | 0 |
 | Ambiguous edges | 1 |
-| CPR | 0.75 (= 6/8) |
-| Weighted CPR | 0.7808 |
-| Recoverability | partially_recoverable |
-| Reconstruction confidence | 0.8055 |
-| CPR stable across runs | True (identical in all 10 runs) |
+| CPR | 0.875 (= 7/8) |
+| Weighted CPR | 0.8767 |
+| Recoverability | mostly_recoverable |
+| Reconstruction confidence | 0.8777 |
+| CPR stable across runs | True (identical in all 2 runs) |
 
 ---
 
@@ -31,7 +31,7 @@
 | `edge_attack_execution_to_ot_write` | ✅ recovered | supported | Attack Execution → OT Modbus Write |
 | `edge_ot_write_to_network_modbus_write` | ✅ recovered | not_required | OT Modbus Write → Observable Network Traffic |
 | `edge_network_modbus_write_to_detection_surface` | ✅ recovered | supported | Network Modbus Write → Detection Surface |
-| `edge_ot_write_to_plc_state_observation` | ⚠️ degraded | not_required | OT Modbus Write → PLC State Observation |
+| `edge_ot_write_to_plc_state_observation` | ✅ recovered | not_required | OT Modbus Write → PLC State Observation |
 | `edge_detection_surface_to_alert_observation` | 🔶 ambiguous | ambiguous | Detection Surface → Alert Observation |
 | `edge_alert_observation_to_forensic_case` | ✅ recovered | supported | Alert Observation → Forensic Case |
 | `edge_forensic_case_to_preserved_case_evidence` | ✅ recovered | supported | Forensic Case → Preserved Case Evidence |

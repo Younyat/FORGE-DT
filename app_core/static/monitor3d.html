@@ -115,6 +115,52 @@
   .relation-label { font-size: 9.5px; font-weight: 600; padding: 2px 6px; border-radius: 4px; white-space: nowrap; pointer-events: none; border: 1px solid; }
   .relation-label.security { color: #fca5a5; border-color: rgba(239,68,68,0.6); background: rgba(30,4,4,0.75); }
   .relation-label.evidence { color: #a5b4fc; border-color: rgba(99,102,241,0.6); background: rgba(8,7,30,0.75); }
+  .relation-label.fault { color: #67e8f9; border-color: rgba(34,211,238,0.6); background: rgba(5,25,30,0.75); }
+  .relation-label.critical { font-size: 13px; font-weight: 800; color: #fecaca; border: 2px solid #ef4444; background: rgba(40,4,4,0.9); padding: 8px 14px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; animation: failure-pulse 1.1s ease-in-out infinite; }
+  /* The digital twin watcher's own permanent, always-on readout -- attached
+     directly under the 3D object (camera-anchored, see reconstruction.js),
+     not a brief flash like .security/.critical above, so it never pulses
+     and allows real wrapped multi-line text instead of a single nowrap tag. */
+  .relation-label.twin-hud { white-space: normal; width: 210px; line-height: 1.35; padding: 6px 9px; color: var(--text); border-color: var(--border); background: rgba(3,10,18,0.88); }
+  @keyframes failure-pulse { 0%, 100% { box-shadow: 0 0 10px 2px rgba(239,68,68,0.5); } 50% { box-shadow: 0 0 26px 8px rgba(239,68,68,0.85); } }
+  /* Alert Center's 3D callout -- a one-shot, un-missable emphasis for a real
+     event (attack detected, fault injection outcome, a computed metric),
+     held for its own short duration by reconstruction.js's triggerAlert()
+     then faded, never a permanent fixture. `currentColor` in the pulse lets
+     one keyframe serve every severity below instead of 4 near-duplicates. */
+  @keyframes alert-pop { 0%, 100% { box-shadow: 0 0 10px 2px currentColor; } 50% { box-shadow: 0 0 22px 7px currentColor; } }
+  .relation-label.alert-callout { white-space: normal; width: 230px; line-height: 1.4; padding: 8px 12px; border-radius: 8px; border: 2px solid currentColor; animation: alert-pop 1s ease-in-out infinite; }
+  .alert-callout .alert-kicker { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; margin-bottom: 2px; }
+  .alert-callout .alert-title { font-size: 13px; font-weight: 700; }
+  .alert-callout .alert-detail { font-size: 10.5px; font-weight: 400; margin-top: 3px; opacity: 0.9; }
+  .relation-label.alert-callout.sev-critical { color: #fecaca; background: rgba(40,4,4,0.92); }
+  .relation-label.alert-callout.sev-warning { color: #fde68a; background: rgba(40,28,4,0.92); }
+  .relation-label.alert-callout.sev-good { color: #bbf7d0; background: rgba(4,32,16,0.92); }
+  .relation-label.alert-callout.sev-info { color: #a5f3fc; background: rgba(4,26,32,0.92); }
+  /* Alert Center feed (left panel) -- same .event-row rhythm as "Recent
+     beats" below it, with a left accent bar color-coded by severity so the
+     most important entries are scannable without reading every line. */
+  .alert-feed-row { border-left: 3px solid var(--text-dim); padding-left: 8px; margin: 5px 0; }
+  .alert-feed-row.sev-critical { border-left-color: #ef4444; }
+  .alert-feed-row.sev-warning { border-left-color: #f2a516; }
+  .alert-feed-row.sev-good { border-left-color: #2fbf71; }
+  .alert-feed-row.sev-info { border-left-color: #22d3ee; }
+  .alert-feed-row .afr-kind { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-dim); }
+  .alert-feed-row .afr-title { font-size: 11.5px; font-weight: 600; }
+  .alert-feed-row .afr-detail { font-size: 10px; color: var(--text-dim); margin-top: 1px; }
+  /* 3D "report card" -- a real, readable summary of a campaign's or a
+     repetition's own key metrics, parked in the scene (not a brief flash
+     like .alert-callout above), per explicit user request to see this
+     "nicely" directly in the 3D background, not only buried in a side
+     panel. No pulse animation (it's meant to be read at leisure, not to
+     demand attention the way a fresh alert does); a quiet static border
+     with a left accent bar reads as a dashboard card, not a warning. */
+  .relation-label.report-card { white-space: normal; width: 205px; line-height: 1.35; padding: 8px 11px; color: var(--text); background: rgba(3,10,18,0.92); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 4px 8px 8px 4px; }
+  .report-card .rc-title { font-size: 12.5px; font-weight: 700; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .report-card .rc-row { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; padding: 1.5px 0; }
+  .report-card .rc-row .rc-k { color: var(--text-dim); }
+  .report-card .rc-row .rc-v { font-weight: 600; text-align: right; }
+  .report-card .rc-note { font-size: 10px; font-weight: 400; color: var(--text-dim); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); line-height: 1.4; }
   .ent-card.dimmed { filter: grayscale(0.5); }
   .ent-card.dimmed .ent-title, .ent-card.dimmed .ent-sub, .ent-card.dimmed .ent-stat { opacity: 0.4; }
 
@@ -124,9 +170,15 @@
   .ent-card {
     --cage-color: #3b82f6;
     position: relative;
-    background: rgba(2,7,14,0.94); border: 1.5px solid var(--cage-color); border-radius: 8px;
+    /* Was 0.94 (near-opaque) -- with several boxes in view, each card
+       fully hid whatever box sat behind it. Every text element inside
+       already carries its own dark text-shadow halo for contrast, so a
+       much lighter backdrop still reads fine while letting boxes behind
+       show through. */
+    background: rgba(2,7,14,0.4); border: 1.5px solid var(--cage-color); border-radius: 8px;
     padding: 9px 11px; min-width: 120px; text-align: left; pointer-events: none;
     box-shadow: 0 0 18px color-mix(in srgb, var(--cage-color) 55%, transparent), inset 0 0 22px color-mix(in srgb, var(--cage-color) 12%, transparent);
+    backdrop-filter: blur(2px);
   }
   .ent-card.selected { box-shadow: 0 0 26px color-mix(in srgb, var(--cage-color) 85%, transparent), inset 0 0 26px color-mix(in srgb, var(--cage-color) 20%, transparent); }
   .ent-card.kind-campaign, .ent-card.kind-case { min-width: 200px; }
@@ -187,6 +239,52 @@
   .kv-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dashed rgba(34,211,238,0.08); font-size: 11px; gap: 8px; }
   .kv-row .k { color: var(--text-dim); }
   .kv-row .v { color: var(--text); text-align: right; }
+
+  /* Digital Twin View's own node detail panel -- bigger, more legible text
+     than the default .kv-row (11px reads too small once a panel is this
+     dense with real values), plus a plain-language sentence under each
+     section explaining what the comparison means, not just raw numbers. */
+  .dt-detail { font-size: 13px; line-height: 1.7; }
+  .dt-detail .kv-row { font-size: 13px; padding: 5px 0; }
+  .dt-detail .kv-row .k { font-weight: 600; }
+  .dt-detail .section-title { margin-top: 16px; font-size: 11.5px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 0.6px; }
+  .dt-detail .section-help { font-size: 12px; color: var(--text-dim); line-height: 1.5; margin: 3px 0 7px; }
+
+  /* Phase timeline widget (js/monitor3d/phase_timeline.js) -- real
+     intervention lifecycle as a vertical HUD "mission stepper" (chosen over
+     a horizontal strip because the real detail sidebar is only ~300px wide
+     -- a 6-across horizontal layout measured live against the real PLC node
+     overflowed it and got clipped). "done" nodes glow solid cyan, "failed"
+     glow red, "pending" stay hollow/dim. The connector segment right after
+     the newest completed phase animates (a traveling light) only while the
+     intervention is still real-active (applied, not yet reverted) -- a
+     visual cue that this step could still complete any moment, never
+     decorative on its own. */
+  .pt-mount { margin-top: 2px; }
+  .pt-empty { color: var(--text-dim); font-size: 11px; padding: 6px 0; }
+  .pt-header { display: flex; align-items: center; gap: 10px; }
+  .pt-type { font-size: 12.5px; font-weight: 700; color: var(--cyan); letter-spacing: 0.3px; }
+  .pt-live-badge { font-size: 9.5px; font-weight: 700; color: #050b14; background: var(--green); padding: 2px 8px; border-radius: 20px; letter-spacing: 0.5px; animation: pt-live-blink 1.6s ease-in-out infinite; }
+  .pt-sub { font-size: 10.5px; color: var(--text-dim); margin: 2px 0 10px; font-family: monospace; word-break: break-all; }
+  .pt-timeline { display: flex; flex-direction: column; }
+  .pt-item { display: flex; align-items: flex-start; gap: 10px; }
+  .pt-node-col { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; width: 24px; }
+  .pt-dot { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; border: 2px solid var(--text-dim); color: var(--text-dim); background: rgba(255,255,255,0.02); transition: all 0.4s ease; }
+  .pt-dot--done { border-color: var(--cyan); color: var(--cyan); background: color-mix(in srgb, var(--cyan) 18%, transparent); box-shadow: 0 0 10px var(--cyan-glow), 0 0 2px var(--cyan) inset; }
+  .pt-dot--failed { border-color: var(--red); color: var(--red); background: color-mix(in srgb, var(--red) 18%, transparent); box-shadow: 0 0 10px color-mix(in srgb, var(--red) 50%, transparent); }
+  .pt-dot--pending { animation: pt-pending-pulse 2.4s ease-in-out infinite; }
+  .pt-connector { width: 2px; flex: 1 1 auto; min-height: 22px; margin: 2px 0; background: var(--border); border-radius: 2px; }
+  .pt-connector--done { background: linear-gradient(180deg, var(--cyan), var(--cyan)); box-shadow: 0 0 6px var(--cyan-glow); }
+  .pt-connector--pending { background: repeating-linear-gradient(180deg, var(--border) 0 4px, transparent 4px 8px); }
+  .pt-connector--active { width: 3px; background: linear-gradient(180deg, var(--cyan) 0%, transparent 25%, var(--cyan) 50%, transparent 75%, var(--cyan) 100%); background-size: 100% 200%; animation: pt-flow 1.4s linear infinite; box-shadow: 0 0 8px var(--cyan-glow); }
+  .pt-body { flex: 1 1 auto; padding-bottom: 14px; min-width: 0; }
+  .pt-label { font-size: 11px; font-weight: 700; color: var(--text); letter-spacing: 0.2px; }
+  .pt-time { font-size: 9.5px; color: var(--text-dim); margin-top: 2px; font-family: monospace; }
+  .pt-detail { font-size: 9.5px; color: var(--text-dim); margin-top: 3px; line-height: 1.4; word-break: break-word; }
+  .pt-older { font-size: 10.5px; color: var(--text-dim); margin-top: 2px; padding-top: 8px; border-top: 1px dashed rgba(34,211,238,0.12); }
+  @keyframes pt-flow { from { background-position: 0 0%; } to { background-position: 0 -200%; } }
+  @keyframes pt-pending-pulse { 0%, 100% { box-shadow: 0 0 0 rgba(124,147,160,0); } 50% { box-shadow: 0 0 6px rgba(124,147,160,0.35); } }
+  @keyframes pt-live-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
   .badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 20px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; border: 1px solid currentColor; }
   .badge::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
   .b-completed,.b-installed,.b-ready,.b-ok,.b-idle{color:var(--green)} .b-running,.b-live{color:var(--cyan)}
@@ -207,8 +305,39 @@
   .action-btn:hover { border-color: var(--cyan); background: rgba(34,211,238,0.08); }
 
   .events-list { max-height: 220px; overflow-y: auto; margin-top: 6px; }
+  /* "Recent beats" (reconstruction progress panel) was clipped to the same
+     220px as the live-mode case detail's much shorter events list, hiding
+     most of its up-to-8 real entries behind an inner scrollbar. Scoped to
+     this one list specifically so the live-mode case panel keeps its own
+     shorter height. */
+  #recon-progress-body .events-list { max-height: 480px; }
   .event-row { font-size: 10px; padding: 3px 0; border-bottom: 1px dashed rgba(34,211,238,0.07); color: var(--text-dim); }
   .event-row b { color: var(--text); }
+
+  .ps-pad { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0 4px; }
+  .ps-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    width: 100%; aspect-ratio: 1 / 1; border-radius: 50%; border: 2px solid rgba(255,255,255,0.15);
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.12), rgba(0,0,0,0.25));
+    color: #fff; font-size: 20px; cursor: pointer; transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .ps-btn span { font-size: 9px; font-weight: 600; text-align: center; line-height: 1.15; padding: 0 6px; }
+  .ps-btn:disabled { opacity: 0.35; cursor: not-allowed; filter: grayscale(0.6); }
+  .ps-btn:not(:disabled):hover { transform: scale(1.05); }
+  .ps-btn:not(:disabled):active { transform: scale(0.96); }
+  .ps-green { background-color: #16a34a; box-shadow: 0 0 14px rgba(22,163,74,0.5); }
+  .ps-blue  { background-color: #2563eb; box-shadow: 0 0 14px rgba(37,99,235,0.5); }
+  .ps-pink  { background-color: #db2777; box-shadow: 0 0 14px rgba(219,39,119,0.5); }
+  .ps-red   { background-color: #dc2626; box-shadow: 0 0 14px rgba(220,38,38,0.5); }
+  .ps-gold  { background-color: #d97706; box-shadow: 0 0 14px rgba(217,119,6,0.5); }
+
+  #live-attack-feed-list { max-height: 420px; overflow-y: auto; }
+  #digital-twin-feed-list { max-height: 840px; overflow-y: auto; }
+  .live-feed-item { padding: 7px 8px; margin-bottom: 6px; background: rgba(255,255,255,0.02); border-radius: 3px; cursor: pointer; }
+  .live-feed-item:hover { background: rgba(34,211,238,0.06); }
+  .live-feed-time { font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.04em; }
+  .live-feed-title { font-size: 12px; color: var(--text); margin-top: 2px; font-weight: 600; }
+  .live-feed-detail { font-size: 10.5px; color: var(--text-dim); margin-top: 2px; }
 
   #hint {
     position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
@@ -249,6 +378,68 @@
     box-shadow: 0 0 10px rgba(251,191,36,0.5);
   }
   #reconstruction-watermark.visible { display: block; }
+
+  /* A YouTube-style corner control living IN the viewport itself, not the
+     top bar -- a plain icon button, dim until hovered, that swaps its
+     glyph (expand <-> compress) based on real fullscreen state rather than
+     a text label. */
+  #fullscreen-toggle-btn {
+    position: absolute; right: 10px; bottom: 10px; z-index: 5;
+    width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+    background: rgba(3,10,18,0.65); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text-dim); cursor: pointer; padding: 0;
+  }
+  #fullscreen-toggle-btn:hover { background: rgba(34,211,238,0.14); color: var(--cyan); border-color: var(--cyan); }
+  #fullscreen-toggle-btn svg { width: 18px; height: 18px; }
+
+  /* Quick fault injection drawer -- Digital Twin View only, docked INSIDE
+     #viewport's own right edge (right:0 here is #viewport's boundary with
+     the pre-existing .side.right detail panel, NOT the page's true right
+     edge) -- a real bug found live: an earlier version of this used
+     `transform: translateX` to slide the panel fully off past that
+     boundary when "closed", which pushed it OUT of #viewport and directly
+     ON TOP of .side.right's real content instead of hiding it. Fixed by
+     never transforming the container at all: the handle stays put at
+     right:0 (always fully inside #viewport, so it can never overlap the
+     neighboring panel), and the panel itself is toggled with the plain
+     `hidden` attribute -- when hidden it is not rendered at all, so there
+     is nothing left that could overlap anything. Lets a fault be
+     applied/reverted against any node WITHOUT leaving this 3D view, so its
+     real effect (lamp color / event flash) is watched live in the same
+     screen, not reconstructed after switching tabs. */
+  #dt-fault-drawer {
+    position: absolute; top: 70px; right: 0; z-index: 6;
+    display: flex; align-items: flex-start;
+  }
+  #dt-fault-drawer-handle {
+    flex-shrink: 0; margin-top: 14px;
+    width: 26px; height: 64px; display: flex; align-items: center; justify-content: center;
+    border-radius: 8px 0 0 8px; border: 1px solid var(--border); border-right: none;
+    background: rgba(3,10,18,0.88); color: var(--cyan); cursor: pointer; font-size: 12px; padding: 0;
+  }
+  #dt-fault-drawer-handle:hover { background: rgba(34,211,238,0.16); }
+  #dt-fault-drawer-panel {
+    width: 258px; max-height: 72vh; overflow-y: auto;
+    background: rgba(3,10,18,0.92); border: 1px solid var(--border); border-right: none;
+    border-radius: 8px 0 0 8px; padding: 12px; box-shadow: -6px 0 18px rgba(0,0,0,0.45);
+  }
+  #dt-fault-drawer-panel[hidden] { display: none; }
+  #dt-fault-drawer-panel h2 { font-size: 12px; margin: 0 0 2px; }
+  #dt-fault-drawer-panel .h2sub { font-size: 10px; color: var(--text-dim); margin-bottom: 10px; }
+  .dtf-field { display: block; font-size: 10.5px; color: var(--text-dim); margin-bottom: 8px; }
+  .dtf-field select, .dtf-field input {
+    display: block; width: 100%; margin-top: 3px; background: var(--panel); border: 1px solid var(--border);
+    color: var(--text); padding: 5px 6px; border-radius: 4px; font-size: 11px;
+  }
+  #dtf-ref { font-size: 9.5px; color: var(--text-dim); font-style: italic; margin-bottom: 8px; }
+  .dtf-actions { display: flex; gap: 6px; margin-top: 4px; }
+  .dtf-actions button {
+    flex: 1; padding: 6px 8px; border-radius: 5px; border: 1px solid var(--border);
+    background: rgba(34,211,238,0.12); color: var(--cyan); font-size: 11px; cursor: pointer;
+  }
+  .dtf-actions button.danger { background: rgba(239,68,68,0.12); color: #fca5a5; }
+  .dtf-actions button:disabled { opacity: 0.4; cursor: not-allowed; }
+  #dtf-status { font-size: 10.5px; color: var(--text-dim); margin-top: 8px; min-height: 13px; }
 </style>
 </head>
 <body>
@@ -261,6 +452,8 @@
       <div class="top-right">
         <button class="back-btn" id="collapse-btn">&larr; Back to overview</button>
         <button class="transparent-btn" id="reconstruction-toggle-btn">Reconstruction mode</button>
+        <button class="transparent-btn" id="live-attack-toggle-btn" title="Nodes only, live: real attack arrows and alert/case notifications">Live Attack View</button>
+        <button class="transparent-btn" id="digital-twin-toggle-btn" title="Nodes only, live: colored by forensic_twin's own expected-vs-real state and divergence events">Digital Twin View</button>
         <div class="conn"><span class="conn-dot" id="conn-dot"></span><span id="conn-text">connecting&hellip;</span></div>
         <div id="theme-switcher-mount"></div>
       </div>
@@ -268,8 +461,10 @@
     <div id="reconstruction-bar">
       <span>Campaign</span>
       <select id="reconstruction-campaign-select"><option value="">Select a campaign&hellip;</option></select>
+      <button class="transport-btn" id="reconstruction-step-back-btn" disabled title="Step back one beat -- pauses and rewinds, for investigating a moment just before">&#9664; Step</button>
       <button class="transport-btn" id="reconstruction-play-btn">Play</button>
       <button class="transport-btn" id="reconstruction-pause-btn" disabled>Pause</button>
+      <button class="transport-btn" id="reconstruction-step-fwd-btn" disabled title="Step forward one beat, without resuming full playback">Step &#9654;</button>
       <button class="transport-btn" id="reconstruction-reset-btn" disabled>Reset</button>
       <button class="transport-btn" id="reconstruction-exit-btn" disabled>Exit</button>
       <div class="recon-speed">
@@ -277,6 +472,14 @@
         <input type="range" id="reconstruction-speed" min="0.25" max="4" step="0.25" value="1">
         <span id="reconstruction-speed-label">1x</span>
       </div>
+      <label class="recon-speed" style="cursor:pointer;" title="Compares the twin's CURRENT reference model (Suricata/Wazuh config + expected ports) against what it really was when this case was built -- off by default because it triggers a real, fresh SSH probe (not free, not continuous).">
+        <input type="checkbox" id="reality-gap-toggle" style="accent-color:var(--cyan);">
+        <span>Reality Gap vs. current twin</span>
+      </label>
+      <label class="recon-speed" style="cursor:pointer;" title="A 3D figure representing forensic_twin itself, watching over the whole replay -- green when nothing has been observed (or it was already resolved), orange for a real but already-reverted divergence, red for one still unresolved at this point in playback. Built from the real Intervention Ledger phase timeline already shown in the Stage Detail panel -- never a decorative animation.">
+        <input type="checkbox" id="forensic-twin-watcher-toggle" style="accent-color:var(--cyan);" checked>
+        <span>Digital twin watcher</span>
+      </label>
       <span id="reconstruction-beat-label"></span>
       <span id="reconstruction-progress"></span>
     </div>
@@ -290,17 +493,64 @@
           <div class="h2sub">Cross-cutting overlays, overview only</div>
           <div id="layers-list"></div>
         </div>
+        <div id="recon-failure-panel" hidden>
+          <h2>Why did this fail?</h2>
+          <div class="h2sub">Real evidence, not the watchdog's own generic guess</div>
+          <div id="recon-failure-body"></div>
+        </div>
         <div id="recon-progress-panel" hidden>
           <h2>Reconstruction progress</h2>
           <div class="h2sub">Since repetition 1, beat 1</div>
           <div id="recon-progress-body"></div>
+        </div>
+        <div id="live-attack-panel" hidden>
+          <h2>Attack control</h2>
+          <div class="h2sub" id="live-attack-target-label">Click a machine box to select it as target</div>
+          <div id="live-attack-pad" class="ps-pad">
+            <button data-attack-key="ping" class="ps-btn ps-green" disabled title="ICMP Reconnaissance">&#9650;<span>Ping / Recon</span></button>
+            <button data-attack-key="access" class="ps-btn ps-blue" disabled title="Unauthorized SSH Attempt">&#10005;<span>Unauthorized Access</span></button>
+            <button data-attack-key="file" class="ps-btn ps-pink" disabled title="Controlled File Tamper">&#9632;<span>File Modification</span></button>
+            <button data-attack-key="modbus" class="ps-btn ps-red" disabled title="Modbus Register Manipulation">&#9679;<span>Modbus Manipulation</span></button>
+            <button class="ps-btn ps-gold" id="btn-fireworks" title="Launches one of each of the 4 real attacks above, staggered over a few seconds, each against a different real compatible node">&#9733;<span>Fireworks Barrage</span></button>
+          </div>
+          <div class="h2sub" id="fireworks-status"></div>
+          <h2 style="margin-top:16px;">Live event feed</h2>
+          <div class="h2sub">Attacks, node alerts &amp; new forensic cases — real time, this scenario only</div>
+          <div id="live-attack-feed-list"></div>
+        </div>
+        <div id="digital-twin-panel" hidden>
+          <h2>Digital twin status</h2>
+          <div class="h2sub" id="digital-twin-tick-status">Continuous monitor: waiting for a status reading from its worker...</div>
+          <h2 style="margin-top:16px;">Divergence events</h2>
+          <div class="h2sub">forensic_twin's own already-computed state &amp; events, read-only -- this view never triggers a new check</div>
+          <div id="digital-twin-feed-list"></div>
         </div>
       </div>
       <div id="viewport">
         <div id="breadcrumb-bar"></div>
         <div id="provenance-hint"></div>
         <div id="reconstruction-watermark">HISTORICAL REPLAY &mdash; NOTHING HERE IS LIVE</div>
+        <button id="fullscreen-toggle-btn" title="Fullscreen" aria-label="Fullscreen">
+          <svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+          <svg class="icon-compress" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M9 3v3a2 2 0 0 1-2 2H4M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/></svg>
+        </button>
         <div id="hint">Drag to orbit &middot; scroll to zoom &middot; click a box for details &middot; double-click a box (or the breadcrumb above) to switch level</div>
+        <div id="dt-fault-drawer" hidden>
+          <button id="dt-fault-drawer-handle" title="Quick fault injection">&#9664;</button>
+          <div id="dt-fault-drawer-panel" hidden>
+            <h2>Quick fault injection</h2>
+            <div class="h2sub">Apply/revert a real fault here, watch its effect live in this same scene</div>
+            <label class="dtf-field">Node<select id="dtf-node"></select></label>
+            <label class="dtf-field">Fault type<select id="dtf-fault"></select></label>
+            <div id="dtf-ref"></div>
+            <div id="dtf-params"></div>
+            <div class="dtf-actions">
+              <button id="dtf-apply">Apply</button>
+              <button id="dtf-revert" class="danger" disabled>Revert</button>
+            </div>
+            <div id="dtf-status"></div>
+          </div>
+        </div>
       </div>
       <div class="side right">
         <div id="live-detail-panel">

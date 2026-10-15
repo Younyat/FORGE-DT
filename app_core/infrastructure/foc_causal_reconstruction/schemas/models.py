@@ -38,6 +38,15 @@ class CausalEdge:
     meaning: str = ""
     status_reason: str = ""
     limitations: list[str] = field(default_factory=list)
+    # investigacion_y_novedad/15_huecos_de_literatura_2025_2026.md gap #1 (Kampourakis et al. 2025,
+    # arXiv:2610.02955: a typed dependency graph -- causal/temporal/co-occurrence -- never claims
+    # causation where only correlation or ordering is supported). One of "causal" (recovered evidence
+    # AND confirmed/not-required temporal order), "temporal" (recovered evidence, but real temporal
+    # order itself not confirmed), "co_occurrence" (some match, not strongly verified -- degraded or
+    # ambiguous), or "unclassified" (support_status is "missing" -- nothing to classify). Purely
+    # additive: derived from support_status/temporal_status/confidence, which already existed and are
+    # unchanged by this field -- see edge_evaluator.py::_classify_evidence_strength.
+    evidence_strength: str = "unclassified"
 
     def to_dict(self) -> dict:
         return asdict(self)

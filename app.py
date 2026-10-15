@@ -2,6 +2,7 @@ import subprocess
 import logging
 import os
 import sys
+import tracemalloc
 import yaml
 
 from flask import Flask
@@ -14,6 +15,36 @@ from app_core.presentation.api import api_bp
 # ===== Configurar logging =====
 log_file = "app.log"
 logger = setup_logging(log_file)
+
+# 2026-09-24/25: tracemalloc se activo dos veces este fin de semana para
+# investigar en vivo la fuga de memoria real en repetition_1_reconstruction,
+# y se desactivo otras dos por el mismo motivo cada vez: su propio overhead
+# (traza cada asignacion de memoria de TODA la app, no solo de los jobs de
+# campaña) deja los 4 workers de gunicorn clavados en 80-90% CPU sostenido.
+# DESACTIVADO DEFINITIVAMENTE el 2026-09-25 tras encontrar y arreglar la
+# causa raiz real por otro camino (lectura de codigo + medicion directa):
+# foc_causal_reconstruction/loaders/foc_context_loader.py cargaba entero, en
+# cada reconstruccion, un fichero de 6.4GB (alert_correlation.json, acumula
+# TODA la historia de alertas del laboratorio sin limite) que solo hacia
+# falta consultar puntualmente -- ver foc_reconstruction/README.md para el
+# hallazgo completo. Confirmado en vivo (intento 10, campaña
+# CMP-20260707-000220-CBFB): con ese fix, repetition_1_reconstruction se
+# supero limpio por primera vez en toda la sesion, con tracemalloc AUN
+# activo -- es decir, tracemalloc ya no aporta nada mas para este problema,
+# solo overhead. Con tracemalloc reactivado, ese mismo intento tambien
+# demostro el riesgo con toda claridad: un job hijo (informe cientifico de
+# Nivel A) termino de verdad, pero el job padre tardo 20+ minutos en darse
+# cuenta porque su propio hilo de sondeo (poll cada 2.5s) no conseguia
+# tiempo de CPU bajo la carga de tracemalloc -- no un bug de logica, un
+# efecto directo del overhead. Si hiciera falta volver a perfilar memoria en
+# el futuro, hacerlo en una sesion de diagnostico aislada (no en produccion
+# con campañas reales corriendo), y preferir tracemalloc.start(1) o un
+# muestreo por intervalos en vez de trazar cada asignacion sin parar.
+# try:
+#     tracemalloc.start(3)
+#     logger.info("[OK] tracemalloc reactivado (3 frames, profundidad reducida) para reconstruction")
+# except Exception as e:
+#     logger.warning(f"[WARN] tracemalloc no se pudo activar: {e}")
 
 
 class StreamToLogger(object):
@@ -186,6 +217,23 @@ def create_app():
         logger.info("[OK] FORGE-VI Scientific Dashboard Blueprint cargado correctamente")
     except Exception as e:
         logger.warning(f"[WARN] forge_vi_bp no cargado: {e}")
+
+    try:
+        from app_core.infrastructure.memory_watchdog.service import start_memory_watchdog
+        start_memory_watchdog()
+        logger.info("[OK] Memory watchdog (swap/PSI, umbral 80%) arrancado en este worker")
+    except Exception as e:
+        logger.warning(f"[WARN] Memory watchdog no arrancado: {e}")
+
+    try:
+        from app_core.infrastructure.forensic_twin.service import start_continuous_monitor
+        became_leader = start_continuous_monitor()
+        if became_leader:
+            logger.info("[OK] Forensic Twin continuous monitor arrancado (lider en este worker)")
+        else:
+            logger.info("[OK] Forensic Twin continuous monitor: otro worker ya es el lider")
+    except Exception as e:
+        logger.warning(f"[WARN] Forensic Twin continuous monitor no arrancado: {e}")
 
     return flask_app
 

@@ -1,0 +1,9 @@
+{
+  "generated_at": "2026-09-22T15:58:09.878580+00:00",
+  "warnings": [
+    "Forensic preservation was never armed because DFIR mode remained OFF during the repeated attack attempts. Alerts may have been observed, but the platform was not in forensic intervention mode."
+  ],
+  "blockers": [
+    "dfir_mode_off_during_trigger_arming"
+  ]
+}

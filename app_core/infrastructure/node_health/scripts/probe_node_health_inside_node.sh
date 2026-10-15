@@ -114,3 +114,21 @@ section_begin largest_var
 du -xh /var 2>/dev/null | sort -h | tail -n 12 || true
 section_end largest_var
 
+# Two volatile-evidence categories NIST SP 800-86 ("Guide to Integrating
+# Forensic Techniques into Incident Response", Section 5.1.2 "Volatile
+# Data") names explicitly as significant types to collect during live
+# response: "Network Connections" ("a list of the ports and IP addresses at
+# which the system is listening for connections") and "Login Sessions"
+# ("information about currently logged-in users... Some OSs have built-in
+# commands for listing the currently logged on users, such as the w command
+# for UNIX systems", Section 5.2). Neither existed anywhere in this
+# platform before -- same SSH session already open for everything above,
+# so this adds no new round-trip, only two more fast local commands.
+section_begin listening_ports
+ss -tulwn 2>/dev/null || netstat -tulwn 2>/dev/null || true
+section_end listening_ports
+
+section_begin login_sessions
+who 2>/dev/null || true
+section_end login_sessions
+

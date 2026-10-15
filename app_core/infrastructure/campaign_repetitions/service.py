@@ -580,10 +580,18 @@ def get_level_c_repetition_detail(job_id: str, rep_num: int) -> dict | None:
     # RUNNING_LEVEL_B/WAITING_LEVEL_B is exactly when this is most needed
     # (that's when the reader is staring at an opaque "waiting" stage).
     level_b_live = None
+    level_b_requested_repetitions = None
     if level_b_job_id:
         try:
             lb_job = job_runner.get_job(level_b_job_id)
             if lb_job:
+                # Exposed so the process-tree UI can show EVERY Level B
+                # repetition this job will run/has run, not only the one
+                # currently "live" -- user explicitly asked for this
+                # (2026-10-09) after noticing the embedded tree only ever
+                # showed the live repetition, hiding any earlier ones within
+                # the same Level C repetition when level_b_repetitions > 1.
+                level_b_requested_repetitions = int((lb_job.get("meta") or {}).get("requested_repetitions") or 0) or None
                 lb_rep_num = None
                 m = _LB_CURRENT_PHASE_REP_RE.match(str(lb_job.get("current_phase") or ""))
                 if m:
@@ -617,6 +625,7 @@ def get_level_c_repetition_detail(job_id: str, rep_num: int) -> dict | None:
         "stages": stages,
         "level_b_job_id": level_b_job_id,
         "level_b_live": level_b_live,
+        "level_b_requested_repetitions": level_b_requested_repetitions,
         "snapshot_id": snapshot_id,
         "snapshot_infrastructure": _lc_snapshot_infrastructure(snapshot_id),
         "tool_installs": tool_installs,
@@ -965,7 +974,7 @@ def get_level_b_repetition_detail(job_id: str, repetition_number: int) -> dict |
             "trigger_alert_rule": result.get("trigger_alert_rule"),
             "trigger_alert_severity": result.get("trigger_alert_severity"),
             "trigger_alert_timestamp": result.get("trigger_alert_timestamp"),
-            "trigger_alert_mitre": result.get("trigger_alert_mitre"),
+            "trigger_alert_mitre": result.get("trigger_alert_mitre") or [],
             "trigger_attempts_total": result.get("trigger_attempts_total"),
             "trigger_attempt_trace": result.get("trigger_attempt_trace") or [],
         },

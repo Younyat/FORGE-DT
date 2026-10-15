@@ -1,0 +1,59 @@
+{
+  "captured_as_baseline_at_utc": "2026-09-22T20:13:58.610059+00:00",
+  "captured_at_utc": "2026-09-22T20:13:57.233981+00:00",
+  "is_baseline": true,
+  "scope_id": "CMP-20260707-000220-CBFB__EXEC-0046",
+  "state_hash": "be2aa87e0c6115905cc807ba55535704df4287a9d37db3bd4daf0b50dfa4d3fe",
+  "target_ip": "10.0.2.37",
+  "variables": {
+    "airValveOpenStatus": {
+      "status": "ok",
+      "stderr": "",
+      "stdout": "mbpoll 1.0-0 - FieldTalk(tm) Modbus(R) Master Simulator\nCopyright \u00a9 2015-2019 Pascal JEAN, https://github.com/epsilonrt/mbpoll\nThis program comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type 'mbpoll -w' for details.\n\nProtocol configuration: Modbus TCP\nSlave configuration...: address = [1]\n                        start reference = 7, count = 1\nCommunication.........: 10.0.2.37, port 502, t/o 1.00 s, poll rate 1000 ms\nData type.............: discrete output (coil)\n\n-- Polling slave 1...\n[7]: \t1\n\n",
+      "validated_modbus_address": 7,
+      "value": 1
+    },
+    "inletValveOpenStatus": {
+      "status": "ok",
+      "stderr": "",
+      "stdout": "mbpoll 1.0-0 - FieldTalk(tm) Modbus(R) Master Simulator\nCopyright \u00a9 2015-2019 Pascal JEAN, https://github.com/epsilonrt/mbpoll\nThis program comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type 'mbpoll -w' for details.\n\nProtocol configuration: Modbus TCP\nSlave configuration...: address = [1]\n                        start reference = 6, count = 1\nCommunication.........: 10.0.2.37, port 502, t/o 1.00 s, poll rate 1000 ms\nData type.............: discrete output (coil)\n\n-- Polling slave 1...\n[6]: \t0\n\n",
+      "validated_modbus_address": 6,
+      "value": 0
+    },
+    "level": {
+      "status": "ok",
+      "stderr": "",
+      "stdout": "mbpoll 1.0-0 - FieldTalk(tm) Modbus(R) Master Simulator\nCopyright \u00a9 2015-2019 Pascal JEAN, https://github.com/epsilonrt/mbpoll\nThis program comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type 'mbpoll -w' for details.\n\nProtocol configuration: Modbus TCP\nSlave configuration...: address = [1]\n                        start reference = 3, count = 1\nCommunication.........: 10.0.2.37, port 502, t/o 1.00 s, poll rate 1000 ms\nData type.............: 32-bit integer (little endian), output (holding) register table\n\n-- Polling slave 1...\n[3]: \t0\n\n",
+      "validated_modbus_address": 3,
+      "value": 0
+    },
+    "level_max": {
+      "status": "ok",
+      "stderr": "",
+      "stdout": "mbpoll 1.0-0 - FieldTalk(tm) Modbus(R) Master Simulator\nCopyright \u00a9 2015-2019 Pascal JEAN, https://github.com/epsilonrt/mbpoll\nThis program comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type 'mbpoll -w' for details.\n\nProtocol configuration: Modbus TCP\nSlave configuration...: address = [1]\n                        start reference = 4, count = 1\nCommunication.........: 10.0.2.37, port 502, t/o 1.00 s, poll rate 1000 ms\nData type.............: 32-bit integer (little endian), output (holding) register table\n\n-- Polling slave 1...\n[4]: \t0\n\n",
+      "validated_modbus_address": 4,
+      "value": 0
+    },
+    "openInletValve": {
+      "status": "ok",
+      "stderr": "",
+      "stdout": "mbpoll 1.0-0 - FieldTalk(tm) Modbus(R) Master Simulator\nCopyright \u00a9 2015-2019 Pascal JEAN, https://github.com/epsilonrt/mbpoll\nThis program comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type 'mbpoll -w' for details.\n\nProtocol configuration: Modbus TCP\nSlave configuration...: address = [1]\n                        start reference = 5, count = 1\nCommunication.........: 10.0.2.37, port 502, t/o 1.00 s, poll rate 1000 ms\nData type.............: discrete output (coil)\n\n-- Polling slave 1...\n[5]: \t0\n\n",
+      "validated_modbus_address": 5,
+      "value": 0
+    },
+    "openOutletValve": {
+      "status": "ok",
+      "stderr": "",
+      "stdout": "mbpoll 1.0-0 - FieldTalk(tm) Modbus(R) Master Simulator\nCopyright \u00a9 2015-2019 Pascal JEAN, https://github.com/epsilonrt/mbpoll\nThis program comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type 'mbpoll -w' for details.\n\nProtocol configuration: Modbus TCP\nSlave configuration...: address = [1]\n                        start reference = 2, count = 1\nCommunication.........: 10.0.2.37, port 502, t/o 1.00 s, poll rate 1000 ms\nData type.............: discrete output (coil)\n\n-- Polling slave 1...\n[2]: \t0\n\n",
+      "validated_modbus_address": 2,
+      "value": 0
+    },
+    "outletValveOpenStatus": {
+      "status": "ok",
+      "stderr": "",
+      "stdout": "mbpoll 1.0-0 - FieldTalk(tm) Modbus(R) Master Simulator\nCopyright \u00a9 2015-2019 Pascal JEAN, https://github.com/epsilonrt/mbpoll\nThis program comes with ABSOLUTELY NO WARRANTY.\nThis is free software, and you are welcome to redistribute it\nunder certain conditions; type 'mbpoll -w' for details.\n\nProtocol configuration: Modbus TCP\nSlave configuration...: address = [1]\n                        start reference = 4, count = 1\nCommunication.........: 10.0.2.37, port 502, t/o 1.00 s, poll rate 1000 ms\nData type.............: discrete output (coil)\n\n-- Polling slave 1...\n[4]: \t0\n\n",
+      "validated_modbus_address": 4,
+      "value": 0
+    }
+  }
+}

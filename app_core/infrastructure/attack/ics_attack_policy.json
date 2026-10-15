@@ -17,7 +17,7 @@
       "validated_modbus_address": 4
     }
   ],
-  "generated_at_utc": "2026-09-17T09:20:39.055629+00:00",
+  "generated_at_utc": "2026-10-15T14:23:12.518081+00:00",
   "lab_only": true,
   "plc_program": "TankSimple",
   "port": 502,

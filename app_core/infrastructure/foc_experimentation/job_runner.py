@@ -24,7 +24,21 @@ _THREADS: dict[str, threading.Thread] = {}
 # (which caught the memory_analysis worker death earlier today), generalized
 # to every job type that goes through this module (Level B repetitions,
 # Level A reports, comparability, paper evidence). See job_runner/README.md.
-_ORPHAN_JOB_GRACE_SECONDS = 180
+#
+# Ampliado de 180 a 900 (2026-09-23): _THREADS (justo abajo) vive en la memoria de UN worker de
+# gunicorn concreto -- un get_job() que aterriza en un worker DISTINTO al que ejecuta el job
+# (round-robin entre los 4 workers, o cualquier poll externo -- el propio panel del dashboard, o un
+# script de monitorizacion) nunca encuentra el hilo en SU copia de _THREADS y cae directo a mirar
+# solo la frescura de `updated_at`. Confirmado en vivo (2026-09-22/23, ver
+# investigacion_y_novedad/06_implementacion_forge_dt.md): la fase de analisis de una repeticion
+# real llama a regenerate_foc(), que recorre TODO el almacen de evidencia (cientos de casos, cientos
+# de GB) y puede tardar bien por encima de 5 minutos con uso de CPU/memoria sostenido -- suficiente,
+# combinado con un poll que cae en el worker equivocado en el momento equivocado, para que el
+# heartbeat de 30s (_heartbeat_during/_heartbeat_during_analysis_phase) parezca "viejo" durante mas
+# de 180s aunque el hilo siga vivo y trabajando de verdad. Tres campanas reales interrumpidas asi
+# antes de este cambio. 900s sigue siendo un margen pequeno frente a la duracion real de una
+# campana (horas), asi que un job genuinamente muerto se sigue detectando en un tiempo razonable.
+_ORPHAN_JOB_GRACE_SECONDS = 900
 
 
 def _parse_ts(raw) -> float | None:

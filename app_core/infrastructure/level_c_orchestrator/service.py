@@ -363,6 +363,31 @@ def _recover_orphaned_lc_job(state: dict, job_dir: Path) -> dict:
         f"{_ORPHAN_LC_JOB_GRACE_SECONDS}s. It was likely interrupted by a process/worker restart before "
         "it could finish. Nothing already produced was deleted — review and relaunch manually if needed."
     )
+    # Real gap found 2026-10-11 investigating why Reconstruction View showed
+    # NO hosts/machines at all for an orphan-killed campaign: the graceful
+    # failure path (level_b_ok == False, still inside the live thread) always
+    # captures a final scenario snapshot before sealing the job (see the
+    # CAPTURING_SNAPSHOT phase above) -- but THIS path runs only after that
+    # thread has already died, so it never had the chance. `level_c_snapshot_ids`
+    # stayed permanently empty for every orphan-recovered job, and
+    # monitor3d._frozen_hosts_for_repetition() depends on exactly that field
+    # to draw any host box at all. Fixed the same way: a best-effort snapshot
+    # of whatever scenario is STILL live right now (scenario_snapshot.
+    # capture_snapshot() is explicitly documented "safe to call from any
+    # thread" and has its own internal lock against concurrent captures) --
+    # wrapped so a capture failure (e.g. the scenario was already torn down)
+    # never blocks sealing the job as failed, the one thing this function
+    # must always do.
+    if not state.get("level_c_snapshot_ids"):
+        try:
+            from app_core.infrastructure.scenario_snapshot.service import capture_snapshot
+            result = capture_snapshot()
+            snap_id = (result or {}).get("snapshot_id")
+            if snap_id:
+                state["level_c_snapshot_ids"] = [snap_id]
+                _log(state, "INFO", f"Orphan recovery: captured a best-effort final scenario snapshot ({snap_id}) so Reconstruction View still has real host data for this campaign.")
+        except Exception as exc:
+            _log(state, "WARNING", f"Orphan recovery: best-effort snapshot capture failed ({exc}) -- Reconstruction View will have no host/machine data for this campaign.")
     state["status"] = "failed"
     state["error"] = reason
     state["completed_at"] = state.get("completed_at") or _utc_now()
@@ -1366,6 +1391,38 @@ def _phase_wait_nodes(state: dict, job_dir: Path, rep_num: int, timeout_seconds:
     if pending:
         _log(state, "WARN",
              f"  SSH wait timeout — still unreachable: {list(pending.keys())}. Proceeding anyway.")
+        # A still-unreachable node with no floating IP at all is the exact
+        # signature of floating-IP quota exhaustion -- confirmed against a
+        # real historical incident (Level C job LC-20260722-180010-9D3A,
+        # repetition 6, 2026-07-22): PLC_Instance/FUXA_Instance both deployed
+        # with float=None after "Quota exceeded for resources:
+        # ['floatingip']", this exact SSH wait then timed out on both, tools
+        # (incl. Suricata/Wazuh) never installed on either, and detection
+        # went completely silent for the rest of that repetition. The
+        # cleanup this needs already exists
+        # (node_health_api.trigger_floating_ip_cleanup, releases unattached
+        # floating IPs) but is only ever auto-triggered by someone polling
+        # the Node Health page, AND that auto-trigger deliberately REFUSES to
+        # run while a Level C deployment is in flight (see
+        # _floating_ip_deployment_in_progress -- a different, legitimate
+        # guard against deleting an IP another live deployment is about to
+        # use) -- so during an unattended campaign run, nothing ever freed
+        # quota at the moment it was actually needed. Triggered directly
+        # here instead, NOT through that guard: this deployment is the one
+        # already stuck, so freeing unattached IPs right now can only help
+        # it (or at worst the next repetition), never race a different one.
+        missing_ip_nodes = [name for name in pending if not _resolve_instance_info(name).get("ip_floating")]
+        if missing_ip_nodes:
+            _log(state, "WARN",
+                 f"  {len(missing_ip_nodes)} unreachable node(s) also have no floating IP "
+                 f"({missing_ip_nodes}) -- likely floating-IP quota exhaustion. Triggering cleanup "
+                 f"of unattached floating IPs now to free headroom.")
+            try:
+                from app_core.infrastructure.node_health.node_health_api import trigger_floating_ip_cleanup
+                cleanup_status = trigger_floating_ip_cleanup(triggered_by="level_c_node_unreachable")
+                _log(state, "INFO", f"  Floating-IP cleanup triggered: {cleanup_status.get('status', 'unknown')}.")
+            except Exception as exc:
+                _log(state, "WARN", f"  Could not trigger floating-IP cleanup: {exc}")
     else:
         _log(state, "INFO", "  All nodes SSH-reachable.")
     return True  # Non-fatal: tool installer will report per-node errors
@@ -2133,6 +2190,23 @@ def _phase_wait_level_b(state: dict, job_dir: Path, rep_num: int, job_id: str) -
         if _is_stop_requested(job_dir):
             _log(state, "WARN", f"Stop requested — aborting wait for Level B job {job_id}.")
             return False
+        # Real false-positive found live (2026-10-09): a whole campaign got
+        # wrongly marked "failed" by the cross-worker orphan watchdog
+        # (_recover_orphaned_lc_job) at WAITING_LEVEL_B, 183s after the last
+        # _save_state -- while the real Level B job, confirmed independently
+        # via its own campaign record, kept running and genuinely completed
+        # 7 minutes later. Root cause: this loop only stamps updated_at via
+        # _save_state at the END of each iteration (below); if any call in
+        # between (get_job, case-directory file scans, stage-timeline reads)
+        # happens to run slow for one iteration -- plausible right as Level B
+        # transitions into its own heavy nested Level A analysis -- the
+        # heartbeat goes stale even though this thread is genuinely still
+        # alive and about to log again. Same exact mechanism already
+        # documented on _touch_heartbeat's own docstring for _phase_deploy_ot;
+        # this loop just never called it. Fixed by touching the heartbeat
+        # FIRST, before any of the potentially-slow calls below, so a single
+        # slow iteration can no longer look like 180s+ of total silence.
+        _touch_heartbeat(job_dir)
         try:
             job = get_job(job_id)
             last_job = job or last_job
@@ -2236,7 +2310,82 @@ def _phase_capture_snapshot(state: dict, job_dir: Path, rep_num: int) -> str | N
         return None
 
 
-def _phase_compare_snapshots(state: dict, job_dir: Path, snapshot_ids: list[str]) -> dict:
+def _fault_schedule_condition(fault_schedule: dict | None, rep: int) -> str:
+    """Strict alternating-treatments design (Barlow & Hayes, 1979, Journal of
+    Applied Behavior Analysis 12:199-210, DOI 10.1901/jaba.1979.12-199):
+    control and treatment repetitions alternate within the SAME campaign so
+    the comparison phase can measure a fault's real effect directly (control
+    mean vs. treatment mean), instead of needing two separate campaigns run
+    at different times. The original paper's own preferred variant alternates
+    randomly/semi-randomly to rule out order effects; this implements the
+    simpler strict-alternation variant the user explicitly asked for --
+    documented here, not silently substituted, so the difference is honest
+    rather than hidden."""
+    if not fault_schedule or not fault_schedule.get("fault_ids"):
+        return "none"
+    start_with = fault_schedule.get("start_with") or "control"
+    is_odd = (rep % 2) == 1
+    if start_with == "control":
+        return "control" if is_odd else "treatment"
+    return "treatment" if is_odd else "control"
+
+
+def _resolve_node_by_role(role: str) -> dict | None:
+    try:
+        from app_core.infrastructure.node_health.node_health_api import _list_nodes
+        nodes = _list_nodes()
+        return next((n for n in nodes if str(n.get("role") or "").lower() == str(role or "").lower()), None)
+    except Exception:
+        return None
+
+
+def _apply_fault_schedule_for_rep(state: dict, job_dir: Path, fault_schedule: dict | None, rep: int) -> list[dict]:
+    """Applies every fault_id in the schedule against the configured
+    target_role, ONLY on a "treatment" repetition -- reuses
+    fault_injection.apply_fault() exactly as the Fault Injection dashboard's
+    own on-demand buttons do, zero new injection logic. Returns the list of
+    {fault_id, injection_id, node_id} applied, so the caller can revert
+    exactly these later regardless of how the repetition turns out."""
+    condition = _fault_schedule_condition(fault_schedule, rep)
+    if condition != "treatment":
+        return []
+    target_role = (fault_schedule or {}).get("target_role") or "plc"
+    node = _resolve_node_by_role(target_role)
+    if not node:
+        _log(state, "WARN", f"[Rep {rep}] Fault schedule: no live node found for role='{target_role}' -- skipping injection this repetition.")
+        return []
+    applied: list[dict] = []
+    try:
+        from app_core.infrastructure.fault_injection.service import apply_fault
+        for fault_id in (fault_schedule or {}).get("fault_ids") or []:
+            params = ((fault_schedule or {}).get("params") or {}).get(fault_id) or {}
+            result = apply_fault(fault_id, node["id"], params, campaign_id=(state.get("config") or {}).get("campaign_id"))
+            if result.get("ok"):
+                injection_id = (result.get("record") or {}).get("injection_id")
+                applied.append({"fault_id": fault_id, "injection_id": injection_id, "node_id": node["id"]})
+                _log(state, "INFO", f"[Rep {rep}] Fault schedule: applied '{fault_id}' on {node.get('name')} (injection_id={injection_id}).")
+            else:
+                _log(state, "WARN", f"[Rep {rep}] Fault schedule: '{fault_id}' failed to apply: {result.get('error') or (result.get('record') or {}).get('errors')}")
+    except Exception as exc:
+        _log(state, "WARN", f"[Rep {rep}] Fault schedule: exception applying faults: {exc}")
+    return applied
+
+
+def _revert_fault_schedule_injections(state: dict, rep: int, injections: list[dict]) -> None:
+    if not injections:
+        return
+    try:
+        from app_core.infrastructure.fault_injection.service import revert_fault
+        for item in injections:
+            if not item.get("injection_id"):
+                continue
+            result = revert_fault(item["injection_id"])
+            _log(state, "INFO", f"[Rep {rep}] Fault schedule: reverted '{item['fault_id']}' (injection_id={item['injection_id']}) -> ok={result.get('ok')}.")
+    except Exception as exc:
+        _log(state, "WARN", f"[Rep {rep}] Fault schedule: exception reverting faults: {exc}")
+
+
+def _phase_compare_snapshots(state: dict, job_dir: Path, snapshot_ids: list[str], fault_schedule_log: list[dict] | None = None) -> dict:
     """
     Compare all Level C snapshots scientifically.
     Returns a comparison report with ΔWCPR, ΔCPR, reproducibility index.
@@ -2313,11 +2462,67 @@ def _phase_compare_snapshots(state: dict, job_dir: Path, snapshot_ids: list[str]
             "reproducibility_index": reproducibility_index,
             "verdict": verdict,
         }
+        alternating = _alternating_design_analysis(comparisons, fault_schedule_log)
+        if alternating:
+            report["alternating_design_analysis"] = alternating
         _write_json(job_dir / "comparison_report.json", report)
         return report
     except Exception as exc:
         _log(state, "ERROR", f"Comparison failed: {exc}")
         return {"status": "error", "error": str(exc)}
+
+
+def _alternating_design_analysis(comparisons: list[dict], fault_schedule_log: list[dict] | None) -> dict | None:
+    """Groups the per-repetition CPR/WCPR already computed above by
+    control/treatment condition (Barlow & Hayes, 1979, alternating treatments
+    design -- see _fault_schedule_condition's docstring) instead of only
+    comparing consecutive pairs. `comparisons` already carries every
+    repetition's own cpr/wcpr twice (as rep_a of one pair and rep_b of the
+    next); reconstructed here into one value per repetition, deliberately
+    NOT recomputed, so this can never disagree with the pairwise comparisons
+    already in the same report."""
+    if not fault_schedule_log or not any((item.get("condition") in ("control", "treatment")) for item in fault_schedule_log):
+        return None
+    per_rep: dict[int, dict] = {}
+    if comparisons:
+        per_rep[comparisons[0]["rep_a"]] = {"cpr": comparisons[0]["cpr_a"], "wcpr": comparisons[0]["wcpr_a"]}
+        for c in comparisons:
+            per_rep[c["rep_b"]] = {"cpr": c["cpr_b"], "wcpr": c["wcpr_b"]}
+
+    def _group(condition: str) -> dict:
+        reps = [item["rep"] for item in fault_schedule_log if item.get("condition") == condition]
+        cprs = [per_rep[r]["cpr"] for r in reps if r in per_rep and per_rep[r]["cpr"] is not None]
+        wcprs = [per_rep[r]["wcpr"] for r in reps if r in per_rep and per_rep[r]["wcpr"] is not None]
+        return {
+            "repetitions": reps,
+            "cpr_mean": round(sum(cprs) / len(cprs), 4) if cprs else None,
+            "wcpr_mean": round(sum(wcprs) / len(wcprs), 4) if wcprs else None,
+        }
+
+    control = _group("control")
+    treatment = _group("treatment")
+    delta_cpr = (
+        round(abs(control["cpr_mean"] - treatment["cpr_mean"]), 4)
+        if control["cpr_mean"] is not None and treatment["cpr_mean"] is not None else None
+    )
+    delta_wcpr = (
+        round(abs(control["wcpr_mean"] - treatment["wcpr_mean"]), 4)
+        if control["wcpr_mean"] is not None and treatment["wcpr_mean"] is not None else None
+    )
+    fault_ids = sorted({fault_id for item in fault_schedule_log for fault_id in (inj.get("fault_id") for inj in (item.get("injections") or []))})
+    return {
+        "methodology": "alternating_treatments_design",
+        "reference": "Barlow & Hayes (1979), Journal of Applied Behavior Analysis 12:199-210, DOI 10.1901/jaba.1979.12-199",
+        "fault_ids": fault_ids,
+        "control": control,
+        "treatment": treatment,
+        "delta_cpr_control_vs_treatment": delta_cpr,
+        "delta_wcpr_control_vs_treatment": delta_wcpr,
+        "interpretation": (
+            "delta measures the fault's real, measured effect on reproducibility -- a value near 0 means "
+            "this fault had no detectable effect in this scenario (a genuine, honest null result), not an error."
+        ),
+    }
 
 
 def _extract_cpr_from_snapshot(snap: dict | None) -> float | None:
@@ -2407,6 +2612,8 @@ def _run_level_c_job(job_id: str, job_dir: Path, config: dict) -> None:
 
     level_c_reps = int(config.get("level_c_repetitions") or 1)
     snapshot_ids: list[str] = []
+    fault_schedule = config.get("fault_schedule")
+    fault_schedule_log: list[dict] = []
 
     # ── VALIDATE ─────────────────────────────────────────────────────────────
     _set_phase("VALIDATING")
@@ -2493,6 +2700,14 @@ def _run_level_c_job(job_id: str, job_dir: Path, config: dict) -> None:
         _phase_verify_monitoring(state, job_dir, rep)
         _save()
 
+        # FAULT SCHEDULE -- apply (treatment reps only; see _fault_schedule_condition)
+        if _check_stop(): return
+        rep_condition = _fault_schedule_condition(fault_schedule, rep)
+        active_injections = _apply_fault_schedule_for_rep(state, job_dir, fault_schedule, rep)
+        fault_schedule_log.append({"rep": rep, "condition": rep_condition, "injections": active_injections})
+        state["fault_schedule_log"] = fault_schedule_log
+        _save()
+
         # RUN LEVEL B
         if _check_stop(): return
         _set_phase(f"RUNNING_LEVEL_B (rep {rep}/{level_c_reps})")
@@ -2500,6 +2715,7 @@ def _run_level_c_job(job_id: str, job_dir: Path, config: dict) -> None:
         state["current_level_b_job_id"] = b_job_id
         _save()
         if not b_job_id:
+            _revert_fault_schedule_injections(state, rep, active_injections)
             if _check_stop(): return  # stop was requested
             _set_phase("FAILED")
             state["status"] = "failed"
@@ -2514,6 +2730,7 @@ def _run_level_c_job(job_id: str, job_dir: Path, config: dict) -> None:
         level_b_ok = _phase_wait_level_b(state, job_dir, rep, b_job_id)
         _save()
         if not level_b_ok:
+            _revert_fault_schedule_injections(state, rep, active_injections)
             if _check_stop(): return  # stop was requested during wait
             # A real failure/stall (not a give-up-after-N-hours guess, see
             # _phase_wait_level_b) is fatal for the WHOLE campaign, per the
@@ -2534,7 +2751,8 @@ def _run_level_c_job(job_id: str, job_dir: Path, config: dict) -> None:
             _save()
             return
 
-        # SNAPSHOT
+        # SNAPSHOT -- fault reverted BEFORE the snapshot, never captured mid-fault
+        _revert_fault_schedule_injections(state, rep, active_injections)
         if _check_stop(): return
         _set_phase(f"CAPTURING_SNAPSHOT (rep {rep}/{level_c_reps})")
         snap_id = _phase_capture_snapshot(state, job_dir, rep)
@@ -2547,7 +2765,7 @@ def _run_level_c_job(job_id: str, job_dir: Path, config: dict) -> None:
     # ── COMPARE ───────────────────────────────────────────────────────────────
     if _check_stop(): return
     _set_phase("COMPARING")
-    comparison = _phase_compare_snapshots(state, job_dir, snapshot_ids)
+    comparison = _phase_compare_snapshots(state, job_dir, snapshot_ids, fault_schedule_log)
     state["comparison_report"] = comparison
     _save()
 
@@ -2624,6 +2842,7 @@ def launch_level_c(
     level_b_repetitions: int = 10,
     level_a_repetitions: int | None = None,
     confirmation: str = "",
+    fault_schedule: dict | None = None,
 ) -> dict:
     """Launch a Level C campaign orchestration job. Returns job info immediately."""
     if confirmation.strip() != CONFIRMATION_TOKEN:
@@ -2650,6 +2869,12 @@ def launch_level_c(
         "level_c_repetitions": max(1, level_c_repetitions),
         "level_b_repetitions": max(1, level_b_repetitions),
         "level_a_repetitions": level_a_repetitions or level_b_repetitions,
+        # Optional alternating-treatments design (Barlow & Hayes, 1979) --
+        # see _fault_schedule_condition/_apply_fault_schedule_for_rep. None
+        # (the default, every pre-existing caller) means zero change in
+        # behavior: _fault_schedule_condition(None, rep) always returns
+        # "none" and no fault is ever applied.
+        "fault_schedule": fault_schedule,
     }
 
     initial_state = {

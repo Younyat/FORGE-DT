@@ -1,0 +1,2662 @@
+{
+  "job_id": "exp-c38115568a23",
+  "job_type": "level_b_repetitions",
+  "title": "Run Level B repetitions for CMP-20260707-000220-CBFB",
+  "status": "running",
+  "requested_at": "2026-09-26T13:02:29.273774+00:00",
+  "started_at": "2026-09-26T13:02:29.274834+00:00",
+  "finished_at": null,
+  "current_phase": "generate_report",
+  "progress_percent": 90.0,
+  "warnings": [
+    {
+      "message": "OT state twin detected a real-state divergence (baseline and/or control-law consistency) during the post-attack poll burst for this repetition (evidence_layer=ot, independent of IDS/SIEM alerts).",
+      "repetition": 1,
+      "burst_count": 3,
+      "differences": [
+        {
+          "canonical_name": "openOutletValve",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "outletValveOpenStatus",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "openOutletValve",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "outletValveOpenStatus",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "openOutletValve",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "outletValveOpenStatus",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        }
+      ]
+    },
+    "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+    "Semantic reconstruction has not been generated.",
+    "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+    "Modbus traffic is observed, but register and value precision are not confirmed by packet-level parsing.",
+    "Integrity and custody validation supports evidentiary trust in the preserved artifacts; it does not by itself confirm the causal hypothesis.",
+    "Heavy generated case artifacts were cleaned after nested Level A reporting so the next Level B repetition could create a fresh case without accumulating heavy storage.",
+    {
+      "message": "OT state twin detected a real-state divergence (baseline and/or control-law consistency) during the post-attack poll burst for this repetition (evidence_layer=ot, independent of IDS/SIEM alerts).",
+      "repetition": 2,
+      "burst_count": 3,
+      "differences": [
+        {
+          "canonical_name": "openOutletValve",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "outletValveOpenStatus",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "openOutletValve",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "outletValveOpenStatus",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "openOutletValve",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "outletValveOpenStatus",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        }
+      ]
+    },
+    "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+    "Semantic reconstruction has not been generated.",
+    "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+    "Modbus traffic is observed, but register and value precision are not confirmed by packet-level parsing.",
+    "Integrity and custody validation supports evidentiary trust in the preserved artifacts; it does not by itself confirm the causal hypothesis.",
+    "Heavy generated case artifacts were cleaned after nested Level A reporting so the next Level B repetition could create a fresh case without accumulating heavy storage.",
+    {
+      "message": "OT state twin detected a real-state divergence (baseline and/or control-law consistency) during the post-attack poll burst for this repetition (evidence_layer=ot, independent of IDS/SIEM alerts).",
+      "repetition": 3,
+      "burst_count": 3,
+      "differences": [
+        {
+          "canonical_name": "openOutletValve",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "outletValveOpenStatus",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "openOutletValve",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "outletValveOpenStatus",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "openOutletValve",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        },
+        {
+          "canonical_name": "outletValveOpenStatus",
+          "reason": "control_law_violation",
+          "expected_value": 1,
+          "observed_value": 0,
+          "branch": "draining"
+        }
+      ]
+    },
+    "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+    "Semantic reconstruction has not been generated.",
+    "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+    "Modbus traffic is observed, but register and value precision are not confirmed by packet-level parsing.",
+    "Integrity and custody validation supports evidentiary trust in the preserved artifacts; it does not by itself confirm the causal hypothesis.",
+    "This was the final repetition of the campaign -- case case-66dc197c was kept fully intact as a complete result sample instead of being reduced to the lightweight bundle."
+  ],
+  "errors": [],
+  "generated_artifacts": [],
+  "meta": {
+    "campaign_id": "CMP-20260707-000220-CBFB",
+    "level": "B",
+    "attack_id": "T0831_MANIPULATION_OF_CONTROL_MODBUS",
+    "requested_repetitions": 3,
+    "nested_level_a_repetitions": 10,
+    "replaced_active_job": null
+  },
+  "job_path": "/home/younes/nicscyberlab_v3/app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/jobs/level-b-repetitions-2026-09-26T130229.273705_0000.json",
+  "updated_at": "2026-09-26T18:08:40.613926+00:00",
+  "current_phase_label": "Generate Level B report",
+  "current_phase_detail": "Aggregating per-repetition timing, acquisition, reconstruction, warnings, blockers, and case outputs into the final Level B validation report bundle.",
+  "phase_statuses": [
+    {
+      "phase_key": "starting",
+      "phase_label": "Starting",
+      "status": "running",
+      "detail": "Preparing experimentation job runner.",
+      "updated_at": "2026-09-26T13:02:29.274853+00:00",
+      "progress_percent": 1.0
+    },
+    {
+      "phase_key": "prepare_level_b_job",
+      "phase_label": "Prepare Level B job",
+      "status": "running",
+      "detail": "Preparing Level B batch execution, runtime workspace, and deterministic scientific progress plan.",
+      "updated_at": "2026-09-26T13:02:29.278661+00:00",
+      "progress_percent": 0.0
+    },
+    {
+      "phase_key": "prepare_level_b_job",
+      "phase_label": "Prepare Level B job",
+      "status": "completed",
+      "detail": "Prepared Level B batch job for campaign CMP-20260707-000220-CBFB.",
+      "updated_at": "2026-09-26T13:02:29.279726+00:00",
+      "progress_percent": 3.33
+    },
+    {
+      "phase_key": "optional_cleanup",
+      "phase_label": "Clean previous heavy cases",
+      "status": "running",
+      "detail": "Inspecting and deleting previous heavy forensic cases before launching the independent Level B repetitions. This is mandatory so two heavy cases never coexist.",
+      "updated_at": "2026-09-26T13:02:29.280701+00:00",
+      "progress_percent": 3.33
+    },
+    {
+      "phase_key": "optional_cleanup",
+      "phase_label": "Clean previous heavy cases",
+      "status": "completed",
+      "detail": "Mandatory cleanup completed. Estimated freed space: 78.56 GB. Actual freed space: 78.56 GB. Deleted cases: 1.",
+      "updated_at": "2026-09-26T13:02:30.614367+00:00",
+      "progress_percent": 6.67
+    },
+    {
+      "phase_key": "resolve_active_scenario",
+      "phase_label": "Resolve active scenario",
+      "status": "running",
+      "detail": "Resolving the already deployed scenario that will host all 3 independent Level B repetitions.",
+      "updated_at": "2026-09-26T13:02:30.615523+00:00",
+      "progress_percent": 6.67
+    },
+    {
+      "phase_key": "resolve_active_scenario",
+      "phase_label": "Resolve active scenario",
+      "status": "completed",
+      "detail": "Resolved target PLC_Instance (10.0.2.37) and monitor monitor 11 (10.0.2.114).",
+      "updated_at": "2026-09-26T13:02:31.616613+00:00",
+      "progress_percent": 10.0
+    },
+    {
+      "phase_key": "verify_plc_target",
+      "phase_label": "Verify PLC target",
+      "status": "running",
+      "detail": "Checking that the selected target is really the PLC node used by the controlled OT register-modification profile.",
+      "updated_at": "2026-09-26T13:02:31.621380+00:00",
+      "progress_percent": 10.0
+    },
+    {
+      "phase_key": "verify_plc_target",
+      "phase_label": "Verify PLC target",
+      "status": "completed",
+      "detail": "PLC target verified: PLC_Instance (10.0.2.37). Multi-host preservation scope resolved: fuxa=10.0.2.24, plc=10.0.2.37, victim=10.0.2.111.",
+      "updated_at": "2026-09-26T13:02:32.456760+00:00",
+      "progress_percent": 13.33
+    },
+    {
+      "phase_key": "enable_dfir_mode",
+      "phase_label": "Enable DFIR mode",
+      "status": "running",
+      "detail": "Verifying that DFIR mode is ON before the first OT attack is launched.",
+      "updated_at": "2026-09-26T13:02:32.459645+00:00",
+      "progress_percent": 13.33
+    },
+    {
+      "phase_key": "enable_dfir_mode",
+      "phase_label": "Enable DFIR mode",
+      "status": "completed",
+      "detail": "DFIR mode verified ON. Browser mode transitioned from off to on.",
+      "updated_at": "2026-09-26T13:02:32.461087+00:00",
+      "progress_percent": 16.67
+    },
+    {
+      "phase_key": "verify_disk_acquisition",
+      "phase_label": "Verify disk acquisition prerequisites",
+      "status": "running",
+      "detail": "Checking whether disk preservation can run in stable non-interactive mode for a long Level B batch.",
+      "updated_at": "2026-09-26T13:02:32.462251+00:00",
+      "progress_percent": 16.67
+    },
+    {
+      "phase_key": "verify_disk_acquisition",
+      "phase_label": "Verify disk acquisition prerequisites",
+      "status": "completed",
+      "detail": "Stable non-interactive disk acquisition prerequisites verified for Level B batch execution.",
+      "updated_at": "2026-09-26T13:02:32.519066+00:00",
+      "progress_percent": 20.0
+    },
+    {
+      "phase_key": "repetition_1_start",
+      "phase_label": "Start repetition 1/3",
+      "status": "running",
+      "detail": "Execution workspace EXEC-0058 created. Starting independent Level B repetition 1 of 3.",
+      "updated_at": "2026-09-26T13:02:32.575291+00:00",
+      "progress_percent": 20.0
+    },
+    {
+      "phase_key": "repetition_1_start",
+      "phase_label": "Start repetition 1/3",
+      "status": "completed",
+      "detail": "Independent Level B repetition 1 has started with execution EXEC-0058.",
+      "updated_at": "2026-09-26T13:02:32.576805+00:00",
+      "progress_percent": 22.33
+    },
+    {
+      "phase_key": "repetition_1_attack",
+      "phase_label": "Execute OT register-modification attack",
+      "status": "running",
+      "detail": "Launching T0831_MANIPULATION_OF_CONTROL_MODBUS against PLC target 10.0.2.37 (attempt 1/10).",
+      "updated_at": "2026-09-26T13:02:36.744804+00:00",
+      "progress_percent": 22.33
+    },
+    {
+      "phase_key": "repetition_1_attack",
+      "phase_label": "Execute OT register-modification attack",
+      "status": "completed",
+      "detail": "Attack completed successfully (attempt 1/10). Output directory: /home/younes/nicscyberlab_v3/app_core/infrastructure/attack/outputs/20260926T130237Z_T0831_MANIPULATION_OF_CONTROL_MODBUS.",
+      "updated_at": "2026-09-26T13:02:58.043182+00:00",
+      "progress_percent": 24.67
+    },
+    {
+      "phase_key": "repetition_1_alert",
+      "phase_label": "Wait for high-severity alert",
+      "status": "running",
+      "detail": "Watching monitor 10.0.2.114 for a HIGH/CRITICAL alert matching the OT attack profile (attempt 1/10).",
+      "updated_at": "2026-09-26T13:03:12.483437+00:00",
+      "progress_percent": 24.67
+    },
+    {
+      "phase_key": "repetition_1_alert",
+      "phase_label": "Wait for high-severity alert",
+      "status": "completed",
+      "detail": "Matched alert 9ab66631ff3e4d9f8b76841f37ebb7f0 with severity HIGH (attempt 1/10).",
+      "updated_at": "2026-09-26T13:03:20.789799+00:00",
+      "progress_percent": 27.0
+    },
+    {
+      "phase_key": "repetition_1_trigger",
+      "phase_label": "Verify forensic intervention trigger",
+      "status": "running",
+      "detail": "Verifying that the matched alert is eligible for forensic intervention and that automatic acquisition may start from this trigger (attempt 1/10).",
+      "updated_at": "2026-09-26T13:03:20.792535+00:00",
+      "progress_percent": 27.0
+    },
+    {
+      "phase_key": "repetition_1_trigger",
+      "phase_label": "Verify forensic intervention trigger",
+      "status": "completed",
+      "detail": "The matched high-severity alert is eligible for automatic forensic intervention and DFIR mode is ON (attempt 1/10).",
+      "updated_at": "2026-09-26T13:03:20.794359+00:00",
+      "progress_percent": 29.33
+    },
+    {
+      "phase_key": "repetition_1_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Creating a fresh forensic case and starting volatility-first DFIR acquisition over fuxa, plc, and victim: memory first, rolling-PCAP context import second, disk third.",
+      "updated_at": "2026-09-26T13:03:20.796501+00:00",
+      "progress_percent": 29.33
+    },
+    {
+      "phase_key": "repetition_1_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: MEMORY (1/3) — acquiring volatile memory from fuxa (10.0.2.24).",
+      "updated_at": "2026-09-26T13:03:41.296937+00:00",
+      "progress_percent": 29.33
+    },
+    {
+      "phase_key": "repetition_1_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: MEMORY (2/3) — acquiring volatile memory from plc (10.0.2.37).",
+      "updated_at": "2026-09-26T13:06:39.663303+00:00",
+      "progress_percent": 29.33
+    },
+    {
+      "phase_key": "repetition_1_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: MEMORY (3/3) — acquiring volatile memory from victim (10.0.2.111).",
+      "updated_at": "2026-09-26T13:10:28.288046+00:00",
+      "progress_percent": 29.33
+    },
+    {
+      "phase_key": "repetition_1_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: NETWORK — importing rolling-PCAP context across fuxa, plc, and victim (post-memory).",
+      "updated_at": "2026-09-26T13:13:26.472087+00:00",
+      "progress_percent": 29.33
+    },
+    {
+      "phase_key": "repetition_1_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: DISK (1/3) — acquiring disk image from fuxa (10.0.2.24).",
+      "updated_at": "2026-09-26T13:13:36.125052+00:00",
+      "progress_percent": 29.33
+    },
+    {
+      "phase_key": "repetition_1_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: DISK (2/3) — acquiring disk image from plc (10.0.2.37).",
+      "updated_at": "2026-09-26T13:17:08.465972+00:00",
+      "progress_percent": 29.33
+    },
+    {
+      "phase_key": "repetition_1_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: DISK (3/3) — acquiring disk image from victim (10.0.2.111).",
+      "updated_at": "2026-09-26T13:20:23.929810+00:00",
+      "progress_percent": 29.33
+    },
+    {
+      "phase_key": "repetition_1_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "completed",
+      "detail": "Case case-662f99fc created. Acquisition scope=fuxa, plc, victim. Memory=ok (3 host(s)); network_import preserved=6 pending=0; disk=ok (3 host(s)).",
+      "updated_at": "2026-09-26T13:28:58.142212+00:00",
+      "progress_percent": 31.67
+    },
+    {
+      "phase_key": "repetition_1_seal",
+      "phase_label": "Seal and register case",
+      "status": "running",
+      "detail": "Finalizing custody/digest state so the new case can feed the scientific analysis and reconstruction pipeline.",
+      "updated_at": "2026-09-26T13:28:58.202227+00:00",
+      "progress_percent": 31.67
+    },
+    {
+      "phase_key": "repetition_1_seal",
+      "phase_label": "Seal and register case",
+      "status": "completed",
+      "detail": "Case case-662f99fc is registered for downstream analysis.",
+      "updated_at": "2026-09-26T13:28:58.204331+00:00",
+      "progress_percent": 34.0
+    },
+    {
+      "phase_key": "repetition_1_analysis",
+      "phase_label": "Run multilayer analysis",
+      "status": "running",
+      "detail": "Running the existing preserved-case lifecycle backend over case-662f99fc.",
+      "updated_at": "2026-09-26T13:28:58.214997+00:00",
+      "progress_percent": 34.0
+    },
+    {
+      "phase_key": "repetition_1_analysis",
+      "phase_label": "Run multilayer analysis",
+      "status": "completed_with_degradation",
+      "detail": "Lifecycle analysis finished with warnings or scientific degradation.",
+      "updated_at": "2026-09-26T13:29:34.509758+00:00",
+      "progress_percent": 36.33
+    },
+    {
+      "phase_key": "repetition_1_reconstruction",
+      "phase_label": "Run reconstruction/dependency analysis",
+      "status": "running",
+      "detail": "Attaching the fresh case back into the repetition workspace and generating the normalized comparison/result-card outputs.",
+      "updated_at": "2026-09-26T13:29:34.519188+00:00",
+      "progress_percent": 36.33
+    },
+    {
+      "phase_key": "repetition_1_reconstruction",
+      "phase_label": "Run reconstruction/dependency analysis",
+      "status": "completed_with_degradation",
+      "detail": "Execution EXEC-0058 now points to case case-662f99fc with comparison family family-70de2e1e355d48b1.",
+      "updated_at": "2026-09-26T13:29:34.775115+00:00",
+      "progress_percent": 38.67
+    },
+    {
+      "phase_key": "repetition_1_store",
+      "phase_label": "Store repetition result",
+      "status": "running",
+      "detail": "Launching nested Level A scientific report for case case-662f99fc using 10 dry-run repetitions inside child campaign CMP-20260926-132934-E2D3.",
+      "updated_at": "2026-09-26T13:29:34.779358+00:00",
+      "progress_percent": 38.67
+    },
+    {
+      "phase_key": "repetition_1_cleanup",
+      "phase_label": "Clean heavy generated case",
+      "status": "running",
+      "detail": "Cleaning heavy artifacts for case case-662f99fc after nested Level A analysis so the next Level B repetition can create a fresh case without coexisting heavy cases.",
+      "updated_at": "2026-09-26T14:39:32.302373+00:00",
+      "progress_percent": 38.67
+    },
+    {
+      "phase_key": "repetition_1_cleanup",
+      "phase_label": "Clean heavy generated case",
+      "status": "completed",
+      "detail": "Heavy generated case case-662f99fc was cleaned after nested Level A analysis. Lightweight retained bundle: app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0058/retained_case_lightweight_bundle/case-662f99fc/lightweight_case_bundle_manifest.json.",
+      "updated_at": "2026-09-26T14:39:34.135083+00:00",
+      "progress_percent": 41.0
+    },
+    {
+      "phase_key": "repetition_1_post_cleanup_node_space",
+      "phase_label": "Free space cleanup on fuxa/plc",
+      "status": "completed",
+      "detail": "Applied safe free-space cleanup on fuxa/plc after deleting heavy case case-662f99fc. Cleaned roles: fuxa, plc.",
+      "updated_at": "2026-09-26T14:39:49.790459+00:00",
+      "progress_percent": 41.0
+    },
+    {
+      "phase_key": "repetition_1_store",
+      "phase_label": "Store repetition result",
+      "status": "completed_with_degradation",
+      "detail": "Stored repetition 1/3 result with status partial and case case-662f99fc.",
+      "updated_at": "2026-09-26T14:39:49.796177+00:00",
+      "progress_percent": 43.33
+    },
+    {
+      "phase_key": "repetition_2_pre_attack_node_space",
+      "phase_label": "Free space cleanup before next attack",
+      "status": "running",
+      "detail": "Running mandatory free-space cleanup on fuxa/plc before launching repetition 2/3. This ensures node-local storage is reclaimed before the next Level B attack.",
+      "updated_at": "2026-09-26T14:39:49.829648+00:00",
+      "progress_percent": 43.33
+    },
+    {
+      "phase_key": "repetition_2_pre_attack_node_space",
+      "phase_label": "Free space cleanup before next attack",
+      "status": "completed",
+      "detail": "Mandatory free-space cleanup completed on fuxa/plc before repetition 2. Cleaned roles: fuxa, plc.",
+      "updated_at": "2026-09-26T14:39:57.469499+00:00",
+      "progress_percent": 45.67
+    },
+    {
+      "phase_key": "repetition_2_start",
+      "phase_label": "Start repetition 2/3",
+      "status": "running",
+      "detail": "Execution workspace EXEC-0059 created. Starting independent Level B repetition 2 of 3.",
+      "updated_at": "2026-09-26T14:39:57.550070+00:00",
+      "progress_percent": 43.33
+    },
+    {
+      "phase_key": "repetition_2_start",
+      "phase_label": "Start repetition 2/3",
+      "status": "completed",
+      "detail": "Independent Level B repetition 2 has started with execution EXEC-0059.",
+      "updated_at": "2026-09-26T14:39:57.561881+00:00",
+      "progress_percent": 45.67
+    },
+    {
+      "phase_key": "repetition_2_attack",
+      "phase_label": "Execute OT register-modification attack",
+      "status": "running",
+      "detail": "Launching T0831_MANIPULATION_OF_CONTROL_MODBUS against PLC target 10.0.2.37 (attempt 1/10).",
+      "updated_at": "2026-09-26T14:40:01.383906+00:00",
+      "progress_percent": 45.67
+    },
+    {
+      "phase_key": "repetition_2_attack",
+      "phase_label": "Execute OT register-modification attack",
+      "status": "completed",
+      "detail": "Attack completed successfully (attempt 1/10). Output directory: /home/younes/nicscyberlab_v3/app_core/infrastructure/attack/outputs/20260926T144001Z_T0831_MANIPULATION_OF_CONTROL_MODBUS.",
+      "updated_at": "2026-09-26T14:40:19.456469+00:00",
+      "progress_percent": 48.0
+    },
+    {
+      "phase_key": "repetition_2_alert",
+      "phase_label": "Wait for high-severity alert",
+      "status": "running",
+      "detail": "Watching monitor 10.0.2.114 for a HIGH/CRITICAL alert matching the OT attack profile (attempt 1/10).",
+      "updated_at": "2026-09-26T14:40:33.925712+00:00",
+      "progress_percent": 48.0
+    },
+    {
+      "phase_key": "repetition_2_alert",
+      "phase_label": "Wait for high-severity alert",
+      "status": "completed",
+      "detail": "Matched alert d01c9ef8bb9f483ba7089e5fe591ff17 with severity HIGH (attempt 1/10).",
+      "updated_at": "2026-09-26T14:40:41.527216+00:00",
+      "progress_percent": 50.33
+    },
+    {
+      "phase_key": "repetition_2_trigger",
+      "phase_label": "Verify forensic intervention trigger",
+      "status": "running",
+      "detail": "Verifying that the matched alert is eligible for forensic intervention and that automatic acquisition may start from this trigger (attempt 1/10).",
+      "updated_at": "2026-09-26T14:40:41.534567+00:00",
+      "progress_percent": 50.33
+    },
+    {
+      "phase_key": "repetition_2_trigger",
+      "phase_label": "Verify forensic intervention trigger",
+      "status": "completed",
+      "detail": "The matched high-severity alert is eligible for automatic forensic intervention and DFIR mode is ON (attempt 1/10).",
+      "updated_at": "2026-09-26T14:40:41.540701+00:00",
+      "progress_percent": 52.67
+    },
+    {
+      "phase_key": "repetition_2_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Creating a fresh forensic case and starting volatility-first DFIR acquisition over fuxa, plc, and victim: memory first, rolling-PCAP context import second, disk third.",
+      "updated_at": "2026-09-26T14:40:41.547567+00:00",
+      "progress_percent": 52.67
+    },
+    {
+      "phase_key": "repetition_2_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: MEMORY (1/3) — acquiring volatile memory from fuxa (10.0.2.24).",
+      "updated_at": "2026-09-26T14:40:47.324249+00:00",
+      "progress_percent": 52.67
+    },
+    {
+      "phase_key": "repetition_2_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: MEMORY (2/3) — acquiring volatile memory from plc (10.0.2.37).",
+      "updated_at": "2026-09-26T14:44:07.703172+00:00",
+      "progress_percent": 52.67
+    },
+    {
+      "phase_key": "repetition_2_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: MEMORY (3/3) — acquiring volatile memory from victim (10.0.2.111).",
+      "updated_at": "2026-09-26T14:47:19.709935+00:00",
+      "progress_percent": 52.67
+    },
+    {
+      "phase_key": "repetition_2_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: NETWORK — importing rolling-PCAP context across fuxa, plc, and victim (post-memory).",
+      "updated_at": "2026-09-26T14:50:15.520315+00:00",
+      "progress_percent": 52.67
+    },
+    {
+      "phase_key": "repetition_2_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: DISK (1/3) — acquiring disk image from fuxa (10.0.2.24).",
+      "updated_at": "2026-09-26T14:54:44.563307+00:00",
+      "progress_percent": 52.67
+    },
+    {
+      "phase_key": "repetition_2_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: DISK (2/3) — acquiring disk image from plc (10.0.2.37).",
+      "updated_at": "2026-09-26T14:58:18.280929+00:00",
+      "progress_percent": 52.67
+    },
+    {
+      "phase_key": "repetition_2_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: DISK (3/3) — acquiring disk image from victim (10.0.2.111).",
+      "updated_at": "2026-09-26T15:01:42.012234+00:00",
+      "progress_percent": 52.67
+    },
+    {
+      "phase_key": "repetition_2_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "completed",
+      "detail": "Case case-601eda86 created. Acquisition scope=fuxa, plc, victim. Memory=ok (3 host(s)); network_import preserved=6 pending=0; disk=ok (3 host(s)).",
+      "updated_at": "2026-09-26T15:10:47.960571+00:00",
+      "progress_percent": 55.0
+    },
+    {
+      "phase_key": "repetition_2_seal",
+      "phase_label": "Seal and register case",
+      "status": "running",
+      "detail": "Finalizing custody/digest state so the new case can feed the scientific analysis and reconstruction pipeline.",
+      "updated_at": "2026-09-26T15:10:48.028610+00:00",
+      "progress_percent": 55.0
+    },
+    {
+      "phase_key": "repetition_2_seal",
+      "phase_label": "Seal and register case",
+      "status": "completed",
+      "detail": "Case case-601eda86 is registered for downstream analysis.",
+      "updated_at": "2026-09-26T15:10:48.033384+00:00",
+      "progress_percent": 57.33
+    },
+    {
+      "phase_key": "repetition_2_analysis",
+      "phase_label": "Run multilayer analysis",
+      "status": "running",
+      "detail": "Running the existing preserved-case lifecycle backend over case-601eda86.",
+      "updated_at": "2026-09-26T15:10:48.046469+00:00",
+      "progress_percent": 57.33
+    },
+    {
+      "phase_key": "repetition_2_analysis",
+      "phase_label": "Run multilayer analysis",
+      "status": "completed_with_degradation",
+      "detail": "Lifecycle analysis finished with warnings or scientific degradation.",
+      "updated_at": "2026-09-26T15:12:54.221551+00:00",
+      "progress_percent": 59.67
+    },
+    {
+      "phase_key": "repetition_2_reconstruction",
+      "phase_label": "Run reconstruction/dependency analysis",
+      "status": "running",
+      "detail": "Attaching the fresh case back into the repetition workspace and generating the normalized comparison/result-card outputs.",
+      "updated_at": "2026-09-26T15:12:54.229091+00:00",
+      "progress_percent": 59.67
+    },
+    {
+      "phase_key": "repetition_2_reconstruction",
+      "phase_label": "Run reconstruction/dependency analysis",
+      "status": "completed_with_degradation",
+      "detail": "Execution EXEC-0059 now points to case case-601eda86 with comparison family family-489338bebf2e8e99.",
+      "updated_at": "2026-09-26T15:12:54.502357+00:00",
+      "progress_percent": 62.0
+    },
+    {
+      "phase_key": "repetition_2_store",
+      "phase_label": "Store repetition result",
+      "status": "running",
+      "detail": "Launching nested Level A scientific report for case case-601eda86 using 10 dry-run repetitions inside child campaign CMP-20260926-151254-FD4B.",
+      "updated_at": "2026-09-26T15:12:54.511700+00:00",
+      "progress_percent": 62.0
+    },
+    {
+      "phase_key": "repetition_2_cleanup",
+      "phase_label": "Clean heavy generated case",
+      "status": "running",
+      "detail": "Cleaning heavy artifacts for case case-601eda86 after nested Level A analysis so the next Level B repetition can create a fresh case without coexisting heavy cases.",
+      "updated_at": "2026-09-26T16:31:55.606215+00:00",
+      "progress_percent": 62.0
+    },
+    {
+      "phase_key": "repetition_2_cleanup",
+      "phase_label": "Clean heavy generated case",
+      "status": "completed",
+      "detail": "Heavy generated case case-601eda86 was cleaned after nested Level A analysis. Lightweight retained bundle: app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0059/retained_case_lightweight_bundle/case-601eda86/lightweight_case_bundle_manifest.json.",
+      "updated_at": "2026-09-26T16:31:56.865431+00:00",
+      "progress_percent": 64.33
+    },
+    {
+      "phase_key": "repetition_2_post_cleanup_node_space",
+      "phase_label": "Free space cleanup on fuxa/plc",
+      "status": "completed",
+      "detail": "Applied safe free-space cleanup on fuxa/plc after deleting heavy case case-601eda86. Cleaned roles: fuxa, plc.",
+      "updated_at": "2026-09-26T16:32:07.387735+00:00",
+      "progress_percent": 64.33
+    },
+    {
+      "phase_key": "repetition_2_store",
+      "phase_label": "Store repetition result",
+      "status": "completed_with_degradation",
+      "detail": "Stored repetition 2/3 result with status partial and case case-601eda86.",
+      "updated_at": "2026-09-26T16:32:07.397351+00:00",
+      "progress_percent": 66.67
+    },
+    {
+      "phase_key": "repetition_3_pre_attack_node_space",
+      "phase_label": "Free space cleanup before next attack",
+      "status": "running",
+      "detail": "Running mandatory free-space cleanup on fuxa/plc before launching repetition 3/3. This ensures node-local storage is reclaimed before the next Level B attack.",
+      "updated_at": "2026-09-26T16:32:07.456687+00:00",
+      "progress_percent": 66.67
+    },
+    {
+      "phase_key": "repetition_3_pre_attack_node_space",
+      "phase_label": "Free space cleanup before next attack",
+      "status": "completed",
+      "detail": "Mandatory free-space cleanup completed on fuxa/plc before repetition 3. Cleaned roles: fuxa, plc.",
+      "updated_at": "2026-09-26T16:32:13.925528+00:00",
+      "progress_percent": 69.0
+    },
+    {
+      "phase_key": "repetition_3_start",
+      "phase_label": "Start repetition 3/3",
+      "status": "running",
+      "detail": "Execution workspace EXEC-0060 created. Starting independent Level B repetition 3 of 3.",
+      "updated_at": "2026-09-26T16:32:13.999155+00:00",
+      "progress_percent": 66.67
+    },
+    {
+      "phase_key": "repetition_3_start",
+      "phase_label": "Start repetition 3/3",
+      "status": "completed",
+      "detail": "Independent Level B repetition 3 has started with execution EXEC-0060.",
+      "updated_at": "2026-09-26T16:32:14.008198+00:00",
+      "progress_percent": 69.0
+    },
+    {
+      "phase_key": "repetition_3_attack",
+      "phase_label": "Execute OT register-modification attack",
+      "status": "running",
+      "detail": "Launching T0831_MANIPULATION_OF_CONTROL_MODBUS against PLC target 10.0.2.37 (attempt 1/10).",
+      "updated_at": "2026-09-26T16:32:17.602092+00:00",
+      "progress_percent": 69.0
+    },
+    {
+      "phase_key": "repetition_3_attack",
+      "phase_label": "Execute OT register-modification attack",
+      "status": "completed",
+      "detail": "Attack completed successfully (attempt 1/10). Output directory: /home/younes/nicscyberlab_v3/app_core/infrastructure/attack/outputs/20260926T163218Z_T0831_MANIPULATION_OF_CONTROL_MODBUS.",
+      "updated_at": "2026-09-26T16:32:34.463061+00:00",
+      "progress_percent": 71.33
+    },
+    {
+      "phase_key": "repetition_3_alert",
+      "phase_label": "Wait for high-severity alert",
+      "status": "running",
+      "detail": "Watching monitor 10.0.2.114 for a HIGH/CRITICAL alert matching the OT attack profile (attempt 1/10).",
+      "updated_at": "2026-09-26T16:32:48.887433+00:00",
+      "progress_percent": 71.33
+    },
+    {
+      "phase_key": "repetition_3_alert",
+      "phase_label": "Wait for high-severity alert",
+      "status": "completed",
+      "detail": "Matched alert 0e734502509a4c80a995e9f8200c511f with severity HIGH (attempt 1/10).",
+      "updated_at": "2026-09-26T16:32:56.705580+00:00",
+      "progress_percent": 73.67
+    },
+    {
+      "phase_key": "repetition_3_trigger",
+      "phase_label": "Verify forensic intervention trigger",
+      "status": "running",
+      "detail": "Verifying that the matched alert is eligible for forensic intervention and that automatic acquisition may start from this trigger (attempt 1/10).",
+      "updated_at": "2026-09-26T16:32:56.714240+00:00",
+      "progress_percent": 73.67
+    },
+    {
+      "phase_key": "repetition_3_trigger",
+      "phase_label": "Verify forensic intervention trigger",
+      "status": "completed",
+      "detail": "The matched high-severity alert is eligible for automatic forensic intervention and DFIR mode is ON (attempt 1/10).",
+      "updated_at": "2026-09-26T16:32:56.722730+00:00",
+      "progress_percent": 76.0
+    },
+    {
+      "phase_key": "repetition_3_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Creating a fresh forensic case and starting volatility-first DFIR acquisition over fuxa, plc, and victim: memory first, rolling-PCAP context import second, disk third.",
+      "updated_at": "2026-09-26T16:32:56.731539+00:00",
+      "progress_percent": 76.0
+    },
+    {
+      "phase_key": "repetition_3_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: MEMORY (1/3) — acquiring volatile memory from fuxa (10.0.2.24).",
+      "updated_at": "2026-09-26T16:33:05.995498+00:00",
+      "progress_percent": 76.0
+    },
+    {
+      "phase_key": "repetition_3_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: MEMORY (2/3) — acquiring volatile memory from plc (10.0.2.37).",
+      "updated_at": "2026-09-26T16:36:24.056718+00:00",
+      "progress_percent": 76.0
+    },
+    {
+      "phase_key": "repetition_3_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: MEMORY (3/3) — acquiring volatile memory from victim (10.0.2.111).",
+      "updated_at": "2026-09-26T16:38:59.594257+00:00",
+      "progress_percent": 76.0
+    },
+    {
+      "phase_key": "repetition_3_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: NETWORK — importing rolling-PCAP context across fuxa, plc, and victim (post-memory).",
+      "updated_at": "2026-09-26T16:42:15.760285+00:00",
+      "progress_percent": 76.0
+    },
+    {
+      "phase_key": "repetition_3_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: DISK (1/3) — acquiring disk image from fuxa (10.0.2.24).",
+      "updated_at": "2026-09-26T16:46:50.544391+00:00",
+      "progress_percent": 76.0
+    },
+    {
+      "phase_key": "repetition_3_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: DISK (2/3) — acquiring disk image from plc (10.0.2.37).",
+      "updated_at": "2026-09-26T16:50:26.409275+00:00",
+      "progress_percent": 76.0
+    },
+    {
+      "phase_key": "repetition_3_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "running",
+      "detail": "Stage: DISK (3/3) — acquiring disk image from victim (10.0.2.111).",
+      "updated_at": "2026-09-26T16:53:45.093037+00:00",
+      "progress_percent": 76.0
+    },
+    {
+      "phase_key": "repetition_3_acquisition",
+      "phase_label": "Run automatic acquisition",
+      "status": "completed",
+      "detail": "Case case-66dc197c created. Acquisition scope=fuxa, plc, victim. Memory=ok (3 host(s)); network_import preserved=6 pending=0; disk=ok (3 host(s)).",
+      "updated_at": "2026-09-26T17:02:45.586691+00:00",
+      "progress_percent": 78.33
+    },
+    {
+      "phase_key": "repetition_3_seal",
+      "phase_label": "Seal and register case",
+      "status": "running",
+      "detail": "Finalizing custody/digest state so the new case can feed the scientific analysis and reconstruction pipeline.",
+      "updated_at": "2026-09-26T17:02:45.650734+00:00",
+      "progress_percent": 78.33
+    },
+    {
+      "phase_key": "repetition_3_seal",
+      "phase_label": "Seal and register case",
+      "status": "completed",
+      "detail": "Case case-66dc197c is registered for downstream analysis.",
+      "updated_at": "2026-09-26T17:02:45.658142+00:00",
+      "progress_percent": 80.67
+    },
+    {
+      "phase_key": "repetition_3_analysis",
+      "phase_label": "Run multilayer analysis",
+      "status": "running",
+      "detail": "Running the existing preserved-case lifecycle backend over case-66dc197c.",
+      "updated_at": "2026-09-26T17:02:45.671368+00:00",
+      "progress_percent": 80.67
+    },
+    {
+      "phase_key": "repetition_3_analysis",
+      "phase_label": "Run multilayer analysis",
+      "status": "completed_with_degradation",
+      "detail": "Lifecycle analysis finished with warnings or scientific degradation.",
+      "updated_at": "2026-09-26T17:05:00.823317+00:00",
+      "progress_percent": 83.0
+    },
+    {
+      "phase_key": "repetition_3_reconstruction",
+      "phase_label": "Run reconstruction/dependency analysis",
+      "status": "running",
+      "detail": "Attaching the fresh case back into the repetition workspace and generating the normalized comparison/result-card outputs.",
+      "updated_at": "2026-09-26T17:05:00.841071+00:00",
+      "progress_percent": 83.0
+    },
+    {
+      "phase_key": "repetition_3_reconstruction",
+      "phase_label": "Run reconstruction/dependency analysis",
+      "status": "completed_with_degradation",
+      "detail": "Execution EXEC-0060 now points to case case-66dc197c with comparison family family-ddb6bcca9534ed35.",
+      "updated_at": "2026-09-26T17:05:01.496677+00:00",
+      "progress_percent": 85.33
+    },
+    {
+      "phase_key": "repetition_3_store",
+      "phase_label": "Store repetition result",
+      "status": "running",
+      "detail": "Launching nested Level A scientific report for case case-66dc197c using 10 dry-run repetitions inside child campaign CMP-20260926-170501-DD55.",
+      "updated_at": "2026-09-26T17:05:01.513696+00:00",
+      "progress_percent": 85.33
+    },
+    {
+      "phase_key": "repetition_3_cleanup",
+      "phase_label": "Preserve final case as full sample",
+      "status": "running",
+      "detail": "This is the final repetition of the campaign -- preserving case case-66dc197c fully intact (raw disk, memory, network, everything) as a real, complete result sample, instead of reducing it to the lightweight bundle.",
+      "updated_at": "2026-09-26T18:08:29.488577+00:00",
+      "progress_percent": 85.33
+    },
+    {
+      "phase_key": "repetition_3_cleanup",
+      "phase_label": "Preserve final case as full sample",
+      "status": "completed",
+      "detail": "Final case case-66dc197c preserved intact at app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/final_sample_case/CASE-20260926-163256.",
+      "updated_at": "2026-09-26T18:08:29.584063+00:00",
+      "progress_percent": 87.67
+    },
+    {
+      "phase_key": "repetition_3_post_cleanup_node_space",
+      "phase_label": "Free space cleanup on fuxa/plc",
+      "status": "completed",
+      "detail": "Applied safe free-space cleanup on fuxa/plc after deleting heavy case case-66dc197c. Cleaned roles: fuxa, plc.",
+      "updated_at": "2026-09-26T18:08:40.551592+00:00",
+      "progress_percent": 87.67
+    },
+    {
+      "phase_key": "repetition_3_store",
+      "phase_label": "Store repetition result",
+      "status": "completed_with_degradation",
+      "detail": "Stored repetition 3/3 result with status partial and case case-66dc197c.",
+      "updated_at": "2026-09-26T18:08:40.560486+00:00",
+      "progress_percent": 90.0
+    },
+    {
+      "phase_key": "generate_report",
+      "phase_label": "Generate Level B report",
+      "status": "running",
+      "detail": "Aggregating per-repetition timing, acquisition, reconstruction, warnings, blockers, and case outputs into the final Level B validation report bundle.",
+      "updated_at": "2026-09-26T18:08:40.609713+00:00",
+      "progress_percent": 90.0
+    }
+  ],
+  "report_output_path": "app_core/infrastructure/forensics/evidence_store/validation_reports/level_b_repetition_report_2026-09-26T130229.277678_0000",
+  "requested_repetitions": 3,
+  "level_b_cleanup_manifest_path": "runtime/level_b_repetitions/exp-c38115568a23/cleanup_manifest.json",
+  "dfir_mode_before": "off",
+  "dfir_mode_after": "on",
+  "disk_preflight": {
+    "ok": true,
+    "blockers": [],
+    "warnings": [],
+    "privilege_mode": "user",
+    "sudo_noninteractive_ok": true,
+    "sudo_nopasswd_granted": true,
+    "docker_available": true,
+    "docker_access_ok": true,
+    "qemu_img_available": true,
+    "script_path": "/home/younes/nicscyberlab_v3/app_core/infrastructure/forensics/scripts/acquire_disk_kolla_libvirt.sh",
+    "container_name": "nova_libvirt",
+    "sudo_list_excerpt": "",
+    "helper_sudo_probe_ok": true
+  },
+  "current_execution_id": "EXEC-0060",
+  "current_case_id": "case-66dc197c",
+  "current_attack_status": "completed",
+  "current_alert_status": "completed",
+  "current_acquisition_status": "completed",
+  "current_preservation_status": "cleanup_completed",
+  "current_analysis_status": "completed",
+  "current_reconstruction_status": "blocked_missing_analysis",
+  "current_repetition": 3,
+  "trigger_attempt": 1,
+  "heartbeat_rss_mb": 1987.6,
+  "current_lifecycle_job_id": null,
+  "nested_level_a_campaign_id": "CMP-20260926-170501-DD55",
+  "current_child_job_id": "exp-74a97f4f0cff",
+  "free_space_cleanup": {
+    "status": "completed",
+    "per_target": [
+      {
+        "status": "completed",
+        "reason": "cleanup_completed",
+        "instance_id": "7d8adec8-50dd-40a9-adcb-ecaea76d53fb",
+        "vm_ip": "10.0.2.24",
+        "node_name": "FUXA_Instance",
+        "ssh_user": "ubuntu",
+        "free_mb_before": 8488,
+        "free_mb_after": 10987,
+        "minimum_free_mb": 1200,
+        "attempts": [
+          {
+            "attempt": 1,
+            "returncode": 0,
+            "stdout_excerpt": [
+              "[INFO] Disk usage before cleanup:",
+              "Filesystem      Size  Used Avail Use% Mounted on",
+              "/dev/vda1        15G  6.1G  8.3G  43% /",
+              "[INFO] Largest directories under /var:",
+              "113M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/3/fs",
+              "201M\t/var/lib/containerd/io.containerd.content.v1.content",
+              "201M\t/var/lib/containerd/io.containerd.content.v1.content/blobs",
+              "201M\t/var/lib/containerd/io.containerd.content.v1.content/blobs/sha256",
+              "207M\t/var/lib/snapd/snaps",
+              "244M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA/server/node_modules",
+              "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10",
+              "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs",
+              "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr",
+              "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src",
+              "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app",
+              "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA",
+              "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA/server",
+              "419M\t/var/lib/snapd/cache",
+              "627M\t/var/lib/snapd",
+              "666M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs",
+              "666M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots",
+              "867M\t/var/lib/containerd",
+              "1.6G\t/var",
+              "1.6G\t/var/lib",
+              "[INFO] Disk usage after cleanup:",
+              "Filesystem      Size  Used Avail Use% Mounted on",
+              "/dev/vda1        15G  3.7G   11G  26% /"
+            ],
+            "stderr_excerpt": [
+              "Vacuuming done, freed 0B of archived journals from /var/log/journal.",
+              "Vacuuming done, freed 0B of archived journals from /var/log/journal/7d8adec850dd40a9adcbecaea76d53fb.",
+              "Vacuuming done, freed 0B of archived journals from /run/log/journal."
+            ],
+            "free_mb_before": 8488,
+            "free_mb_after": 10987
+          }
+        ],
+        "role": "fuxa",
+        "vm_name": "FUXA_Instance",
+        "elapsed_seconds": 6.194
+      },
+      {
+        "status": "completed",
+        "reason": "cleanup_completed",
+        "instance_id": "1c047b30-ebf3-4637-acd1-be6b0d5098b5",
+        "vm_ip": "10.0.2.37",
+        "node_name": "PLC_Instance",
+        "ssh_user": "ubuntu",
+        "free_mb_before": 9659,
+        "free_mb_after": 11706,
+        "minimum_free_mb": 1200,
+        "attempts": [
+          {
+            "attempt": 1,
+            "returncode": 0,
+            "stdout_excerpt": [
+              "[INFO] Disk usage before cleanup:",
+              "Filesystem      Size  Used Avail Use% Mounted on",
+              "/dev/vda1        15G  5.0G  9.5G  35% /",
+              "[INFO] Largest directories under /var:",
+              "4.7M\t/var/cache/apparmor",
+              "4.7M\t/var/cache/debconf",
+              "5.3M\t/var/lib/ubuntu-advantage/apt-esm/var/cache",
+              "5.3M\t/var/lib/ubuntu-advantage/apt-esm/var/cache/apt",
+              "7.0M\t/var/lib/ubuntu-advantage/apt-esm/var",
+              "7.1M\t/var/lib/ubuntu-advantage",
+              "7.1M\t/var/lib/ubuntu-advantage/apt-esm",
+              "14M\t/var/ossec/lib",
+              "16M\t/var/cache",
+              "23M\t/var/ossec",
+              "31M\t/var/lib/dpkg/info",
+              "33M\t/var/lib/dpkg",
+              "57M\t/var/log/journal",
+              "57M\t/var/log/journal/1c047b30ebf34637acd1be6b0d5098b5",
+              "67M\t/var/log",
+              "207M\t/var/lib/snapd/snaps",
+              "419M\t/var/lib/snapd/cache",
+              "627M\t/var/lib/snapd",
+              "671M\t/var/lib",
+              "778M\t/var",
+              "[INFO] Disk usage after cleanup:",
+              "Filesystem      Size  Used Avail Use% Mounted on",
+              "/dev/vda1        15G  3.0G   12G  21% /"
+            ],
+            "stderr_excerpt": [
+              "Vacuuming done, freed 0B of archived journals from /var/log/journal.",
+              "Vacuuming done, freed 0B of archived journals from /var/log/journal/1c047b30ebf34637acd1be6b0d5098b5.",
+              "Vacuuming done, freed 0B of archived journals from /run/log/journal."
+            ],
+            "free_mb_before": 9659,
+            "free_mb_after": 11706
+          }
+        ],
+        "role": "plc",
+        "vm_name": "PLC_Instance",
+        "elapsed_seconds": 4.767
+      }
+    ],
+    "cleaned_roles": [
+      "fuxa",
+      "plc"
+    ],
+    "failed_roles": []
+  },
+  "per_repetition_results": [
+    {
+      "repetition_number": 1,
+      "campaign_id": "CMP-20260707-000220-CBFB",
+      "execution_id": "EXEC-0058",
+      "execution_status": "partial",
+      "dfir_mode_before": "off",
+      "dfir_mode_after": "on",
+      "dfir_mode_enabled_successfully": true,
+      "dfir_mode_blocker": null,
+      "attack_profile_id": "T0831_MANIPULATION_OF_CONTROL_MODBUS",
+      "attack_name": "Modbus Register Manipulation",
+      "target_role": "PLC",
+      "target_node": "PLC_Instance",
+      "target_ip": "192.168.100.207",
+      "protocol": "modbus_tcp",
+      "destination_port": 502,
+      "function_code": "confirmed",
+      "register": "confirmed",
+      "value": "confirmed",
+      "attack_started_at": "2026-09-26T13:02:36.746854+00:00",
+      "attack_completed_at": "2026-09-26T13:02:58.043136+00:00",
+      "attack_output_path": "app_core/infrastructure/attack/outputs/20260926T130237Z_T0831_MANIPULATION_OF_CONTROL_MODBUS",
+      "attack_output_sha256": "30b9eb3963e2fbaf4673d4455f5c5812c314cb1bdfb06c35593f8d215e115cea",
+      "trigger_alert_detected": true,
+      "trigger_alert_id": "9ab66631ff3e4d9f8b76841f37ebb7f0",
+      "trigger_alert_rule": "86601",
+      "trigger_alert_severity": "high",
+      "trigger_alert_timestamp": "2026-09-26T13:02:51.277+0000",
+      "trigger_alert_mitre": null,
+      "forensic_intervention_required": true,
+      "automatic_acquisition_started": true,
+      "alert_to_acquisition_start_seconds": 634.723,
+      "case_id": "case-662f99fc",
+      "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-130320",
+      "memory_acquisition_status": "completed",
+      "memory_hash": null,
+      "network_context_status": "completed",
+      "pcap_segments_imported": 6,
+      "disk_acquisition_status": "completed",
+      "ot_export_status": "partial",
+      "alerts_preserved": 0,
+      "custody_status": "valid",
+      "case_sealed_status": "sealed",
+      "analysis_status": "completed",
+      "layers_total": 14,
+      "layers_completed": 14,
+      "layers_partial": 0,
+      "layers_failed": 0,
+      "memory_analysis_status": "completed",
+      "network_analysis_status": "completed",
+      "disk_analysis_status": "completed",
+      "ot_analysis_status": "completed",
+      "alert_analysis_status": "completed",
+      "timeline_status": "completed",
+      "reconstruction_status": "blocked_missing_analysis",
+      "timing_metrics": {
+        "deploy_time_seconds": 0.0,
+        "teardown_redeploy_time_seconds": 0.0,
+        "network_mode": "continuous_rolling_pcap_with_case_bound_incident_window_import",
+        "alert_to_acquisition_start_seconds": 634.723,
+        "alert_to_memory_start_seconds": 50.018,
+        "alert_to_memory_preserved_seconds": 635.188,
+        "alert_to_ot_export_preserved_seconds": 643.723,
+        "alert_to_disk_snapshot_start_seconds": 644.844,
+        "alert_to_disk_snapshot_preserved_seconds": 1566.862,
+        "alert_to_case_sealed_seconds": 1566.723,
+        "t_first_sealed_seconds": 1566.723,
+        "t_case_sealed_seconds": 1566.723,
+        "memory_acquisition_duration_seconds": 585.171,
+        "pcap_import_duration_seconds": 10.117,
+        "disk_acquisition_duration_seconds": 922.018,
+        "case_sealed_to_analysis_completed_seconds": 4156.788,
+        "total_repetition_duration_seconds": 1614.999,
+        "pcap_periodic_context_size_gib": 0.049721,
+        "pcap_reactive_capture_size_bytes": 0,
+        "memory_dump_size_bytes": 8588285152,
+        "disk_snapshot_size_bytes": 75161927680,
+        "retries_or_failures_count": 0,
+        "ot_export_present_in_manifest": true,
+        "ot_export_paths": [
+          "industrial/ot_export_rolling_EXEC-0058_20260926_131326Z.json"
+        ],
+        "evidence_completeness_gate": "scientifically_complete"
+      },
+      "reconstruction_metrics": {
+        "expected_relations": 8,
+        "recovered_relations": null,
+        "degraded_relations": null,
+        "ambiguous_relations": null,
+        "missing_relations": null,
+        "recoverability_score": null,
+        "weighted_recoverability_score": null,
+        "reconstruction_confidence": null,
+        "recoverability_label": null,
+        "scientific_confidence_label": null,
+        "warnings": [
+          "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+          "Semantic reconstruction has not been generated.",
+          "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+          "Modbus traffic is observed, but register and value precision are not confirmed by packet-level parsing.",
+          "Integrity and custody validation supports evidentiary trust in the preserved artifacts; it does not by itself confirm the causal hypothesis."
+        ],
+        "blockers": []
+      },
+      "comparison_family_id": "family-70de2e1e355d48b1",
+      "scenario_fingerprint": "3a0a8948a1b6f684462cd789",
+      "final_case_status": "the hypothesis currently receives only not evaluable; stronger claims are not yet supportable.",
+      "scientific_case_status": "scientifically_complete",
+      "critical_evidence_gate": {
+        "generated_at_utc": "2026-09-26T13:28:58.190037+00:00",
+        "execution_id": "EXEC-0058",
+        "case_id": "case-662f99fc",
+        "gate_status": "scientifically_complete",
+        "scientifically_complete": true,
+        "missing_critical_evidence": [],
+        "checks": {
+          "pcap_packet_level_modbus_evidence_present": true,
+          "ot_export_present_in_manifest": true,
+          "raw_wazuh_trigger_binding_present": true,
+          "forensic_intervention_artifact_present": true,
+          "memory_artifacts_present": true,
+          "disk_artifacts_present": true,
+          "manifest_present": true,
+          "custody_present": true,
+          "normalized_timestamps_available": true
+        },
+        "failure_details": [],
+        "supporting_metrics": {
+          "pcap_artifact_count": 6,
+          "preserved_segments": 6,
+          "ot_export_artifact_count": 1,
+          "memory_artifact_count": 9,
+          "disk_artifact_count": 9
+        },
+        "message": "Critical scientific evidence gate passed."
+      },
+      "nested_level_a": {
+        "status": "completed_with_degradation",
+        "campaign_id": "CMP-20260926-132934-E2D3",
+        "job_id": "exp-546ad5120fa3",
+        "report": {
+          "generated_at": "2026-09-26T13:29:34.784468+00:00",
+          "campaign_id": "CMP-20260926-132934-E2D3",
+          "execution_id": "EXEC-0010",
+          "generated_execution_ids": [
+            "EXEC-0001",
+            "EXEC-0002",
+            "EXEC-0003",
+            "EXEC-0004",
+            "EXEC-0005",
+            "EXEC-0006",
+            "EXEC-0007",
+            "EXEC-0008",
+            "EXEC-0009",
+            "EXEC-0010"
+          ],
+          "requested_repetitions": 10,
+          "completed_repetitions": 10,
+          "case_id": "case-662f99fc",
+          "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-130320",
+          "report_type": "level_a_scientific_report",
+          "report_scope": "consolidated_level_a_dry_run_repetitions",
+          "level": "A",
+          "job_id": "exp-546ad5120fa3",
+          "report_markdown_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-662f99fc/CMP-20260926-132934-E2D3/level_A_2026-09-26T132934.784468_0000/SCIENTIFIC_LEVEL_A_REPORT.md",
+          "report_output_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-662f99fc/CMP-20260926-132934-E2D3/level_A_2026-09-26T132934.784468_0000",
+          "status": "completed_with_degradation",
+          "comparison_status": "Comparable With Degradation",
+          "comparison_type": "direct_level_a_repeatability_comparison",
+          "source_files_index_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-662f99fc/CMP-20260926-132934-E2D3/level_A_2026-09-26T132934.784468_0000/source_files_index.json",
+          "evidence_to_claim_map_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-662f99fc/CMP-20260926-132934-E2D3/level_A_2026-09-26T132934.784468_0000/evidence_to_claim_map.json",
+          "generation_log_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-662f99fc/CMP-20260926-132934-E2D3/level_A_2026-09-26T132934.784468_0000/generation_log.jsonl",
+          "report_summary_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-662f99fc/CMP-20260926-132934-E2D3/level_A_2026-09-26T132934.784468_0000/report_summary.json"
+        },
+        "warnings": [],
+        "errors": [],
+        "comparison_status": "Comparable With Degradation",
+        "comparison_type": "direct_level_a_repeatability_comparison",
+        "generated_execution_ids": [
+          "EXEC-0001",
+          "EXEC-0002",
+          "EXEC-0003",
+          "EXEC-0004",
+          "EXEC-0005",
+          "EXEC-0006",
+          "EXEC-0007",
+          "EXEC-0008",
+          "EXEC-0009",
+          "EXEC-0010"
+        ],
+        "report_output_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-662f99fc/CMP-20260926-132934-E2D3/level_A_2026-09-26T132934.784468_0000",
+        "report_markdown_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-662f99fc/CMP-20260926-132934-E2D3/level_A_2026-09-26T132934.784468_0000/SCIENTIFIC_LEVEL_A_REPORT.md",
+        "completed_repetitions": 10,
+        "requested_repetitions": 10
+      },
+      "trigger_attempt_trace": [
+        {
+          "attempt_number": 1,
+          "attack_started_at": "2026-09-26T13:02:36.746854+00:00",
+          "attack_completed_at": "2026-09-26T13:02:58.043136+00:00",
+          "attack_status": "completed",
+          "dfir_mode_after": "on",
+          "trigger_alert_detected": true,
+          "trigger_alert_id": "9ab66631ff3e4d9f8b76841f37ebb7f0",
+          "trigger_alert_rule": "86601",
+          "trigger_alert_severity": "high",
+          "forensic_intervention_eligible": true,
+          "automatic_preservation_armed": true,
+          "eligibility_reason": "observed alert is HIGH/CRITICAL and eligible for forensic intervention",
+          "fallback_reasons": [],
+          "observed_alerts_count": 890
+        }
+      ],
+      "trigger_attempts_total": 1,
+      "artifacts": {
+        "forensic_result_card": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0058/forensic_result_card.json",
+        "forensic_comparison_profile": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0058/forensic_comparison_profile.json",
+        "acquisition_profile": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-130320/metadata/acquisition_profile.json",
+        "network_context_manifest": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-130320/network/traffic_preserved/network_context_manifest.json",
+        "pipeline_events": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-130320/metadata/pipeline_events.jsonl"
+      },
+      "warnings": [
+        "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+        "Semantic reconstruction has not been generated.",
+        "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+        "Modbus traffic is observed, but register and value precision are not confirmed by packet-level parsing.",
+        "Integrity and custody validation supports evidentiary trust in the preserved artifacts; it does not by itself confirm the causal hypothesis.",
+        "Heavy generated case artifacts were cleaned after nested Level A reporting so the next Level B repetition could create a fresh case without accumulating heavy storage."
+      ],
+      "blockers": [],
+      "post_report_case_cleanup": {
+        "status": "ok",
+        "action_type": "delete_case_directory",
+        "retention_manifest_path": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0058/retention_manifest.json",
+        "archive_target": null,
+        "lightweight_case_bundle_path": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0058/retained_case_lightweight_bundle/case-662f99fc",
+        "lightweight_case_bundle_manifest_path": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0058/retained_case_lightweight_bundle/case-662f99fc/lightweight_case_bundle_manifest.json"
+      },
+      "post_case_free_space_cleanup": {
+        "status": "completed",
+        "per_target": [
+          {
+            "status": "completed",
+            "reason": "cleanup_completed",
+            "instance_id": "7d8adec8-50dd-40a9-adcb-ecaea76d53fb",
+            "vm_ip": "10.0.2.24",
+            "node_name": "FUXA_Instance",
+            "ssh_user": "ubuntu",
+            "free_mb_before": 8948,
+            "free_mb_after": 10996,
+            "minimum_free_mb": 1200,
+            "attempts": [
+              {
+                "attempt": 1,
+                "returncode": 0,
+                "stdout_excerpt": [
+                  "[INFO] Disk usage before cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  5.7G  8.8G  40% /",
+                  "[INFO] Largest directories under /var:",
+                  "113M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/3/fs",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content/blobs",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content/blobs/sha256",
+                  "207M\t/var/lib/snapd/snaps",
+                  "244M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA/server/node_modules",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA/server",
+                  "419M\t/var/lib/snapd/cache",
+                  "627M\t/var/lib/snapd",
+                  "666M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs",
+                  "666M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots",
+                  "867M\t/var/lib/containerd",
+                  "1.6G\t/var",
+                  "1.6G\t/var/lib",
+                  "[INFO] Disk usage after cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  3.7G   11G  26% /"
+                ],
+                "stderr_excerpt": [
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal.",
+                  "Vacuuming done, freed 0B of archived journals from /run/log/journal.",
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal/7d8adec850dd40a9adcbecaea76d53fb."
+                ],
+                "free_mb_before": 8948,
+                "free_mb_after": 10996
+              }
+            ],
+            "role": "fuxa",
+            "vm_name": "FUXA_Instance",
+            "elapsed_seconds": 10.534
+          },
+          {
+            "status": "completed",
+            "reason": "cleanup_completed",
+            "instance_id": "1c047b30-ebf3-4637-acd1-be6b0d5098b5",
+            "vm_ip": "10.0.2.37",
+            "node_name": "PLC_Instance",
+            "ssh_user": "ubuntu",
+            "free_mb_before": 9668,
+            "free_mb_after": 11715,
+            "minimum_free_mb": 1200,
+            "attempts": [
+              {
+                "attempt": 1,
+                "returncode": 0,
+                "stdout_excerpt": [
+                  "[INFO] Disk usage before cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  5.0G  9.5G  35% /",
+                  "[INFO] Largest directories under /var:",
+                  "4.7M\t/var/cache/apparmor",
+                  "4.7M\t/var/cache/debconf",
+                  "5.3M\t/var/lib/ubuntu-advantage/apt-esm/var/cache",
+                  "5.3M\t/var/lib/ubuntu-advantage/apt-esm/var/cache/apt",
+                  "7.0M\t/var/lib/ubuntu-advantage/apt-esm/var",
+                  "7.1M\t/var/lib/ubuntu-advantage",
+                  "7.1M\t/var/lib/ubuntu-advantage/apt-esm",
+                  "14M\t/var/ossec/lib",
+                  "16M\t/var/cache",
+                  "23M\t/var/ossec",
+                  "31M\t/var/lib/dpkg/info",
+                  "33M\t/var/lib/dpkg",
+                  "49M\t/var/log/journal",
+                  "49M\t/var/log/journal/1c047b30ebf34637acd1be6b0d5098b5",
+                  "58M\t/var/log",
+                  "207M\t/var/lib/snapd/snaps",
+                  "419M\t/var/lib/snapd/cache",
+                  "627M\t/var/lib/snapd",
+                  "671M\t/var/lib",
+                  "769M\t/var",
+                  "[INFO] Disk usage after cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  3.0G   12G  21% /"
+                ],
+                "stderr_excerpt": [
+                  "Vacuuming done, freed 0B of archived journals from /run/log/journal.",
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal/1c047b30ebf34637acd1be6b0d5098b5.",
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal."
+                ],
+                "free_mb_before": 9668,
+                "free_mb_after": 11715
+              }
+            ],
+            "role": "plc",
+            "vm_name": "PLC_Instance",
+            "elapsed_seconds": 5.117
+          }
+        ],
+        "cleaned_roles": [
+          "fuxa",
+          "plc"
+        ],
+        "failed_roles": []
+      },
+      "pre_next_repetition_cleanup": {
+        "status": "skipped",
+        "reason": "no_active_case_present"
+      },
+      "pre_next_repetition_node_cleanup": {
+        "status": "completed",
+        "per_target": [
+          {
+            "status": "completed",
+            "reason": "cleanup_completed",
+            "instance_id": "7d8adec8-50dd-40a9-adcb-ecaea76d53fb",
+            "vm_ip": "10.0.2.24",
+            "node_name": "FUXA_Instance",
+            "ssh_user": "ubuntu",
+            "free_mb_before": 10996,
+            "free_mb_after": 10996,
+            "minimum_free_mb": 1200,
+            "attempts": [
+              {
+                "attempt": 1,
+                "returncode": 0,
+                "stdout_excerpt": [
+                  "[INFO] Disk usage before cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  3.7G   11G  26% /",
+                  "[INFO] Largest directories under /var:",
+                  "113M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/3/fs",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content/blobs",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content/blobs/sha256",
+                  "207M\t/var/lib/snapd/snaps",
+                  "244M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA/server/node_modules",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA/server",
+                  "419M\t/var/lib/snapd/cache",
+                  "627M\t/var/lib/snapd",
+                  "666M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs",
+                  "666M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots",
+                  "867M\t/var/lib/containerd",
+                  "1.6G\t/var",
+                  "1.6G\t/var/lib",
+                  "[INFO] Disk usage after cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  3.7G   11G  26% /"
+                ],
+                "stderr_excerpt": [
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal.",
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal/7d8adec850dd40a9adcbecaea76d53fb.",
+                  "Vacuuming done, freed 0B of archived journals from /run/log/journal."
+                ],
+                "free_mb_before": 10996,
+                "free_mb_after": 10996
+              }
+            ],
+            "role": "fuxa",
+            "vm_name": "FUXA_Instance",
+            "elapsed_seconds": 4.625
+          },
+          {
+            "status": "completed",
+            "reason": "cleanup_completed",
+            "instance_id": "1c047b30-ebf3-4637-acd1-be6b0d5098b5",
+            "vm_ip": "10.0.2.37",
+            "node_name": "PLC_Instance",
+            "ssh_user": "ubuntu",
+            "free_mb_before": 11715,
+            "free_mb_after": 11715,
+            "minimum_free_mb": 1200,
+            "attempts": [
+              {
+                "attempt": 1,
+                "returncode": 0,
+                "stdout_excerpt": [
+                  "[INFO] Disk usage before cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  3.0G   12G  21% /",
+                  "[INFO] Largest directories under /var:",
+                  "4.7M\t/var/cache/apparmor",
+                  "4.7M\t/var/cache/debconf",
+                  "5.3M\t/var/lib/ubuntu-advantage/apt-esm/var/cache",
+                  "5.3M\t/var/lib/ubuntu-advantage/apt-esm/var/cache/apt",
+                  "7.0M\t/var/lib/ubuntu-advantage/apt-esm/var",
+                  "7.1M\t/var/lib/ubuntu-advantage",
+                  "7.1M\t/var/lib/ubuntu-advantage/apt-esm",
+                  "14M\t/var/ossec/lib",
+                  "16M\t/var/cache",
+                  "23M\t/var/ossec",
+                  "31M\t/var/lib/dpkg/info",
+                  "33M\t/var/lib/dpkg",
+                  "49M\t/var/log/journal",
+                  "49M\t/var/log/journal/1c047b30ebf34637acd1be6b0d5098b5",
+                  "58M\t/var/log",
+                  "207M\t/var/lib/snapd/snaps",
+                  "419M\t/var/lib/snapd/cache",
+                  "627M\t/var/lib/snapd",
+                  "671M\t/var/lib",
+                  "769M\t/var",
+                  "[INFO] Disk usage after cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  3.0G   12G  21% /"
+                ],
+                "stderr_excerpt": [
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal.",
+                  "Vacuuming done, freed 0B of archived journals from /run/log/journal.",
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal/1c047b30ebf34637acd1be6b0d5098b5."
+                ],
+                "free_mb_before": 11715,
+                "free_mb_after": 11715
+              }
+            ],
+            "role": "plc",
+            "vm_name": "PLC_Instance",
+            "elapsed_seconds": 3.01
+          }
+        ],
+        "cleaned_roles": [
+          "fuxa",
+          "plc"
+        ],
+        "failed_roles": []
+      },
+      "ot_state_twin_verdict": {
+        "scope_id": "CMP-20260707-000220-CBFB__EXEC-0058",
+        "verdict": "corroborado",
+        "twin_detected": true,
+        "alert_detected": true,
+        "control_law_violation_count": 3,
+        "state_divergence_count": 0,
+        "attacker_alerts_in_window_count": 7,
+        "attacker_alerts_in_window": [
+          {
+            "session_id": "ALERTS-20260925-203433Z",
+            "event_id": "2bac4eec49a047dd9576026da79d4ed1",
+            "ts_utc": "2026-09-26T13:02:51.277+0000",
+            "signature": "NICS CyberLab ICS Modbus write multiple registers",
+            "rule_id": "86601",
+            "rule_level": 3,
+            "src_ip": "192.168.100.56",
+            "origin": "attacker_vm",
+            "origin_reason": "src_ip_matches_private_ip_of_attack 22",
+            "origin_instance_name": "attack 22",
+            "origin_instance_id": "9208f5fa-6bf7-4c31-b1bb-8552d3fba984"
+          },
+          {
+            "session_id": "ALERTS-20260925-203433Z",
+            "event_id": "7c59a01d3aff43d4914e2db29d73288d",
+            "ts_utc": "2026-09-26T13:02:51.277+0000",
+            "signature": "NICS CyberLab ICS Modbus write multiple registers",
+            "rule_id": "86601",
+            "rule_level": 3,
+            "src_ip": "192.168.100.56",
+            "origin": "attacker_vm",
+            "origin_reason": "src_ip_matches_private_ip_of_attack 22",
+            "origin_instance_name": "attack 22",
+            "origin_instance_id": "9208f5fa-6bf7-4c31-b1bb-8552d3fba984"
+          },
+          {
+            "session_id": "ALERTS-20260925-203433Z",
+            "event_id": "27ebb99614384ad2892c15fb4242483d",
+            "ts_utc": "2026-09-26T13:02:51.277+0000",
+            "signature": "NICS CyberLab ICS Modbus write multiple registers",
+            "rule_id": "86601",
+            "rule_level": 3,
+            "src_ip": "192.168.100.56",
+            "origin": "attacker_vm",
+            "origin_reason": "src_ip_matches_private_ip_of_attack 22",
+            "origin_instance_name": "attack 22",
+            "origin_instance_id": "9208f5fa-6bf7-4c31-b1bb-8552d3fba984"
+          },
+          {
+            "session_id": "ALERTS-20260926-130312Z",
+            "event_id": "9ab66631ff3e4d9f8b76841f37ebb7f0",
+            "ts_utc": "2026-09-26T13:02:51.277+0000",
+            "signature": "NICS CyberLab ICS Modbus write multiple registers",
+            "rule_id": "86601",
+            "rule_level": 3,
+            "src_ip": "192.168.100.56",
+            "origin": "attacker_vm",
+            "origin_reason": "src_ip_matches_private_ip_of_attack 22",
+            "origin_instance_name": "attack 22",
+            "origin_instance_id": "9208f5fa-6bf7-4c31-b1bb-8552d3fba984"
+          },
+          {
+            "session_id": "ALERTS-20260925-203433Z",
+            "event_id": "877093e18d6c47c4a3582eb6db8e594c",
+            "ts_utc": "2026-09-26T13:02:55.279+0000",
+            "signature": "NICS CyberLab ICS Modbus write multiple registers",
+            "rule_id": "86601",
+            "rule_level": 3,
+            "src_ip": "192.168.100.56",
+            "origin": "attacker_vm",
+            "origin_reason": "src_ip_matches_private_ip_of_attack 22",
+            "origin_instance_name": "attack 22",
+            "origin_instance_id": "9208f5fa-6bf7-4c31-b1bb-8552d3fba984"
+          },
+          {
+            "session_id": "ALERTS-20260925-203433Z",
+            "event_id": "3eda5c2d35f74bdbbdf939e9c917c631",
+            "ts_utc": "2026-09-26T13:02:55.279+0000",
+            "signature": "NICS CyberLab ICS Modbus write multiple registers",
+            "rule_id": "86601",
+            "rule_level": 3,
+            "src_ip": "192.168.100.56",
+            "origin": "attacker_vm",
+            "origin_reason": "src_ip_matches_private_ip_of_attack 22",
+            "origin_instance_name": "attack 22",
+            "origin_instance_id": "9208f5fa-6bf7-4c31-b1bb-8552d3fba984"
+          },
+          {
+            "session_id": "ALERTS-20260925-203433Z",
+            "event_id": "f3ab2cde131a40a99b46f1329445a28b",
+            "ts_utc": "2026-09-26T13:02:55.279+0000",
+            "signature": "NICS CyberLab ICS Modbus write multiple registers",
+            "rule_id": "86601",
+            "rule_level": 3,
+            "src_ip": "192.168.100.56",
+            "origin": "attacker_vm",
+            "origin_reason": "src_ip_matches_private_ip_of_attack 22",
+            "origin_instance_name": "attack 22",
+            "origin_instance_id": "9208f5fa-6bf7-4c31-b1bb-8552d3fba984"
+          }
+        ],
+        "attack_started_at": "2026-09-26T13:02:36.746854+00:00",
+        "attack_completed_at": "2026-09-26T13:02:58.043136+00:00",
+        "evaluated_at_utc": "2026-09-26T18:08:40.785432+00:00"
+      }
+    },
+    {
+      "repetition_number": 2,
+      "campaign_id": "CMP-20260707-000220-CBFB",
+      "execution_id": "EXEC-0059",
+      "execution_status": "partial",
+      "dfir_mode_before": "off",
+      "dfir_mode_after": "on",
+      "dfir_mode_enabled_successfully": true,
+      "dfir_mode_blocker": null,
+      "attack_profile_id": "T0831_MANIPULATION_OF_CONTROL_MODBUS",
+      "attack_name": "Modbus Register Manipulation",
+      "target_role": "PLC",
+      "target_node": "PLC_Instance",
+      "target_ip": "192.168.100.207",
+      "protocol": "modbus_tcp",
+      "destination_port": 502,
+      "function_code": "confirmed",
+      "register": "confirmed",
+      "value": "confirmed",
+      "attack_started_at": "2026-09-26T14:40:01.392796+00:00",
+      "attack_completed_at": "2026-09-26T14:40:19.456420+00:00",
+      "attack_output_path": "app_core/infrastructure/attack/outputs/20260926T144001Z_T0831_MANIPULATION_OF_CONTROL_MODBUS",
+      "attack_output_sha256": "0f435119e2b60d8f9dc8533a0480c55ea9f2fd1f27546a5ed7431b49394aa943",
+      "trigger_alert_detected": true,
+      "trigger_alert_id": "d01c9ef8bb9f483ba7089e5fe591ff17",
+      "trigger_alert_rule": "86601",
+      "trigger_alert_severity": "high",
+      "trigger_alert_timestamp": "2026-09-26T14:40:14.747+0000",
+      "trigger_alert_mitre": null,
+      "forensic_intervention_required": true,
+      "automatic_acquisition_started": true,
+      "alert_to_acquisition_start_seconds": 600.253,
+      "case_id": "case-601eda86",
+      "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-144041",
+      "memory_acquisition_status": "completed",
+      "memory_hash": null,
+      "network_context_status": "completed",
+      "pcap_segments_imported": 6,
+      "disk_acquisition_status": "completed",
+      "ot_export_status": "partial",
+      "alerts_preserved": 0,
+      "custody_status": "valid",
+      "case_sealed_status": "sealed",
+      "analysis_status": "completed",
+      "layers_total": 14,
+      "layers_completed": 14,
+      "layers_partial": 0,
+      "layers_failed": 0,
+      "memory_analysis_status": "completed",
+      "network_analysis_status": "completed",
+      "disk_analysis_status": "completed",
+      "ot_analysis_status": "completed",
+      "alert_analysis_status": "completed",
+      "timeline_status": "completed",
+      "reconstruction_status": "blocked_missing_analysis",
+      "timing_metrics": {
+        "deploy_time_seconds": 0.0,
+        "teardown_redeploy_time_seconds": 0.0,
+        "network_mode": "continuous_rolling_pcap_with_case_bound_incident_window_import",
+        "alert_to_acquisition_start_seconds": 600.253,
+        "alert_to_memory_start_seconds": 32.575,
+        "alert_to_memory_preserved_seconds": 600.677,
+        "alert_to_ot_export_preserved_seconds": 868.253,
+        "alert_to_disk_snapshot_start_seconds": 869.804,
+        "alert_to_disk_snapshot_preserved_seconds": 1833.209,
+        "alert_to_case_sealed_seconds": 1832.253,
+        "t_first_sealed_seconds": 1832.253,
+        "t_case_sealed_seconds": 1832.253,
+        "memory_acquisition_duration_seconds": 568.102,
+        "pcap_import_duration_seconds": 269.541,
+        "disk_acquisition_duration_seconds": 963.405,
+        "case_sealed_to_analysis_completed_seconds": 4733.863,
+        "total_repetition_duration_seconds": 1969.974,
+        "pcap_periodic_context_size_gib": 0.919881,
+        "pcap_reactive_capture_size_bytes": 0,
+        "memory_dump_size_bytes": 8588285152,
+        "disk_snapshot_size_bytes": 75161927680,
+        "retries_or_failures_count": 0,
+        "ot_export_present_in_manifest": true,
+        "ot_export_paths": [
+          "industrial/ot_export_rolling_EXEC-0059_20260926_145024Z.json"
+        ],
+        "evidence_completeness_gate": "scientifically_complete"
+      },
+      "reconstruction_metrics": {
+        "expected_relations": 8,
+        "recovered_relations": null,
+        "degraded_relations": null,
+        "ambiguous_relations": null,
+        "missing_relations": null,
+        "recoverability_score": null,
+        "weighted_recoverability_score": null,
+        "reconstruction_confidence": null,
+        "recoverability_label": null,
+        "scientific_confidence_label": null,
+        "warnings": [
+          "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+          "Semantic reconstruction has not been generated.",
+          "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+          "Modbus traffic is observed, but register and value precision are not confirmed by packet-level parsing.",
+          "Integrity and custody validation supports evidentiary trust in the preserved artifacts; it does not by itself confirm the causal hypothesis."
+        ],
+        "blockers": []
+      },
+      "comparison_family_id": "family-489338bebf2e8e99",
+      "scenario_fingerprint": "3a0a8948a1b6f684462cd789",
+      "final_case_status": "the hypothesis currently receives only not evaluable; stronger claims are not yet supportable.",
+      "scientific_case_status": "scientifically_complete",
+      "critical_evidence_gate": {
+        "generated_at_utc": "2026-09-26T15:10:48.016895+00:00",
+        "execution_id": "EXEC-0059",
+        "case_id": "case-601eda86",
+        "gate_status": "scientifically_complete",
+        "scientifically_complete": true,
+        "missing_critical_evidence": [],
+        "checks": {
+          "pcap_packet_level_modbus_evidence_present": true,
+          "ot_export_present_in_manifest": true,
+          "raw_wazuh_trigger_binding_present": true,
+          "forensic_intervention_artifact_present": true,
+          "memory_artifacts_present": true,
+          "disk_artifacts_present": true,
+          "manifest_present": true,
+          "custody_present": true,
+          "normalized_timestamps_available": true
+        },
+        "failure_details": [],
+        "supporting_metrics": {
+          "pcap_artifact_count": 6,
+          "preserved_segments": 6,
+          "ot_export_artifact_count": 1,
+          "memory_artifact_count": 9,
+          "disk_artifact_count": 9
+        },
+        "message": "Critical scientific evidence gate passed."
+      },
+      "nested_level_a": {
+        "status": "completed_with_degradation",
+        "campaign_id": "CMP-20260926-151254-FD4B",
+        "job_id": "exp-9f7001dbe393",
+        "report": {
+          "generated_at": "2026-09-26T15:12:54.521925+00:00",
+          "campaign_id": "CMP-20260926-151254-FD4B",
+          "execution_id": "EXEC-0010",
+          "generated_execution_ids": [
+            "EXEC-0001",
+            "EXEC-0002",
+            "EXEC-0003",
+            "EXEC-0004",
+            "EXEC-0005",
+            "EXEC-0006",
+            "EXEC-0007",
+            "EXEC-0008",
+            "EXEC-0009",
+            "EXEC-0010"
+          ],
+          "requested_repetitions": 10,
+          "completed_repetitions": 10,
+          "case_id": "case-601eda86",
+          "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-144041",
+          "report_type": "level_a_scientific_report",
+          "report_scope": "consolidated_level_a_dry_run_repetitions",
+          "level": "A",
+          "job_id": "exp-9f7001dbe393",
+          "report_markdown_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-601eda86/CMP-20260926-151254-FD4B/level_A_2026-09-26T151254.521925_0000/SCIENTIFIC_LEVEL_A_REPORT.md",
+          "report_output_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-601eda86/CMP-20260926-151254-FD4B/level_A_2026-09-26T151254.521925_0000",
+          "status": "completed_with_degradation",
+          "comparison_status": "Comparable With Degradation",
+          "comparison_type": "direct_level_a_repeatability_comparison",
+          "source_files_index_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-601eda86/CMP-20260926-151254-FD4B/level_A_2026-09-26T151254.521925_0000/source_files_index.json",
+          "evidence_to_claim_map_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-601eda86/CMP-20260926-151254-FD4B/level_A_2026-09-26T151254.521925_0000/evidence_to_claim_map.json",
+          "generation_log_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-601eda86/CMP-20260926-151254-FD4B/level_A_2026-09-26T151254.521925_0000/generation_log.jsonl",
+          "report_summary_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-601eda86/CMP-20260926-151254-FD4B/level_A_2026-09-26T151254.521925_0000/report_summary.json"
+        },
+        "warnings": [],
+        "errors": [],
+        "comparison_status": "Comparable With Degradation",
+        "comparison_type": "direct_level_a_repeatability_comparison",
+        "generated_execution_ids": [
+          "EXEC-0001",
+          "EXEC-0002",
+          "EXEC-0003",
+          "EXEC-0004",
+          "EXEC-0005",
+          "EXEC-0006",
+          "EXEC-0007",
+          "EXEC-0008",
+          "EXEC-0009",
+          "EXEC-0010"
+        ],
+        "report_output_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-601eda86/CMP-20260926-151254-FD4B/level_A_2026-09-26T151254.521925_0000",
+        "report_markdown_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-601eda86/CMP-20260926-151254-FD4B/level_A_2026-09-26T151254.521925_0000/SCIENTIFIC_LEVEL_A_REPORT.md",
+        "completed_repetitions": 10,
+        "requested_repetitions": 10
+      },
+      "trigger_attempt_trace": [
+        {
+          "attempt_number": 1,
+          "attack_started_at": "2026-09-26T14:40:01.392796+00:00",
+          "attack_completed_at": "2026-09-26T14:40:19.456420+00:00",
+          "attack_status": "completed",
+          "dfir_mode_after": "on",
+          "trigger_alert_detected": true,
+          "trigger_alert_id": "d01c9ef8bb9f483ba7089e5fe591ff17",
+          "trigger_alert_rule": "86601",
+          "trigger_alert_severity": "high",
+          "forensic_intervention_eligible": true,
+          "automatic_preservation_armed": true,
+          "eligibility_reason": "observed alert is HIGH/CRITICAL and eligible for forensic intervention",
+          "fallback_reasons": [],
+          "observed_alerts_count": 1
+        }
+      ],
+      "trigger_attempts_total": 1,
+      "artifacts": {
+        "forensic_result_card": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0059/forensic_result_card.json",
+        "forensic_comparison_profile": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0059/forensic_comparison_profile.json",
+        "acquisition_profile": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-144041/metadata/acquisition_profile.json",
+        "network_context_manifest": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-144041/network/traffic_preserved/network_context_manifest.json",
+        "pipeline_events": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-144041/metadata/pipeline_events.jsonl"
+      },
+      "warnings": [
+        "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+        "Semantic reconstruction has not been generated.",
+        "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+        "Modbus traffic is observed, but register and value precision are not confirmed by packet-level parsing.",
+        "Integrity and custody validation supports evidentiary trust in the preserved artifacts; it does not by itself confirm the causal hypothesis.",
+        "Heavy generated case artifacts were cleaned after nested Level A reporting so the next Level B repetition could create a fresh case without accumulating heavy storage."
+      ],
+      "blockers": [],
+      "post_report_case_cleanup": {
+        "status": "ok",
+        "action_type": "delete_case_directory",
+        "retention_manifest_path": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0059/retention_manifest.json",
+        "archive_target": null,
+        "lightweight_case_bundle_path": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0059/retained_case_lightweight_bundle/case-601eda86",
+        "lightweight_case_bundle_manifest_path": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0059/retained_case_lightweight_bundle/case-601eda86/lightweight_case_bundle_manifest.json"
+      },
+      "post_case_free_space_cleanup": {
+        "status": "completed",
+        "per_target": [
+          {
+            "status": "completed",
+            "reason": "cleanup_completed",
+            "instance_id": "7d8adec8-50dd-40a9-adcb-ecaea76d53fb",
+            "vm_ip": "10.0.2.24",
+            "node_name": "FUXA_Instance",
+            "ssh_user": "ubuntu",
+            "free_mb_before": 8940,
+            "free_mb_after": 10987,
+            "minimum_free_mb": 1200,
+            "attempts": [
+              {
+                "attempt": 1,
+                "returncode": 0,
+                "stdout_excerpt": [
+                  "[INFO] Disk usage before cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  5.7G  8.8G  40% /",
+                  "[INFO] Largest directories under /var:",
+                  "113M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/3/fs",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content/blobs",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content/blobs/sha256",
+                  "207M\t/var/lib/snapd/snaps",
+                  "244M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA/server/node_modules",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA/server",
+                  "419M\t/var/lib/snapd/cache",
+                  "627M\t/var/lib/snapd",
+                  "666M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs",
+                  "666M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots",
+                  "867M\t/var/lib/containerd",
+                  "1.6G\t/var",
+                  "1.6G\t/var/lib",
+                  "[INFO] Disk usage after cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  3.7G   11G  26% /"
+                ],
+                "stderr_excerpt": [
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal.",
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal/7d8adec850dd40a9adcbecaea76d53fb.",
+                  "Vacuuming done, freed 0B of archived journals from /run/log/journal."
+                ],
+                "free_mb_before": 8940,
+                "free_mb_after": 10987
+              }
+            ],
+            "role": "fuxa",
+            "vm_name": "FUXA_Instance",
+            "elapsed_seconds": 5.668
+          },
+          {
+            "status": "completed",
+            "reason": "cleanup_completed",
+            "instance_id": "1c047b30-ebf3-4637-acd1-be6b0d5098b5",
+            "vm_ip": "10.0.2.37",
+            "node_name": "PLC_Instance",
+            "ssh_user": "ubuntu",
+            "free_mb_before": 9667,
+            "free_mb_after": 11707,
+            "minimum_free_mb": 1200,
+            "attempts": [
+              {
+                "attempt": 1,
+                "returncode": 0,
+                "stdout_excerpt": [
+                  "[INFO] Disk usage before cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  5.0G  9.5G  35% /",
+                  "[INFO] Largest directories under /var:",
+                  "4.7M\t/var/cache/apparmor",
+                  "4.7M\t/var/cache/debconf",
+                  "5.3M\t/var/lib/ubuntu-advantage/apt-esm/var/cache",
+                  "5.3M\t/var/lib/ubuntu-advantage/apt-esm/var/cache/apt",
+                  "7.0M\t/var/lib/ubuntu-advantage/apt-esm/var",
+                  "7.1M\t/var/lib/ubuntu-advantage",
+                  "7.1M\t/var/lib/ubuntu-advantage/apt-esm",
+                  "14M\t/var/ossec/lib",
+                  "16M\t/var/cache",
+                  "23M\t/var/ossec",
+                  "31M\t/var/lib/dpkg/info",
+                  "33M\t/var/lib/dpkg",
+                  "57M\t/var/log/journal",
+                  "57M\t/var/log/journal/1c047b30ebf34637acd1be6b0d5098b5",
+                  "67M\t/var/log",
+                  "207M\t/var/lib/snapd/snaps",
+                  "419M\t/var/lib/snapd/cache",
+                  "627M\t/var/lib/snapd",
+                  "671M\t/var/lib",
+                  "777M\t/var",
+                  "[INFO] Disk usage after cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  3.0G   12G  21% /"
+                ],
+                "stderr_excerpt": [
+                  "Vacuuming done, freed 0B of archived journals from /run/log/journal.",
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal.",
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal/1c047b30ebf34637acd1be6b0d5098b5."
+                ],
+                "free_mb_before": 9667,
+                "free_mb_after": 11707
+              }
+            ],
+            "role": "plc",
+            "vm_name": "PLC_Instance",
+            "elapsed_seconds": 4.849
+          }
+        ],
+        "cleaned_roles": [
+          "fuxa",
+          "plc"
+        ],
+        "failed_roles": []
+      },
+      "pre_next_repetition_cleanup": {
+        "status": "skipped",
+        "reason": "no_active_case_present"
+      },
+      "pre_next_repetition_node_cleanup": {
+        "status": "completed",
+        "per_target": [
+          {
+            "status": "completed",
+            "reason": "cleanup_completed",
+            "instance_id": "7d8adec8-50dd-40a9-adcb-ecaea76d53fb",
+            "vm_ip": "10.0.2.24",
+            "node_name": "FUXA_Instance",
+            "ssh_user": "ubuntu",
+            "free_mb_before": 10987,
+            "free_mb_after": 10987,
+            "minimum_free_mb": 1200,
+            "attempts": [
+              {
+                "attempt": 1,
+                "returncode": 0,
+                "stdout_excerpt": [
+                  "[INFO] Disk usage before cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  3.7G   11G  26% /",
+                  "[INFO] Largest directories under /var:",
+                  "113M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/3/fs",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content/blobs",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content/blobs/sha256",
+                  "207M\t/var/lib/snapd/snaps",
+                  "244M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA/server/node_modules",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA/server",
+                  "419M\t/var/lib/snapd/cache",
+                  "627M\t/var/lib/snapd",
+                  "666M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs",
+                  "666M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots",
+                  "867M\t/var/lib/containerd",
+                  "1.6G\t/var",
+                  "1.6G\t/var/lib",
+                  "[INFO] Disk usage after cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  3.7G   11G  26% /"
+                ],
+                "stderr_excerpt": [
+                  "Vacuuming done, freed 0B of archived journals from /run/log/journal.",
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal.",
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal/7d8adec850dd40a9adcbecaea76d53fb."
+                ],
+                "free_mb_before": 10987,
+                "free_mb_after": 10987
+              }
+            ],
+            "role": "fuxa",
+            "vm_name": "FUXA_Instance",
+            "elapsed_seconds": 3.516
+          },
+          {
+            "status": "completed",
+            "reason": "cleanup_completed",
+            "instance_id": "1c047b30-ebf3-4637-acd1-be6b0d5098b5",
+            "vm_ip": "10.0.2.37",
+            "node_name": "PLC_Instance",
+            "ssh_user": "ubuntu",
+            "free_mb_before": 11707,
+            "free_mb_after": 11707,
+            "minimum_free_mb": 1200,
+            "attempts": [
+              {
+                "attempt": 1,
+                "returncode": 0,
+                "stdout_excerpt": [
+                  "[INFO] Disk usage before cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  3.0G   12G  21% /",
+                  "[INFO] Largest directories under /var:",
+                  "4.7M\t/var/cache/apparmor",
+                  "4.7M\t/var/cache/debconf",
+                  "5.3M\t/var/lib/ubuntu-advantage/apt-esm/var/cache",
+                  "5.3M\t/var/lib/ubuntu-advantage/apt-esm/var/cache/apt",
+                  "7.0M\t/var/lib/ubuntu-advantage/apt-esm/var",
+                  "7.1M\t/var/lib/ubuntu-advantage",
+                  "7.1M\t/var/lib/ubuntu-advantage/apt-esm",
+                  "14M\t/var/ossec/lib",
+                  "16M\t/var/cache",
+                  "23M\t/var/ossec",
+                  "31M\t/var/lib/dpkg/info",
+                  "33M\t/var/lib/dpkg",
+                  "57M\t/var/log/journal",
+                  "57M\t/var/log/journal/1c047b30ebf34637acd1be6b0d5098b5",
+                  "67M\t/var/log",
+                  "207M\t/var/lib/snapd/snaps",
+                  "419M\t/var/lib/snapd/cache",
+                  "627M\t/var/lib/snapd",
+                  "671M\t/var/lib",
+                  "777M\t/var",
+                  "[INFO] Disk usage after cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  3.0G   12G  21% /"
+                ],
+                "stderr_excerpt": [
+                  "Vacuuming done, freed 0B of archived journals from /run/log/journal.",
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal/1c047b30ebf34637acd1be6b0d5098b5.",
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal."
+                ],
+                "free_mb_before": 11707,
+                "free_mb_after": 11707
+              }
+            ],
+            "role": "plc",
+            "vm_name": "PLC_Instance",
+            "elapsed_seconds": 2.943
+          }
+        ],
+        "cleaned_roles": [
+          "fuxa",
+          "plc"
+        ],
+        "failed_roles": []
+      },
+      "ot_state_twin_verdict": {
+        "scope_id": "CMP-20260707-000220-CBFB__EXEC-0059",
+        "verdict": "corroborado",
+        "twin_detected": true,
+        "alert_detected": true,
+        "control_law_violation_count": 3,
+        "state_divergence_count": 0,
+        "attacker_alerts_in_window_count": 1,
+        "attacker_alerts_in_window": [
+          {
+            "session_id": "ALERTS-20260926-144033Z",
+            "event_id": "d01c9ef8bb9f483ba7089e5fe591ff17",
+            "ts_utc": "2026-09-26T14:40:14.747+0000",
+            "signature": "NICS CyberLab ICS Modbus write multiple registers",
+            "rule_id": "86601",
+            "rule_level": 3,
+            "src_ip": "192.168.100.56",
+            "origin": "attacker_vm",
+            "origin_reason": "src_ip_matches_private_ip_of_attack 22",
+            "origin_instance_name": "attack 22",
+            "origin_instance_id": "9208f5fa-6bf7-4c31-b1bb-8552d3fba984"
+          }
+        ],
+        "attack_started_at": "2026-09-26T14:40:01.392796+00:00",
+        "attack_completed_at": "2026-09-26T14:40:19.456420+00:00",
+        "evaluated_at_utc": "2026-09-26T18:08:40.788333+00:00"
+      }
+    },
+    {
+      "repetition_number": 3,
+      "campaign_id": "CMP-20260707-000220-CBFB",
+      "execution_id": "EXEC-0060",
+      "execution_status": "partial",
+      "dfir_mode_before": "off",
+      "dfir_mode_after": "on",
+      "dfir_mode_enabled_successfully": true,
+      "dfir_mode_blocker": null,
+      "attack_profile_id": "T0831_MANIPULATION_OF_CONTROL_MODBUS",
+      "attack_name": "Modbus Register Manipulation",
+      "target_role": "PLC",
+      "target_node": "PLC_Instance",
+      "target_ip": "192.168.100.207",
+      "protocol": "modbus_tcp",
+      "destination_port": 502,
+      "function_code": "confirmed",
+      "register": "confirmed",
+      "value": "confirmed",
+      "attack_started_at": "2026-09-26T16:32:17.609188+00:00",
+      "attack_completed_at": "2026-09-26T16:32:34.463010+00:00",
+      "attack_output_path": "app_core/infrastructure/attack/outputs/20260926T163218Z_T0831_MANIPULATION_OF_CONTROL_MODBUS",
+      "attack_output_sha256": "5bc29a24bed62672d631fe55bc58aeb18409301adfe79f0fbb1ea18b53b5cb51",
+      "trigger_alert_detected": true,
+      "trigger_alert_id": "0e734502509a4c80a995e9f8200c511f",
+      "trigger_alert_rule": "86601",
+      "trigger_alert_severity": "high",
+      "trigger_alert_timestamp": "2026-09-26T16:32:29.205+0000",
+      "trigger_alert_mitre": null,
+      "forensic_intervention_required": true,
+      "automatic_acquisition_started": true,
+      "alert_to_acquisition_start_seconds": 585.795,
+      "case_id": "case-66dc197c",
+      "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-163256",
+      "memory_acquisition_status": "completed",
+      "memory_hash": null,
+      "network_context_status": "completed",
+      "pcap_segments_imported": 6,
+      "disk_acquisition_status": "completed",
+      "ot_export_status": "partial",
+      "alerts_preserved": 0,
+      "custody_status": "valid",
+      "case_sealed_status": "sealed",
+      "analysis_status": "completed",
+      "layers_total": 14,
+      "layers_completed": 14,
+      "layers_partial": 0,
+      "layers_failed": 0,
+      "memory_analysis_status": "completed",
+      "network_analysis_status": "completed",
+      "disk_analysis_status": "completed",
+      "ot_analysis_status": "completed",
+      "alert_analysis_status": "completed",
+      "timeline_status": "completed",
+      "reconstruction_status": "blocked_missing_analysis",
+      "timing_metrics": {
+        "deploy_time_seconds": 0.0,
+        "teardown_redeploy_time_seconds": 0.0,
+        "network_mode": "continuous_rolling_pcap_with_case_bound_incident_window_import",
+        "alert_to_acquisition_start_seconds": 585.795,
+        "alert_to_memory_start_seconds": 36.788,
+        "alert_to_memory_preserved_seconds": 586.547,
+        "alert_to_ot_export_preserved_seconds": 860.795,
+        "alert_to_disk_snapshot_start_seconds": 861.336,
+        "alert_to_disk_snapshot_preserved_seconds": 1816.378,
+        "alert_to_case_sealed_seconds": 1815.795,
+        "t_first_sealed_seconds": 1815.795,
+        "t_case_sealed_seconds": 1815.795,
+        "memory_acquisition_duration_seconds": 549.759,
+        "pcap_import_duration_seconds": 275.538,
+        "disk_acquisition_duration_seconds": 955.042,
+        "case_sealed_to_analysis_completed_seconds": 3806.608,
+        "total_repetition_duration_seconds": 1961.343,
+        "pcap_periodic_context_size_gib": 0.941646,
+        "pcap_reactive_capture_size_bytes": 0,
+        "memory_dump_size_bytes": 8588285152,
+        "disk_snapshot_size_bytes": 75161927680,
+        "retries_or_failures_count": 0,
+        "ot_export_present_in_manifest": true,
+        "ot_export_paths": [
+          "industrial/ot_export_rolling_EXEC-0060_20260926_164220Z.json"
+        ],
+        "evidence_completeness_gate": "scientifically_complete"
+      },
+      "reconstruction_metrics": {
+        "expected_relations": 8,
+        "recovered_relations": null,
+        "degraded_relations": null,
+        "ambiguous_relations": null,
+        "missing_relations": null,
+        "recoverability_score": null,
+        "weighted_recoverability_score": null,
+        "reconstruction_confidence": null,
+        "recoverability_label": null,
+        "scientific_confidence_label": null,
+        "warnings": [
+          "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+          "Semantic reconstruction has not been generated.",
+          "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+          "Modbus traffic is observed, but register and value precision are not confirmed by packet-level parsing.",
+          "Integrity and custody validation supports evidentiary trust in the preserved artifacts; it does not by itself confirm the causal hypothesis."
+        ],
+        "blockers": []
+      },
+      "comparison_family_id": "family-ddb6bcca9534ed35",
+      "scenario_fingerprint": "3a0a8948a1b6f684462cd789",
+      "final_case_status": "the hypothesis currently receives only not evaluable; stronger claims are not yet supportable.",
+      "scientific_case_status": "scientifically_complete",
+      "critical_evidence_gate": {
+        "generated_at_utc": "2026-09-26T17:02:45.641134+00:00",
+        "execution_id": "EXEC-0060",
+        "case_id": "case-66dc197c",
+        "gate_status": "scientifically_complete",
+        "scientifically_complete": true,
+        "missing_critical_evidence": [],
+        "checks": {
+          "pcap_packet_level_modbus_evidence_present": true,
+          "ot_export_present_in_manifest": true,
+          "raw_wazuh_trigger_binding_present": true,
+          "forensic_intervention_artifact_present": true,
+          "memory_artifacts_present": true,
+          "disk_artifacts_present": true,
+          "manifest_present": true,
+          "custody_present": true,
+          "normalized_timestamps_available": true
+        },
+        "failure_details": [],
+        "supporting_metrics": {
+          "pcap_artifact_count": 6,
+          "preserved_segments": 6,
+          "ot_export_artifact_count": 1,
+          "memory_artifact_count": 9,
+          "disk_artifact_count": 9
+        },
+        "message": "Critical scientific evidence gate passed."
+      },
+      "nested_level_a": {
+        "status": "completed_with_degradation",
+        "campaign_id": "CMP-20260926-170501-DD55",
+        "job_id": "exp-74a97f4f0cff",
+        "report": {
+          "generated_at": "2026-09-26T17:05:01.527667+00:00",
+          "campaign_id": "CMP-20260926-170501-DD55",
+          "execution_id": "EXEC-0010",
+          "generated_execution_ids": [
+            "EXEC-0001",
+            "EXEC-0002",
+            "EXEC-0003",
+            "EXEC-0004",
+            "EXEC-0005",
+            "EXEC-0006",
+            "EXEC-0007",
+            "EXEC-0008",
+            "EXEC-0009",
+            "EXEC-0010"
+          ],
+          "requested_repetitions": 10,
+          "completed_repetitions": 10,
+          "case_id": "case-66dc197c",
+          "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-163256",
+          "report_type": "level_a_scientific_report",
+          "report_scope": "consolidated_level_a_dry_run_repetitions",
+          "level": "A",
+          "job_id": "exp-74a97f4f0cff",
+          "report_markdown_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-66dc197c/CMP-20260926-170501-DD55/level_A_2026-09-26T170501.527667_0000/SCIENTIFIC_LEVEL_A_REPORT.md",
+          "report_output_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-66dc197c/CMP-20260926-170501-DD55/level_A_2026-09-26T170501.527667_0000",
+          "status": "completed_with_degradation",
+          "comparison_status": "Comparable With Degradation",
+          "comparison_type": "direct_level_a_repeatability_comparison",
+          "source_files_index_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-66dc197c/CMP-20260926-170501-DD55/level_A_2026-09-26T170501.527667_0000/source_files_index.json",
+          "evidence_to_claim_map_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-66dc197c/CMP-20260926-170501-DD55/level_A_2026-09-26T170501.527667_0000/evidence_to_claim_map.json",
+          "generation_log_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-66dc197c/CMP-20260926-170501-DD55/level_A_2026-09-26T170501.527667_0000/generation_log.jsonl",
+          "report_summary_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-66dc197c/CMP-20260926-170501-DD55/level_A_2026-09-26T170501.527667_0000/report_summary.json"
+        },
+        "warnings": [],
+        "errors": [],
+        "comparison_status": "Comparable With Degradation",
+        "comparison_type": "direct_level_a_repeatability_comparison",
+        "generated_execution_ids": [
+          "EXEC-0001",
+          "EXEC-0002",
+          "EXEC-0003",
+          "EXEC-0004",
+          "EXEC-0005",
+          "EXEC-0006",
+          "EXEC-0007",
+          "EXEC-0008",
+          "EXEC-0009",
+          "EXEC-0010"
+        ],
+        "report_output_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-66dc197c/CMP-20260926-170501-DD55/level_A_2026-09-26T170501.527667_0000",
+        "report_markdown_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-66dc197c/CMP-20260926-170501-DD55/level_A_2026-09-26T170501.527667_0000/SCIENTIFIC_LEVEL_A_REPORT.md",
+        "completed_repetitions": 10,
+        "requested_repetitions": 10
+      },
+      "trigger_attempt_trace": [
+        {
+          "attempt_number": 1,
+          "attack_started_at": "2026-09-26T16:32:17.609188+00:00",
+          "attack_completed_at": "2026-09-26T16:32:34.463010+00:00",
+          "attack_status": "completed",
+          "dfir_mode_after": "on",
+          "trigger_alert_detected": true,
+          "trigger_alert_id": "0e734502509a4c80a995e9f8200c511f",
+          "trigger_alert_rule": "86601",
+          "trigger_alert_severity": "high",
+          "forensic_intervention_eligible": true,
+          "automatic_preservation_armed": true,
+          "eligibility_reason": "observed alert is HIGH/CRITICAL and eligible for forensic intervention",
+          "fallback_reasons": [],
+          "observed_alerts_count": 1
+        }
+      ],
+      "trigger_attempts_total": 1,
+      "artifacts": {
+        "forensic_result_card": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0060/forensic_result_card.json",
+        "forensic_comparison_profile": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0060/forensic_comparison_profile.json",
+        "acquisition_profile": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-163256/metadata/acquisition_profile.json",
+        "network_context_manifest": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-163256/network/traffic_preserved/network_context_manifest.json",
+        "pipeline_events": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-163256/metadata/pipeline_events.jsonl"
+      },
+      "warnings": [
+        "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+        "Semantic reconstruction has not been generated.",
+        "Causal reconstruction is blocked because multilayer forensic analysis has not been generated for this case.",
+        "Modbus traffic is observed, but register and value precision are not confirmed by packet-level parsing.",
+        "Integrity and custody validation supports evidentiary trust in the preserved artifacts; it does not by itself confirm the causal hypothesis.",
+        "This was the final repetition of the campaign -- case case-66dc197c was kept fully intact as a complete result sample instead of being reduced to the lightweight bundle."
+      ],
+      "blockers": [],
+      "post_report_case_cleanup": {
+        "status": "ok",
+        "action_type": "archive_case_directory",
+        "retention_manifest_path": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0060/retention_manifest.json",
+        "archive_target": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/final_sample_case/CASE-20260926-163256",
+        "lightweight_case_bundle_path": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0060/retained_case_lightweight_bundle/case-66dc197c",
+        "lightweight_case_bundle_manifest_path": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20260707-000220-CBFB/level_B/EXEC-0060/retained_case_lightweight_bundle/case-66dc197c/lightweight_case_bundle_manifest.json"
+      },
+      "post_case_free_space_cleanup": {
+        "status": "completed",
+        "per_target": [
+          {
+            "status": "completed",
+            "reason": "cleanup_completed",
+            "instance_id": "7d8adec8-50dd-40a9-adcb-ecaea76d53fb",
+            "vm_ip": "10.0.2.24",
+            "node_name": "FUXA_Instance",
+            "ssh_user": "ubuntu",
+            "free_mb_before": 8488,
+            "free_mb_after": 10987,
+            "minimum_free_mb": 1200,
+            "attempts": [
+              {
+                "attempt": 1,
+                "returncode": 0,
+                "stdout_excerpt": [
+                  "[INFO] Disk usage before cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  6.1G  8.3G  43% /",
+                  "[INFO] Largest directories under /var:",
+                  "113M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/3/fs",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content/blobs",
+                  "201M\t/var/lib/containerd/io.containerd.content.v1.content/blobs/sha256",
+                  "207M\t/var/lib/snapd/snaps",
+                  "244M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA/server/node_modules",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA",
+                  "248M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs/usr/src/app/FUXA/server",
+                  "419M\t/var/lib/snapd/cache",
+                  "627M\t/var/lib/snapd",
+                  "666M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs",
+                  "666M\t/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots",
+                  "867M\t/var/lib/containerd",
+                  "1.6G\t/var",
+                  "1.6G\t/var/lib",
+                  "[INFO] Disk usage after cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  3.7G   11G  26% /"
+                ],
+                "stderr_excerpt": [
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal.",
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal/7d8adec850dd40a9adcbecaea76d53fb.",
+                  "Vacuuming done, freed 0B of archived journals from /run/log/journal."
+                ],
+                "free_mb_before": 8488,
+                "free_mb_after": 10987
+              }
+            ],
+            "role": "fuxa",
+            "vm_name": "FUXA_Instance",
+            "elapsed_seconds": 6.194
+          },
+          {
+            "status": "completed",
+            "reason": "cleanup_completed",
+            "instance_id": "1c047b30-ebf3-4637-acd1-be6b0d5098b5",
+            "vm_ip": "10.0.2.37",
+            "node_name": "PLC_Instance",
+            "ssh_user": "ubuntu",
+            "free_mb_before": 9659,
+            "free_mb_after": 11706,
+            "minimum_free_mb": 1200,
+            "attempts": [
+              {
+                "attempt": 1,
+                "returncode": 0,
+                "stdout_excerpt": [
+                  "[INFO] Disk usage before cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  5.0G  9.5G  35% /",
+                  "[INFO] Largest directories under /var:",
+                  "4.7M\t/var/cache/apparmor",
+                  "4.7M\t/var/cache/debconf",
+                  "5.3M\t/var/lib/ubuntu-advantage/apt-esm/var/cache",
+                  "5.3M\t/var/lib/ubuntu-advantage/apt-esm/var/cache/apt",
+                  "7.0M\t/var/lib/ubuntu-advantage/apt-esm/var",
+                  "7.1M\t/var/lib/ubuntu-advantage",
+                  "7.1M\t/var/lib/ubuntu-advantage/apt-esm",
+                  "14M\t/var/ossec/lib",
+                  "16M\t/var/cache",
+                  "23M\t/var/ossec",
+                  "31M\t/var/lib/dpkg/info",
+                  "33M\t/var/lib/dpkg",
+                  "57M\t/var/log/journal",
+                  "57M\t/var/log/journal/1c047b30ebf34637acd1be6b0d5098b5",
+                  "67M\t/var/log",
+                  "207M\t/var/lib/snapd/snaps",
+                  "419M\t/var/lib/snapd/cache",
+                  "627M\t/var/lib/snapd",
+                  "671M\t/var/lib",
+                  "778M\t/var",
+                  "[INFO] Disk usage after cleanup:",
+                  "Filesystem      Size  Used Avail Use% Mounted on",
+                  "/dev/vda1        15G  3.0G   12G  21% /"
+                ],
+                "stderr_excerpt": [
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal.",
+                  "Vacuuming done, freed 0B of archived journals from /var/log/journal/1c047b30ebf34637acd1be6b0d5098b5.",
+                  "Vacuuming done, freed 0B of archived journals from /run/log/journal."
+                ],
+                "free_mb_before": 9659,
+                "free_mb_after": 11706
+              }
+            ],
+            "role": "plc",
+            "vm_name": "PLC_Instance",
+            "elapsed_seconds": 4.767
+          }
+        ],
+        "cleaned_roles": [
+          "fuxa",
+          "plc"
+        ],
+        "failed_roles": []
+      },
+      "ot_state_twin_verdict": {
+        "scope_id": "CMP-20260707-000220-CBFB__EXEC-0060",
+        "verdict": "corroborado",
+        "twin_detected": true,
+        "alert_detected": true,
+        "control_law_violation_count": 3,
+        "state_divergence_count": 0,
+        "attacker_alerts_in_window_count": 1,
+        "attacker_alerts_in_window": [
+          {
+            "session_id": "ALERTS-20260926-163248Z",
+            "event_id": "0e734502509a4c80a995e9f8200c511f",
+            "ts_utc": "2026-09-26T16:32:29.205+0000",
+            "signature": "NICS CyberLab ICS Modbus write multiple registers",
+            "rule_id": "86601",
+            "rule_level": 3,
+            "src_ip": "192.168.100.56",
+            "origin": "attacker_vm",
+            "origin_reason": "src_ip_matches_private_ip_of_attack 22",
+            "origin_instance_name": "attack 22",
+            "origin_instance_id": "9208f5fa-6bf7-4c31-b1bb-8552d3fba984"
+          }
+        ],
+        "attack_started_at": "2026-09-26T16:32:17.609188+00:00",
+        "attack_completed_at": "2026-09-26T16:32:34.463010+00:00",
+        "evaluated_at_utc": "2026-09-26T18:08:40.789885+00:00"
+      }
+    }
+  ]
+}

@@ -31,6 +31,7 @@ def api_launch():
         level_b_repetitions=int(body.get("level_b_repetitions") or 10),
         level_a_repetitions=body.get("level_a_repetitions"),
         confirmation=str(body.get("confirmation") or ""),
+        fault_schedule=body.get("fault_schedule"),
     )
     if result.get("error") == "confirmation_required":
         return jsonify(result), 400

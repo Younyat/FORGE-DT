@@ -1,0 +1,12 @@
+{
+  "instance_id": "93db5b76-8e3a-4a4e-bf74-5b7bfa11fca3",
+  "instance_name": "monitor 11",
+  "installed_tools": {
+    "wazuh": "2026-09-29T22:53:42.074809+00:00",
+    "nmap": "2026-09-29T22:54:04.177506+00:00"
+  },
+  "install_started_utc": {
+    "wazuh": "2026-09-29T22:44:31.738801+00:00",
+    "nmap": "2026-09-29T22:53:42.081180+00:00"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "deleted_cases": [
+    "case-8a565aa0"
+  ],
+  "deleted_paths": [
+    "app_core/infrastructure/forensics/evidence_store/CASE-20261010-110152"
+  ],
+  "freed_bytes_estimated": 1354109,
+  "freed_bytes_actual": 1354109,
+  "preserved_metadata": [
+    {
+      "case_id": "case-8a565aa0",
+      "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20261010-110152",
+      "size_bytes": 1354109,
+      "lightweight_bundle_path": "runtime/level_b_repetitions/exp-7cc0959ecd82/retained_case_lightweight_bundle/case-8a565aa0",
+      "lightweight_bundle_copied_files": 37
+    }
+  ],
+  "cleanup_status": "completed",
+  "warnings": []
+}

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-16T05:38:23.916161+00:00",
+  "generated_at": "2026-10-10T15:26:31.378530+00:00",
   "scenario_id": "scn-b83dbbfb",
   "scenario_name": "industrial_file",
   "causal_reconstruction_ready": false,
@@ -15,23 +15,23 @@
   ],
   "sections": {
     "attack_attestation": {
-      "record_count": 624,
+      "record_count": 707,
       "minimum_expected_records": 1,
       "overall_status": "partial",
       "fields": {
         "attack_executed": {
           "path": "attack_id",
           "status": "ok",
-          "present_records": 624,
-          "applicable_records": 624,
+          "present_records": 707,
+          "applicable_records": 707,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "tool": {
           "path": "operation.tool_used",
           "status": "ok",
-          "present_records": 624,
-          "applicable_records": 624,
+          "present_records": 707,
+          "applicable_records": 707,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
@@ -39,7 +39,7 @@
           "path": "operation.tool_version",
           "status": "missing",
           "present_records": 0,
-          "applicable_records": 624,
+          "applicable_records": 707,
           "coverage_ratio": 0.0,
           "missing_samples": [
             "atk-f4c9d8b0",
@@ -59,17 +59,17 @@
         "mitre_technique": {
           "path": "mitre.technique_id",
           "status": "ok",
-          "present_records": 624,
-          "applicable_records": 624,
+          "present_records": 707,
+          "applicable_records": 707,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "target_node": {
           "path": "target.node_id",
           "status": "partial",
-          "present_records": 3,
-          "applicable_records": 624,
-          "coverage_ratio": 0.0048,
+          "present_records": 4,
+          "applicable_records": 707,
+          "coverage_ratio": 0.0057,
           "missing_samples": [
             "atk-f4c9d8b0",
             "atk-1ffc12d9",
@@ -88,17 +88,17 @@
         "target_ip": {
           "path": "target.target_ip",
           "status": "ok",
-          "present_records": 624,
-          "applicable_records": 624,
+          "present_records": 707,
+          "applicable_records": 707,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "protocol": {
           "path": "operation.protocol",
           "status": "partial",
-          "present_records": 379,
-          "applicable_records": 624,
-          "coverage_ratio": 0.6074,
+          "present_records": 427,
+          "applicable_records": 707,
+          "coverage_ratio": 0.604,
           "missing_samples": [
             "atk-f4c9d8b0",
             "atk-1ffc12d9",
@@ -117,9 +117,9 @@
         "port": {
           "path": "operation.target_port",
           "status": "partial",
-          "present_records": 379,
-          "applicable_records": 624,
-          "coverage_ratio": 0.6074,
+          "present_records": 427,
+          "applicable_records": 707,
+          "coverage_ratio": 0.604,
           "missing_samples": [
             "atk-f4c9d8b0",
             "atk-1ffc12d9",
@@ -138,41 +138,41 @@
         "modbus_function": {
           "path": "operation.modbus_function",
           "status": "ok",
-          "present_records": 379,
-          "applicable_records": 379,
+          "present_records": 427,
+          "applicable_records": 427,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "register": {
           "path": "operation.register_reference",
           "status": "ok",
-          "present_records": 379,
-          "applicable_records": 379,
+          "present_records": 427,
+          "applicable_records": 427,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "expected_value": {
           "path": "operation.value",
           "status": "ok",
-          "present_records": 379,
-          "applicable_records": 379,
+          "present_records": 427,
+          "applicable_records": 427,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "started_at": {
           "path": "execution.started_at",
           "status": "ok",
-          "present_records": 624,
-          "applicable_records": 624,
+          "present_records": 707,
+          "applicable_records": 707,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "completed_at": {
           "path": "execution.completed_at",
           "status": "partial",
-          "present_records": 622,
-          "applicable_records": 624,
-          "coverage_ratio": 0.9968,
+          "present_records": 705,
+          "applicable_records": 707,
+          "coverage_ratio": 0.9972,
           "missing_samples": [
             "atk-6402b8e1",
             "atk-6402b8e1"
@@ -181,8 +181,8 @@
         "success_criteria": {
           "path": "execution.success_criteria",
           "status": "ok",
-          "present_records": 624,
-          "applicable_records": 624,
+          "present_records": 707,
+          "applicable_records": 707,
           "coverage_ratio": 1.0,
           "missing_samples": []
         }
@@ -196,15 +196,15 @@
       ]
     },
     "detection_attestation": {
-      "record_count": 367,
+      "record_count": 2661,
       "minimum_expected_records": 1,
       "overall_status": "partial",
       "fields": {
         "detection_engine": {
           "path": "detector_engine",
           "status": "ok",
-          "present_records": 367,
-          "applicable_records": 367,
+          "present_records": 2661,
+          "applicable_records": 2661,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
@@ -212,7 +212,7 @@
           "path": "engine_version",
           "status": "missing",
           "present_records": 0,
-          "applicable_records": 367,
+          "applicable_records": 2661,
           "coverage_ratio": 0.0,
           "missing_samples": [
             "1000001",
@@ -225,40 +225,40 @@
             "550",
             "550",
             "550",
-            "553",
-            "553"
+            "550",
+            "550"
           ]
         },
         "rule_active": {
           "path": "rule_active",
           "status": "ok",
-          "present_records": 367,
-          "applicable_records": 367,
+          "present_records": 2661,
+          "applicable_records": 2661,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "rule_id": {
           "path": "rule_id",
           "status": "ok",
-          "present_records": 367,
-          "applicable_records": 367,
+          "present_records": 2661,
+          "applicable_records": 2661,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "severity": {
           "path": "severity",
           "status": "ok",
-          "present_records": 367,
-          "applicable_records": 367,
+          "present_records": 2661,
+          "applicable_records": 2661,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "rule_file": {
           "path": "rule_file",
           "status": "partial",
-          "present_records": 13,
-          "applicable_records": 367,
-          "coverage_ratio": 0.0354,
+          "present_records": 1350,
+          "applicable_records": 2661,
+          "coverage_ratio": 0.5073,
           "missing_samples": [
             "553",
             "553",
@@ -277,8 +277,8 @@
         "rule_hash": {
           "path": "rule_hash",
           "status": "ok",
-          "present_records": 367,
-          "applicable_records": 367,
+          "present_records": 2661,
+          "applicable_records": 2661,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
@@ -286,8 +286,8 @@
           "path": "mitre_techniques",
           "status": "partial",
           "present_records": 4,
-          "applicable_records": 367,
-          "coverage_ratio": 0.0109,
+          "applicable_records": 2661,
+          "coverage_ratio": 0.0015,
           "missing_samples": [
             "550",
             "550",
@@ -298,17 +298,17 @@
             "550",
             "550",
             "550",
-            "553",
-            "553",
-            "553"
+            "550",
+            "550",
+            "550"
           ]
         },
         "active_node": {
           "path": "node_id",
           "status": "partial",
-          "present_records": 2,
-          "applicable_records": 367,
-          "coverage_ratio": 0.0054,
+          "present_records": 1,
+          "applicable_records": 2661,
+          "coverage_ratio": 0.0004,
           "missing_samples": [
             "1000001",
             "550",
@@ -320,8 +320,8 @@
             "550",
             "550",
             "550",
-            "553",
-            "553"
+            "550",
+            "550"
           ]
         }
       },
@@ -333,84 +333,84 @@
       ]
     },
     "alerts_normalized": {
-      "record_count": 6995,
+      "record_count": 95602,
       "minimum_expected_records": 1,
       "overall_status": "partial",
       "fields": {
         "timestamp": {
           "path": "timestamp",
           "status": "ok",
-          "present_records": 6995,
-          "applicable_records": 6995,
+          "present_records": 95602,
+          "applicable_records": 95602,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "detector": {
           "path": "detector",
           "status": "ok",
-          "present_records": 6995,
-          "applicable_records": 6995,
+          "present_records": 95602,
+          "applicable_records": 95602,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "rule_id": {
           "path": "rule_id",
           "status": "ok",
-          "present_records": 6995,
-          "applicable_records": 6995,
+          "present_records": 95602,
+          "applicable_records": 95602,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "severity": {
           "path": "severity",
           "status": "ok",
-          "present_records": 6995,
-          "applicable_records": 6995,
+          "present_records": 95602,
+          "applicable_records": 95602,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "origin": {
           "path": "origin.ip",
           "status": "ok",
-          "present_records": 6995,
-          "applicable_records": 6995,
+          "present_records": 95602,
+          "applicable_records": 95602,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "destination": {
           "path": "destination.ip",
           "status": "ok",
-          "present_records": 6995,
-          "applicable_records": 6995,
+          "present_records": 95602,
+          "applicable_records": 95602,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "protocol": {
           "path": "protocol",
           "status": "partial",
-          "present_records": 1171,
-          "applicable_records": 6995,
-          "coverage_ratio": 0.1674,
+          "present_records": 1287,
+          "applicable_records": 95602,
+          "coverage_ratio": 0.0135,
           "missing_samples": [
-            "alr-b415aa92",
-            "alr-cffb03f9",
-            "alr-57272e3a",
-            "alr-fe8972b6",
-            "alr-66ad96a7",
-            "alr-3c5840ca",
-            "alr-a09cdd27",
-            "alr-50906fdd",
-            "alr-9369e8b1",
-            "alr-fa35c177",
-            "alr-2a0125f6",
-            "alr-b98537d1"
+            "alr-955ca419",
+            "alr-35284d81",
+            "alr-8ccba4fa",
+            "alr-f50e28a5",
+            "alr-c1a59652",
+            "alr-e9c93d28",
+            "alr-82a6086f",
+            "alr-04b23dbf",
+            "alr-dd21f2b8",
+            "alr-a3f6aaef",
+            "alr-2669314a",
+            "alr-7e38a3e7"
           ]
         },
         "normalized_message": {
           "path": "normalized_message",
           "status": "ok",
-          "present_records": 6995,
-          "applicable_records": 6995,
+          "present_records": 95602,
+          "applicable_records": 95602,
           "coverage_ratio": 1.0,
           "missing_samples": []
         }
@@ -420,24 +420,24 @@
       ]
     },
     "alert_correlation": {
-      "record_count": 12508,
+      "record_count": 33797,
       "minimum_expected_records": 1,
       "overall_status": "partial",
       "fields": {
         "attack_relation": {
           "path": "attack_id",
           "status": "ok",
-          "present_records": 12508,
-          "applicable_records": 12508,
+          "present_records": 33797,
+          "applicable_records": 33797,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "alert_relation": {
           "path": "alert_id",
           "status": "partial",
-          "present_records": 12386,
-          "applicable_records": 12447,
-          "coverage_ratio": 0.9951,
+          "present_records": 33605,
+          "applicable_records": 33701,
+          "coverage_ratio": 0.9972,
           "missing_samples": [
             "atk-f4c9d8b0",
             "atk-1ffc12d9",
@@ -456,9 +456,9 @@
         "detection_rule_relation": {
           "path": "detection_rule_relation.rule_id",
           "status": "partial",
-          "present_records": 12386,
-          "applicable_records": 12447,
-          "coverage_ratio": 0.9951,
+          "present_records": 33605,
+          "applicable_records": 33701,
+          "coverage_ratio": 0.9972,
           "missing_samples": [
             "atk-f4c9d8b0",
             "atk-1ffc12d9",
@@ -477,8 +477,8 @@
         "correlation_state": {
           "path": "correlation_bucket",
           "status": "ok",
-          "present_records": 12447,
-          "applicable_records": 12447,
+          "present_records": 33701,
+          "applicable_records": 33701,
           "coverage_ratio": 1.0,
           "missing_samples": []
         }
@@ -516,7 +516,7 @@
           "applicable_records": 1,
           "coverage_ratio": 0.0,
           "missing_samples": [
-            "case-18fe976a"
+            "case-5a366cf2"
           ]
         },
         "expected_artifacts": {
@@ -542,7 +542,7 @@
           "applicable_records": 1,
           "coverage_ratio": 0.0,
           "missing_samples": [
-            "case-18fe976a"
+            "case-5a366cf2"
           ]
         },
         "latency_start_to_sealed": {
@@ -552,7 +552,7 @@
           "applicable_records": 1,
           "coverage_ratio": 0.0,
           "missing_samples": [
-            "case-18fe976a"
+            "case-5a366cf2"
           ]
         },
         "acquisition_result": {
@@ -598,7 +598,7 @@
           "applicable_records": 1,
           "coverage_ratio": 0.0,
           "missing_samples": [
-            "case-18fe976a"
+            "case-5a366cf2"
           ]
         },
         "tools_used": {
@@ -616,7 +616,7 @@
           "applicable_records": 1,
           "coverage_ratio": 0.0,
           "missing_samples": [
-            "case-18fe976a"
+            "case-5a366cf2"
           ]
         },
         "artifacts_collected": {
@@ -706,46 +706,53 @@
       "problem_fields": []
     },
     "case_manifest_link": {
-      "record_count": 698,
+      "record_count": 775,
       "minimum_expected_records": 1,
       "overall_status": "partial",
       "fields": {
         "case_id": {
           "path": "case_id",
           "status": "ok",
-          "present_records": 698,
-          "applicable_records": 698,
+          "present_records": 775,
+          "applicable_records": 775,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "manifest_path": {
           "path": "manifest_path",
           "status": "ok",
-          "present_records": 698,
-          "applicable_records": 698,
+          "present_records": 775,
+          "applicable_records": 775,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "artifact_exists": {
           "path": "artifact_exists",
           "status": "ok",
-          "present_records": 698,
-          "applicable_records": 698,
+          "present_records": 775,
+          "applicable_records": 775,
           "coverage_ratio": 1.0,
           "missing_samples": []
         },
         "artifact_in_manifest": {
           "path": "artifact_in_manifest",
           "status": "partial",
-          "present_records": 693,
-          "applicable_records": 698,
-          "coverage_ratio": 0.9928,
+          "present_records": 756,
+          "applicable_records": 775,
+          "coverage_ratio": 0.9755,
           "missing_samples": [
-            "case-18fe976a",
-            "case-18fe976a",
-            "case-18fe976a",
-            "case-18fe976a",
-            "case-18fe976a"
+            "case-5a366cf2",
+            "case-5a366cf2",
+            "case-5a366cf2",
+            "case-5a366cf2",
+            "case-5a366cf2",
+            "case-5a366cf2",
+            "case-5a366cf2",
+            "case-5a366cf2",
+            "case-5a366cf2",
+            "case-5a366cf2",
+            "case-5a366cf2",
+            "case-5a366cf2"
           ]
         }
       },

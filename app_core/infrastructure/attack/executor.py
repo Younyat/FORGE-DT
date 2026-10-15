@@ -126,10 +126,108 @@ def _load_effective_target_metadata(output_dir: str) -> Dict[str, Any]:
     }
 
 
+def _notify_intervention_ledger(output_dir: str, result: Dict[str, Any]) -> None:
+    """M1 (Intervention Ledger, investigacion_y_novedad/13_plan_construccion_forge_dt_v3.md):
+    projects this real attack execution into the shared, hash-chained
+    ledger -- same adapter principle as fault_injection's own
+    _notify_intervention_ledger, an adapter over an already-real record,
+    never a second source of truth (source_record_ref points at this exact
+    execution's own result.json). intervention_id reuses output_dir's own
+    basename (executor.py's own `{utc_timestamp()}_{slugify_attack_id}`,
+    already a stable, unique-per-execution identifier -- no new ID scheme
+    invented). Best-effort: never allowed to affect a real attack
+    execution."""
+    try:
+        from app_core.infrastructure.intervention_ledger.service import record_intervention
+        from app_core.infrastructure.attack.effect_verifiers import verify_attack_effect
+        case_dir = result.get("case_dir") or ""
+        # M2: real, content-based effect verification (see effect_verifiers.py)
+        # -- replaces the earlier placeholder of just exit_code/success,
+        # which the study's own baseline audit flagged as insufficient
+        # ("no se deduce sólo del exit code", section 8.1 step 3).
+        verification = verify_attack_effect(result.get("attack_id"), result, output_dir)
+        record_intervention(
+            source="attack_lab",
+            source_record_ref=os.path.join(output_dir, "result.json"),
+            class_="cyberattack",
+            type_=result.get("attack_id"),
+            phase="executed",
+            intervention_id=f"atk-{Path(output_dir).name}",
+            target_ip=result.get("effective_target_ip") or result.get("target_ip"),
+            case_id=os.path.basename(case_dir.rstrip("/")) if case_dir else None,
+            params=result.get("parameters"),
+            requested_at=result.get("started_at"),
+            applied_at=result.get("started_at"),
+            effect_verified_at=result.get("completed_at"),
+            effect_verification=verification,
+        )
+    except Exception:
+        pass
+
+
+def _resolve_node_id_for_ip(target_ip: str | None) -> Optional[str]:
+    if not target_ip:
+        return None
+    from app_core.infrastructure.intervention_ledger.linker import _resolve_node_id_for_entry
+    return _resolve_node_id_for_entry({"target_ip": target_ip})
+
+
+def _start_twin_followup_window(result: Dict[str, Any]) -> None:
+    """Real gap measured this session (TOR=0.0 for source=attack_lab,
+    see intervention_ledger/README.md's "Open gap" note on linker.py):
+    unlike fault_injection (FAULT_RELEVANT_CHECKS), an Attack Lab execution
+    never triggered any forensic_twin follow-up on its own, so a real
+    divergence it caused could sit unnoticed until the continuous monitor's
+    next heavy tick. Fixed with the SAME real M3 experimental window
+    mechanism built for exactly this purpose -- started here, unconditionally
+    for every attack (never keyed by attack_id/type, so it cannot leak which
+    attack is running, only that some attack just started, same as any
+    other M3 window). Best-effort: a window failing to start must never
+    affect the real attack execution."""
+    try:
+        node_id = _resolve_node_id_for_ip(result.get("target_ip") or result.get("requested_target_ip"))
+        if not node_id:
+            return
+        from app_core.infrastructure.forensic_twin.experimental_window import start_experimental_window
+        start_experimental_window([node_id], sensors=["resources", "network_latency"], interval_seconds=10.0, duration_seconds=180.0)
+    except Exception:
+        pass
+
+
+def _trigger_twin_followup_check(result: Dict[str, Any]) -> None:
+    """The other half of the same fix: resources/network_latency are cheap
+    enough for the repeating M3 window above, but clock/PLC/config_integrity/
+    network_exposure are deliberately NOT (experimental_window.py's own
+    docstring: "heavy, on-demand-only"). The sanctioned way to cover those
+    is a single on-demand check_node_state call -- exactly what
+    fault_injection's FAULT_RELEVANT_CHECKS already does per-fault, done
+    here unconditionally per-attack instead (same non-leaking reasoning as
+    the window above). This is what actually catches a real
+    plc_baseline_divergence from an attack like T0831 (Modbus
+    manipulation) -- the window's two allowed sensors never would."""
+    try:
+        node_id = _resolve_node_id_for_ip(result.get("effective_target_ip") or result.get("target_ip"))
+        if not node_id:
+            return
+        from app_core.infrastructure.forensic_twin import service as ft
+        ft.check_node_state(node_id, source="attack_lab_followup")
+    except Exception:
+        pass
+
+
 def persist_execution_result(output_dir: str, result: Dict[str, Any]) -> None:
     ensure_dir(output_dir)
     with open(os.path.join(output_dir, "result.json"), "w", encoding="utf-8") as fh:
         json.dump(result, fh, indent=2, sort_keys=True)
+    # Only the FINAL persist (after the attack actually ran) has
+    # completed_at -- the initial persist (written before execution, see
+    # the two call sites above each pair) deliberately does not trigger a
+    # ledger entry, since nothing happened yet to record.
+    if result.get("completed_at"):
+        _notify_intervention_ledger(output_dir, result)
+        _trigger_twin_followup_check(result)
+    else:
+        _start_twin_followup_window(result)
 
 
 def _collect_generated_artifacts(output_dir: str) -> list[dict]:

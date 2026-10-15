@@ -179,7 +179,40 @@ def _consume_attack_stream(generator) -> dict:
     return result
 
 
-def _launch_attack(attack: dict, target_ip: str, target_role: str, ssh_key: str | None = None) -> dict:
+def _resolve_injected_attack_parameters(config: dict, attack: dict) -> dict:
+    """Reads `config["injected_faults"]` (see app_core/infrastructure/fault_injection)
+    looking for a `modbus_payload_precision` entry for THIS attack_id.
+    mode="degraded" (or no injection config at all) leaves the parameters
+    empty -- byte-identical to the always-existing behavior.
+    mode="fixed" passes a real, explicit `value`, the scientific control
+    condition against the fault reproduced by default."""
+    faults = config.get("injected_faults") or []
+    for fault in faults:
+        if fault.get("type") != "modbus_payload_precision":
+            continue
+        if fault.get("attack_id") and fault["attack_id"] != attack.get("attack_id"):
+            continue
+        params = fault.get("params") or {}
+        if params.get("mode") == "fixed":
+            value = params.get("value", 30)
+            return {"value": value}
+        return {}
+    return {}
+
+
+def _launch_attack(attack: dict, target_ip: str, target_role: str, ssh_key: str | None = None, parameters: dict | None = None) -> dict:
+    # `parameters` defaults to empty -- byte-identical to the previous
+    # behavior for every other caller. Verified end-to-end (2026-09-28):
+    # executor.py:313 does json.dumps(payload["parameters"]) into argv[3], and
+    # t0831_manipulation_of_control_modbus.py:98 itself ALREADY reads
+    # params.get("value", default_attack_value) -- the plumbing for a real
+    # value already existed in full, nobody ever just passed anything other
+    # than {}. This is the real, reproducible root cause of the degradation
+    # observed in repetition 6 of a historical Level C campaign (see
+    # investigacion_y_novedad/09_inyeccion_de_fallos.md): with empty
+    # parameters, the script falls back to the OpenPLC catalog's default
+    # value instead of a deliberately requested one, and register/value
+    # precision at the packet level is left unconfirmed.
     attacker_ip, attacker_user = attack_launcher._resolve_attacker_context("")
     if not attacker_ip:
         return {"ok": False, "reason": "No attacker instance with a floating IP was found."}
@@ -194,7 +227,7 @@ def _launch_attack(attack: dict, target_ip: str, target_role: str, ssh_key: str 
         "target_role": target_role,
         "attacker_ip": attacker_ip,
         "case_dir": "",
-        "parameters": {},
+        "parameters": parameters or {},
     }
 
     if attack.get("execution_backend") == "local":
@@ -491,7 +524,8 @@ def _run_real_level_b_execution(job_id: str, job_path: Path, campaign_id: str, c
     # Step 5/6 -- attack_launched / attack_completed.
     _phase(job_id, job_path, "attack_launched", "Launch comparable attack", "running", 22.0, f"Launching {attack.get('attack_id')} against {target.get('vm_ip')}.")
     attack_started_utc = utc_now()
-    attack_result = _launch_attack(attack, target.get("vm_ip"), target.get("role"), ssh_key=ssh_key)
+    attack_parameters = _resolve_injected_attack_parameters(config, attack)
+    attack_result = _launch_attack(attack, target.get("vm_ip"), target.get("role"), ssh_key=ssh_key, parameters=attack_parameters)
     attack_completed_utc = utc_now()
     if not attack_result.get("ok"):
         reason = attack_result.get("reason") or "Attack execution did not complete successfully."

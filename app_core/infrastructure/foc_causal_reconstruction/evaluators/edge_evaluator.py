@@ -97,6 +97,7 @@ def evaluate_edges(case_context: dict, requirement_evaluator, temporal_evaluator
             temporal_status=temporal_status,
             integrity_status=integrity_status,
         )
+        evidence_strength = _classify_evidence_strength(support_status, temporal_status)
 
         edges.append(
             CausalEdge(
@@ -118,9 +119,38 @@ def evaluate_edges(case_context: dict, requirement_evaluator, temporal_evaluator
                 meaning=meaning,
                 status_reason=status_reason,
                 limitations=_unique(limitations),
+                evidence_strength=evidence_strength,
             )
         )
     return edges
+
+
+def _classify_evidence_strength(support_status: str, temporal_status: str) -> str:
+    """investigacion_y_novedad/15_huecos_de_literatura_2025_2026.md gap #1: never
+    claim causation where only correlation/ordering is supported. Derived
+    PURELY from support_status + temporal_status, both already computed above
+    and unchanged by this -- zero new data, zero change to existing scoring.
+
+    - "causal": real evidence recovered AND real temporal order either
+      confirmed ("supported") or explicitly not meaningful for this edge
+      ("not_required", e.g. two effects of the same instant).
+    - "temporal": real evidence recovered, but the real temporal order itself
+      could not be confirmed -- an edge the structural guarantee above already
+      downgrades out of "recovered" the moment this happens, so in practice
+      this label currently only applies via degraded/ambiguous support with
+      real temporal signal; kept as its own branch for when a future
+      evaluator loosens that guarantee.
+    - "co_occurrence": some type-level match exists (selector matched a real
+      record) but support is degraded or ambiguous -- the record is real, but
+      not strongly enough verified to claim either confirmed evidence or
+      confirmed order.
+    - "unclassified": support_status is "missing" -- no real record to
+      classify at all."""
+    if support_status == "missing":
+        return "unclassified"
+    if support_status == "recovered":
+        return "causal" if temporal_status in {"supported", "not_required"} else "temporal"
+    return "co_occurrence"
 
 
 def _build_status_reason(

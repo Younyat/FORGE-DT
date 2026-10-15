@@ -296,6 +296,13 @@ def create_campaign(payload: dict) -> dict:
         # consumed by an automated attack-launch pipeline for Level B/C,
         # which does not exist in foc_experimentation today.
         "attack_id": attack_id or None,
+        # Faults deliberately configured for this campaign (see
+        # app_core/infrastructure/fault_injection) -- a free-form list of
+        # {type, attack_id, phase, params}, read by
+        # level_b_orchestrator._resolve_injected_attack_parameters and by the
+        # fault-injection dashboard to record/measure its effectiveness.
+        # Empty by default: no existing campaign changes behavior.
+        "injected_faults": payload.get("injected_faults") or [],
     }
     _write_json(campaign_manifest_path(campaign_id), manifest)
     _write_json(campaign_config_path(campaign_id), config)

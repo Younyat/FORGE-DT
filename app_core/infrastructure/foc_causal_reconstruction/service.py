@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 import os
+import re
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +16,7 @@ from .config import (
 from .evaluators import evaluate_edges
 from .graph import build_nodes_from_ground_truth
 from .loaders import (
+    load_alert_correlation_records,
     load_analysis_summary,
     load_custody_context,
     load_foc_context,
@@ -185,6 +187,117 @@ def _match_selector(item: dict, selector: dict | None) -> bool:
     return True
 
 
+# Real bug found and fixed 2026-10-10 (investigacion_y_novedad/15_huecos_de_literatura_2025_2026.md,
+# section "0.5"): `attack_id` as produced by foc_timeline_builder.py is NOT unique per real execution --
+# it's make_id("atk", <catalog attack-type id>), a deterministic hash of the ATTACK TYPE string, so
+# EVERY real execution of e.g. T0831_MANIPULATION_OF_CONTROL_MODBUS produces the exact same attack_id
+# (verified live: 609 of 705 real entries in the global attack_attestation.json share one literal
+# attack_id, the oldest dated months before this session). Since `_match_selector` + `matches[0]` just
+# took the FIRST type-matching record in the whole, never-case-scoped global attestation list, every
+# case's "attack happened" / "attack was detected" edges always cited the SAME oldest historical record,
+# never the real execution that actually caused THAT case. The other edges downstream (forensic_intervention
+# onward) are already correctly anchored per-case (keyed by case_id); only the two upstream,
+# attack_attestation-only edges had this gap.
+#
+# Fixed here by picking, among every type-matching record, the one whose own real timestamp is closest
+# to (and no later than) this CASE's own real trigger time -- not simply the first one in file order.
+_ATTACK_MATCH_WINDOW_SECONDS = 3600.0  # generous but bounded: real detection+forensic-trigger latency
+# observed this session tops out around ~16 minutes (case-8753f8d6: attack 13:36, intervention 13:47).
+
+
+def _case_trigger_ts_from_path(case_path: Path) -> float | None:
+    """Real per-case anchor timestamp: metadata/forensic_intervention.json's own
+    intervention_started_at, when this case actually went through automatic forensic
+    intervention. Returns None honestly for a case that doesn't have this file yet
+    (e.g. intervention still in progress, or a pre-existing case from before this
+    field existed) -- callers must treat None as "can't temporally anchor", never
+    as "anchor at epoch 0"."""
+    try:
+        path = Path(case_path) / "metadata" / "forensic_intervention.json"
+        if path.is_file():
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            return _parse_ts(payload.get("intervention_started_at"))
+    except Exception:
+        pass
+    return None
+
+
+def _case_trigger_ts(case_context: dict) -> float | None:
+    """Same as _case_trigger_ts_from_path, cached on case_context so repeated
+    calls (one per edge needing it) don't re-read the file."""
+    if "_case_trigger_ts_cache" in case_context:
+        return case_context["_case_trigger_ts_cache"]
+    ts = _case_trigger_ts_from_path(case_context.get("case_path"))
+    case_context["_case_trigger_ts_cache"] = ts
+    return ts
+
+
+def _pick_closest_before(pairs: list[tuple[dict, float | None]], trigger_ts: float | None, window_seconds: float) -> dict | None:
+    """Core selection shared by every temporal-anchoring fix in this file:
+    given (item, item_ts) pairs, picks the item whose item_ts is closest to,
+    and no later than, trigger_ts, within window_seconds.
+
+    Only falls back to the first pair's item (the pre-fix behavior) when
+    trigger_ts itself is unavailable (this case has no real anchor to compare
+    against at all -- the best available signal is still "a record of this
+    type exists somewhere"). When trigger_ts IS available but nothing falls
+    inside the window, returns None deliberately -- the whole point of this
+    function is to stop citing a temporally unrelated record just because it
+    matches the TYPE-level selector; silently falling back here would undo
+    the fix in exactly the case it exists for."""
+    if not pairs:
+        return None
+    if trigger_ts is None:
+        return pairs[0][0]
+    candidates = []
+    for item, item_ts in pairs:
+        if item_ts is None:
+            continue
+        delta = trigger_ts - item_ts
+        if 0 <= delta <= window_seconds:
+            candidates.append((delta, item))
+    if not candidates:
+        return None
+    candidates.sort(key=lambda pair: pair[0])
+    return candidates[0][1]
+
+
+def _select_temporally_relevant(matches: list[dict], trigger_ts: float | None, ts_path: str, window_seconds: float = _ATTACK_MATCH_WINDOW_SECONDS) -> dict | None:
+    """Among several records that already passed the TYPE-level selector match,
+    picks the one whose own real timestamp (dotted path `ts_path`, e.g.
+    "execution.completed_at") is closest to, and no later than, this case's
+    real trigger_ts. See _pick_closest_before for the real selection rule."""
+    pairs = [(item, _parse_ts(_nested_get(item, ts_path))) for item in matches]
+    return _pick_closest_before(pairs, trigger_ts, window_seconds)
+
+
+_ALERTS_DIR_TS_RE = re.compile(r"ALERTS-(\d{8})-(\d{6})Z")
+
+
+def _evidence_path_ts(evidence_refs) -> float | None:
+    """Real per-record timestamp for an `alert_correlation` match, extracted
+    from the capture directory name already embedded in its own `evidence`
+    path list (e.g. ".../ALERTS-20261005-153829Z/alerts.jsonl") -- NOT a
+    second file load. `alert_correlation.json` is a real, measured 6.4GB file
+    (see load_alert_correlation_records's own docstring, and the real OOM
+    incident it documents) -- reading yet another large attestation file just
+    to get a timestamp per match would repeat exactly the mistake that
+    incident was about. The capture directory's own name already encodes a
+    real UTC timestamp close enough to the alert's own real time for this
+    purpose (within the same window_seconds tolerance used everywhere else
+    here), at zero extra I/O or memory cost."""
+    for ref in evidence_refs or []:
+        m = _ALERTS_DIR_TS_RE.search(str(ref))
+        if not m:
+            continue
+        try:
+            dt = datetime.strptime(f"{m.group(1)}{m.group(2)}", "%Y%m%d%H%M%S").replace(tzinfo=timezone.utc)
+            return dt.timestamp()
+        except Exception:
+            continue
+    return None
+
+
 def _primary_detection_rule(case_context: dict) -> dict | None:
     ground_truth = case_context.get("ground_truth") or {}
     for spec in ground_truth.get("expected_edges") or []:
@@ -202,8 +315,13 @@ def _primary_alert_correlation_record(case_context: dict) -> dict | None:
     for spec in ground_truth.get("expected_edges") or []:
         selector = ((spec or {}).get("selectors") or {}).get("alert_correlation")
         if selector:
-            alert_correlation = case_context.get("foc_context", {}).get("alert_correlation") or {}
-            records = alert_correlation.get("correlations") or alert_correlation.get("records") or []
+            # 2026-09-25: loaded on-demand here instead of via
+            # foc_context["alert_correlation"] -- that key is no longer
+            # eager-loaded (see foc_context_loader.py, the real fix for a
+            # repeated real OOM: this file measured 6.4GB in this evidence
+            # store). This is the only place that ever needs the real
+            # records, gated behind an actual selector being present.
+            records = load_alert_correlation_records()
             match = next((item for item in records if isinstance(item, dict) and _match_selector(item, selector)), None)
             if match:
                 return match
@@ -339,7 +457,14 @@ def _build_case_context(case_id: str, case_path: Path, analysis_status: dict | N
     ground_truth = gt_resolution.get("payload") if isinstance(gt_resolution.get("payload"), dict) else {}
     primary_selector = ground_truth.get("attack_expected", {}).get("selector") if isinstance(ground_truth.get("attack_expected"), dict) else {}
     attacks = (foc_context.get("attack_attestation") or {}).get("attacks") or []
-    primary_attack = next((item for item in attacks if isinstance(item, dict) and _match_selector(item, primary_selector)), None)
+    primary_attack_matches = [item for item in attacks if isinstance(item, dict) and _match_selector(item, primary_selector)]
+    # Same 2026-10-10 fix as _evaluate_requirement's attack_attestation branch, applied
+    # here too: `primary_attack` feeds _resolve_timestamp's "attack_started_at"/
+    # "attack_completed_at" (used for the edge's own temporal-order check) -- leaving
+    # this on the old first-match selection would have kept citing the wrong
+    # (type-matched but temporally unrelated) execution's timestamps even after the
+    # evidence_refs citation itself was fixed.
+    primary_attack = _select_temporally_relevant(primary_attack_matches, _case_trigger_ts_from_path(case_path), "execution.completed_at")
     return {
         "case_id": case_id,
         "case_path": case_path,
@@ -368,11 +493,24 @@ def _evaluate_requirement(case_context: dict, req_type: str, selector: dict | No
     if req_type == "attack_attestation":
         records = (foc_context.get("attack_attestation") or {}).get("attacks") or []
         matches = [item for item in records if isinstance(item, dict) and _match_selector(item, selector)]
-        if matches:
-            attack = matches[0]
+        # See _select_temporally_relevant's own docstring and the 2026-10-10 fix
+        # note above _case_trigger_ts: `attack_id` here is a TYPE-level id, shared
+        # by every real execution of that attack type -- picking matches[0]
+        # blindly would always cite the SAME oldest historical record for every
+        # case ever analyzed, never the execution that actually caused THIS case.
+        trigger_ts = _case_trigger_ts(case_context)
+        attack = _select_temporally_relevant(matches, trigger_ts, "execution.completed_at")
+        if attack:
             evidence_refs.append(f"foc-reconstruction/attestations/attack_attestation.json#{attack.get('attack_id')}")
             return {"type": req_type, "status": "recovered", "evidence_refs": evidence_refs, "limitations": limitations}
-        limitations.append("The preserved attack attestation does not contain a record matching the expected attack selector.")
+        if matches and trigger_ts is not None:
+            limitations.append(
+                f"{len(matches)} attack attestation record(s) matched this attack TYPE, but none fell within "
+                f"{int(_ATTACK_MATCH_WINDOW_SECONDS)}s of this case's own real intervention trigger time -- "
+                "not citing an unrelated historical execution of the same attack type as if it were this case's."
+            )
+        else:
+            limitations.append("The preserved attack attestation does not contain a record matching the expected attack selector.")
         return {"type": req_type, "status": "missing", "evidence_refs": evidence_refs, "limitations": limitations}
 
     if req_type == "detection_attestation":
@@ -389,12 +527,32 @@ def _evaluate_requirement(case_context: dict, req_type: str, selector: dict | No
         return {"type": req_type, "status": "missing", "evidence_refs": evidence_refs, "limitations": limitations}
 
     if req_type == "alert_correlation":
-        records = (foc_context.get("alert_correlation") or {}).get("correlations") or (foc_context.get("alert_correlation") or {}).get("records") or []
+        # 2026-09-25: loaded on-demand -- see the comment in
+        # _primary_alert_correlation_record() above for why.
+        records = load_alert_correlation_records()
         matches = [item for item in records if isinstance(item, dict) and _match_selector(item, selector)]
-        if not matches:
-            limitations.append("No preserved attack-to-alert correlation record matched the expected selector.")
+        # Same 2026-10-10 fix as attack_attestation above, same root cause: this
+        # selector's `attack_id` is the same TYPE-level id (verified live: 32,886
+        # of 32,982 real correlation records match attack_id+protocol alone), so
+        # matches[0] always cited the same old record regardless of which case
+        # was being analyzed. Anchored to the case's real trigger time via the
+        # capture-directory timestamp already embedded in each record's own
+        # `evidence` path -- NOT a second large-file load, see
+        # _evidence_path_ts's own docstring for why that matters here
+        # specifically (alert_correlation.json is a real, measured 6.4GB file).
+        trigger_ts = _case_trigger_ts(case_context)
+        pairs = [(m, _evidence_path_ts(m.get("evidence"))) for m in matches]
+        item = _pick_closest_before(pairs, trigger_ts, _ATTACK_MATCH_WINDOW_SECONDS)
+        if not item:
+            if matches and trigger_ts is not None:
+                limitations.append(
+                    f"{len(matches)} alert correlation record(s) matched this attack TYPE, but none fell within "
+                    f"{int(_ATTACK_MATCH_WINDOW_SECONDS)}s of this case's own real intervention trigger time -- "
+                    "not citing an unrelated historical correlation as if it were this case's."
+                )
+            else:
+                limitations.append("No preserved attack-to-alert correlation record matched the expected selector.")
             return {"type": req_type, "status": "missing", "evidence_refs": evidence_refs, "limitations": limitations}
-        item = matches[0]
         evidence_refs.append(f"foc-reconstruction/attestations/alert_correlation.json#{item.get('alert_id')}")
         relationship_status = str(item.get("relationship_status") or "").lower()
         correlation_status = str(item.get("correlation_status") or "").lower()

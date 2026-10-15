@@ -1,0 +1,6 @@
+/* Reuses fault_injection.css's design system (variables, .fi-*/.lamp/.pill
+   classes) wholesale -- this file only adds the couple of things genuinely
+   specific to this page instead of duplicating the whole stylesheet. */
+
+.ft-kv{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:11.5px;margin:4px 0}
+.ft-kv .k{color:var(--dim)}

@@ -1755,6 +1755,34 @@ import threading
 _capture_lock = threading.Lock()
 _capture_in_progress: bool = False
 
+# Single-shot, opt-in test hook for gap_validation's own acquisition_failure
+# experiment (app_core/infrastructure/gap_validation/catalog.py -- evaluates
+# g17_chaos_engineering_forensic_pipeline, "no reviewed source applies
+# chaos-engineering methodology to a forensic pipeline"). No other code path
+# ever creates this file -- a normal capture_snapshot() call is completely
+# unaffected; this only exists so the acquisition pipeline's OWN failure
+# handling can be exercised for real, without touching any real collector.
+_FORCE_FAILURE_ONCE_FLAG = PROJECT_ROOT / "runtime" / "gap_validation" / "sandbox" / "force_capture_snapshot_failure_once.flag"
+
+
+def force_capture_snapshot_failure_once() -> None:
+    """Arms the single-shot flag -- the NEXT capture_snapshot() call fails
+    immediately (before any real collector runs) and clears this flag the
+    moment it consumes it. Calling this twice in a row without an
+    intervening capture_snapshot() call is harmless (the flag is just
+    re-written)."""
+    _FORCE_FAILURE_ONCE_FLAG.parent.mkdir(parents=True, exist_ok=True)
+    _FORCE_FAILURE_ONCE_FLAG.write_text("1", encoding="utf-8")
+
+
+def is_capture_snapshot_failure_armed() -> bool:
+    return _FORCE_FAILURE_ONCE_FLAG.is_file()
+
+
+def disarm_capture_snapshot_failure_once() -> None:
+    """Idempotent -- a no-op if nothing is armed."""
+    _FORCE_FAILURE_ONCE_FLAG.unlink(missing_ok=True)
+
 
 # ---------------------------------------------------------------------------
 # Main entry point
@@ -1774,6 +1802,13 @@ def capture_snapshot() -> dict:
         _capture_in_progress = True
 
     try:
+        if _FORCE_FAILURE_ONCE_FLAG.is_file():
+            disarm_capture_snapshot_failure_once()
+            return {
+                "status": "ERROR",
+                "error": "Forced failure (gap_validation acquisition_failure experiment, single-shot -- see force_capture_snapshot_failure_once()).",
+            }
+
         warnings: list = []
         errors: list = []
 

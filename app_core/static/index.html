@@ -226,6 +226,24 @@
     letter-spacing: 0;
   }
 
+  /* OpenStack Instances shrunk to half its original slot to make room for
+     the host-resource tile beside it -- both live inside the same grid
+     column .kpi-strip already reserved for OpenStack Instances alone, so
+     the rest of the 6-column strip is untouched. */
+  .kpi-card-split { display: flex; gap: 8px; min-width: 0; }
+  .kpi-card-compact { flex: 1; padding: 10px; gap: 8px; min-width: 0; }
+  .kpi-card-compact .kpi-icon { width: 36px; height: 36px; font-size: 11px; border-radius: 10px; }
+  .kpi-card-compact .kpi-label { font-size: 10px; white-space: normal; }
+  .kpi-card-compact .kpi-value { font-size: 18px; margin-top: 2px; gap: 4px; }
+  .kpi-card-compact .kpi-delta { font-size: 10px; }
+
+  .host-kpi-card { display: flex; align-items: center; }
+  .host-kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 10px; width: 100%; }
+  .host-kpi-cell { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; }
+  .host-kpi-label { font-size: 9px; font-weight: 800; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+  .host-kpi-val { font-size: 13px; font-weight: 900; transition: color 0.3s ease; }
+  .host-kpi-real { font-size: 8px; font-weight: 700; color: var(--muted); margin-left: 3px; white-space: nowrap; }
+
   .lang-card {
     border-radius: 16px;
     padding: 14px;
@@ -1612,6 +1630,17 @@
     white-space: nowrap;
   }
 
+  /* Host resource widget -- same .rt-pill shell (horizontal, fixed 64px
+     header height, never grows the bar), 4 compact columns side by side
+     instead of 1, so it stays wide rather than tall and never blocks the
+     view. Each value's color is set inline per-reading (green/yellow/
+     orange/red by usage), not by a fixed class, since it changes every
+     10s. */
+  .host-metrics-pill { gap: 14px; }
+  .hm-col { display: flex; flex-direction: column; align-items: flex-end; min-width: 34px; }
+  .hm-val { font-size: 11px; font-weight: 900; letter-spacing: .04em; line-height: 1; white-space: nowrap; transition: color 0.3s ease; }
+  .hm-real { font-size: 8px; font-weight: 700; color: rgba(15, 23, 42, 0.45); margin-left: 3px; white-space: nowrap; }
+
   #dfir-auto-overlay {
     position: fixed;
     inset: 0;
@@ -2206,11 +2235,21 @@
       </div>
 
       <div class="kpi-strip">
-        <div class="kpi-card">
-          <div class="kpi-icon">RG</div>
-          <div>
-            <div class="kpi-label">OpenStack Instances</div>
-            <div id="kpi-openstack-instances" class="kpi-value">-- <span class="kpi-delta">Unknown</span></div>
+        <div class="kpi-card-split">
+          <div class="kpi-card kpi-card-compact">
+            <div class="kpi-icon">RG</div>
+            <div>
+              <div class="kpi-label">OpenStack</div>
+              <div id="kpi-openstack-instances" class="kpi-value">-- <span class="kpi-delta">Unknown</span></div>
+            </div>
+          </div>
+          <div class="kpi-card kpi-card-compact host-kpi-card" title="This host machine's own CPU / RAM / disk / network -- refreshes every 10s">
+            <div class="host-kpi-grid">
+              <div class="host-kpi-cell"><span class="host-kpi-label">CPU</span><span><span id="hmCpuValKpi" class="host-kpi-val">--%</span><span id="hmCpuRealKpi" class="host-kpi-real"></span></span></div>
+              <div class="host-kpi-cell"><span class="host-kpi-label">RAM</span><span><span id="hmRamValKpi" class="host-kpi-val">--%</span><span id="hmRamRealKpi" class="host-kpi-real"></span></span></div>
+              <div class="host-kpi-cell"><span class="host-kpi-label">DISK</span><span><span id="hmDiskValKpi" class="host-kpi-val">--%</span><span id="hmDiskRealKpi" class="host-kpi-real"></span></span></div>
+              <div class="host-kpi-cell"><span class="host-kpi-label">NET</span><span><span id="hmNetValKpi" class="host-kpi-val">--%</span><span id="hmNetRealKpi" class="host-kpi-real"></span></span></div>
+            </div>
           </div>
         </div>
 
@@ -2421,6 +2460,34 @@
             <div class="side-text"><span>3D Live Monitor</span><span class="side-sub">Campaign &amp; host telemetry</span></div>
           </div>
           <span id="wf-monitor3d" class="side-state status-unknown">Unknown</span>
+        </div>
+        <div class="side-item" data-view="control_room" tabindex="0" role="button">
+          <div class="side-item-main">
+            <span class="side-glyph">CR</span>
+            <div class="side-text"><span>Control Room</span><span class="side-sub">Jobs, threads &amp; system state</span></div>
+          </div>
+          <span id="wf-control-room" class="side-state status-unknown">Unknown</span>
+        </div>
+        <div class="side-item" data-view="fault_injection" tabindex="0" role="button">
+          <div class="side-item-main">
+            <span class="side-glyph">FI</span>
+            <div class="side-text"><span>Fault Injection</span><span class="side-sub">Reversible fault injection &amp; effectiveness</span></div>
+          </div>
+          <span id="wf-fault-injection" class="side-state status-unknown">Unknown</span>
+        </div>
+        <div class="side-item" data-view="forensic_twin" tabindex="0" role="button">
+          <div class="side-item-main">
+            <span class="side-glyph">FT</span>
+            <div class="side-text"><span>Forensic Twin</span><span class="side-sub">Expected-vs-real state &amp; divergence events</span></div>
+          </div>
+          <span id="wf-forensic-twin" class="side-state status-unknown">Unknown</span>
+        </div>
+        <div class="side-item" data-view="forge_dt_metrics" tabindex="0" role="button">
+          <div class="side-item-main">
+            <span class="side-glyph">DT</span>
+            <div class="side-text"><span>FORGE-DT Metrics</span><span class="side-sub">Realized / observed / evidenced -- IRR, TOR, IER, ESR &amp; the Intervention Ledger</span></div>
+          </div>
+          <span id="wf-forge-dt-metrics" class="side-state status-unknown">Unknown</span>
         </div>
       </nav>
 
@@ -2781,6 +2848,13 @@
             START MONITORING
           </button>
 
+          <div id="hostMetricsPill" class="rt-pill host-metrics-pill" title="This host machine's own CPU / RAM / disk / network — refreshes every 10s">
+            <div class="hm-col"><div class="rt-pill-title">CPU</div><div><span id="hmCpuVal" class="hm-val">--%</span><span id="hmCpuReal" class="hm-real"></span></div></div>
+            <div class="hm-col"><div class="rt-pill-title">RAM</div><div><span id="hmRamVal" class="hm-val">--%</span><span id="hmRamReal" class="hm-real"></span></div></div>
+            <div class="hm-col"><div class="rt-pill-title">DISK</div><div><span id="hmDiskVal" class="hm-val">--%</span><span id="hmDiskReal" class="hm-real"></span></div></div>
+            <div class="hm-col"><div class="rt-pill-title">NET</div><div><span id="hmNetVal" class="hm-val">--%</span><span id="hmNetReal" class="hm-real"></span></div></div>
+          </div>
+
           <div id="rtStatusPill" class="rt-pill">
             <span id="rtStatusDot" class="rt-dot off"></span>
             <div class="flex flex-col">
@@ -2843,7 +2917,7 @@
 
   <script src="/js/theme-switcher.js"></script>
   <script>window.NicsThemeSwitcher.mount('#theme-switcher-mount');</script>
-  <script src="/js/repetition_process_tree.js?v=20260726-stage-warnings"></script>
+  <script src="/js/repetition_process_tree.js?v=20261009-dry-run-history"></script>
   <script>
     let COPILOT_PENDING = false;
 
@@ -3346,6 +3420,116 @@
       const percent = e.clientX / window.innerWidth;
       const maxMove = wrapper.scrollWidth - window.innerWidth;
       targetX = -(percent * maxMove);
+    });
+
+    // Host resource widget (CPU/RAM/DISK/NET of the machine running this
+    // platform, not a scenario node) -- lives in the one header shared by
+    // every dashboard (#contentOverlay's own header wraps whichever
+    // dashboard openView() loads into #contentIframe), so it shows up
+    // everywhere without touching each dashboard's own HTML.
+    const HM_THRESHOLDS_STD = [60, 80, 90];   // CPU/RAM/DISK/NET(utilization): green<60, yellow<80, orange<90, red>=90
+    const HM_COLOR_UNKNOWN = '#94a3b8';
+    const HM_COLORS = ['#16a34a', '#ca8a04', '#ea580c', '#dc2626']; // green, yellow, orange, red
+
+    function hmColorFor(value, thresholds) {
+      if (value === null || value === undefined) return HM_COLOR_UNKNOWN;
+      if (value < thresholds[0]) return HM_COLORS[0];
+      if (value < thresholds[1]) return HM_COLORS[1];
+      if (value < thresholds[2]) return HM_COLORS[2];
+      return HM_COLORS[3];
+    }
+
+    function hmSetMetric(elId, value, thresholds, forceRed, decimals) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      el.textContent = (value === null || value === undefined) ? '--%' : `${value.toFixed(decimals ?? 0)}%`;
+      el.style.color = forceRed ? HM_COLORS[3] : hmColorFor(value, thresholds);
+    }
+
+    // NET's headline number is real link utilization (throughput / this
+    // host's own real NIC speed, computed backend-side against only the
+    // actual default-route physical interface -- see host_metrics/service.py
+    // for why summing every OpenStack virtual interface was wrong) -- it
+    // moves with real traffic instead of sitting at a constant 0 the way an
+    // error-rate-only percentage would on a host with few real errors.
+    // `network_degraded` (a real error/drop seen in the sampling window)
+    // always forces red, even when utilization itself is low.
+    function hmSetNetworkMetric(elId, data) {
+      // 2 decimals, not 0 like the other three: this host's real NIC link
+      // is 10Gbps (confirmed real, not a guessed number), so ordinary
+      // traffic genuinely is a few hundredths of a percent of it -- integer
+      // rounding would show "0%" at all times even while real (small)
+      // traffic is flowing, indistinguishable from the metric being dead.
+      hmSetMetric(elId, data.network_used_pct, HM_THRESHOLDS_STD, !!data.network_degraded, 2);
+    }
+
+    // Real absolute values alongside each percentage -- GB for RAM/disk,
+    // Mbps for network, "N of M cores" for CPU. Derived from the same
+    // snapshot the percentage already comes from, never a second request.
+    function hmSetReal(elId, text) {
+      const el = document.getElementById(elId);
+      if (el) el.textContent = text;
+    }
+
+    function hmRealCpu(data) {
+      if (data.cpu_used_pct == null || !data.cpu_count) return '';
+      const busyCores = (data.cpu_used_pct / 100 * data.cpu_count).toFixed(1);
+      return ` ${busyCores}/${data.cpu_count} cores`;
+    }
+    function hmRealRam(data) {
+      if (data.mem_total_mb == null || data.mem_available_mb == null) return '';
+      const usedGb = (data.mem_total_mb - data.mem_available_mb) / 1024;
+      const totalGb = data.mem_total_mb / 1024;
+      return ` ${usedGb.toFixed(1)}/${totalGb.toFixed(1)}GB`;
+    }
+    function hmRealDisk(data) {
+      if (data.disk_used_bytes == null || data.disk_total_bytes == null) return '';
+      const usedGb = data.disk_used_bytes / 1e9;
+      const totalGb = data.disk_total_bytes / 1e9;
+      return ` ${usedGb.toFixed(0)}/${totalGb.toFixed(0)}GB`;
+    }
+    function hmRealNet(data) {
+      if (data.network_throughput_mbps == null) return '';
+      return ` ${data.network_throughput_mbps.toFixed(2)}Mbps`;
+    }
+
+    async function hmPollOnce() {
+      try {
+        const res = await fetch('/api/host-metrics/snapshot', { cache: 'no-store' });
+        const data = await res.json();
+        hmSetMetric('hmCpuVal', data.cpu_used_pct, HM_THRESHOLDS_STD);
+        hmSetMetric('hmRamVal', data.mem_used_pct, HM_THRESHOLDS_STD);
+        hmSetMetric('hmDiskVal', data.disk_used_pct, HM_THRESHOLDS_STD);
+        hmSetNetworkMetric('hmNetVal', data);
+        hmSetReal('hmCpuReal', hmRealCpu(data));
+        hmSetReal('hmRamReal', hmRealRam(data));
+        hmSetReal('hmDiskReal', hmRealDisk(data));
+        hmSetReal('hmNetReal', hmRealNet(data));
+        // Same data, second place it's shown: the compact tile on the main
+        // index page itself (next to the shrunk OpenStack Instances card) --
+        // the header pill above only exists once a dashboard is opened
+        // inside #contentOverlay, so the index page needed its own copy.
+        hmSetMetric('hmCpuValKpi', data.cpu_used_pct, HM_THRESHOLDS_STD);
+        hmSetMetric('hmRamValKpi', data.mem_used_pct, HM_THRESHOLDS_STD);
+        hmSetMetric('hmDiskValKpi', data.disk_used_pct, HM_THRESHOLDS_STD);
+        hmSetNetworkMetric('hmNetValKpi', data);
+        hmSetReal('hmCpuRealKpi', hmRealCpu(data));
+        hmSetReal('hmRamRealKpi', hmRealRam(data));
+        hmSetReal('hmDiskRealKpi', hmRealDisk(data));
+        hmSetReal('hmNetRealKpi', hmRealNet(data));
+        const pill = document.getElementById('hostMetricsPill');
+        if (pill) {
+          const mbps = data.network_throughput_mbps;
+          const iface = data.network_iface || '?';
+          const speed = data.network_speed_mbps;
+          pill.title = `This host machine's own CPU / RAM / disk / network -- refreshes every 10s. Network (${iface}${speed ? `, ${speed}Mbps link` : ''}): ${mbps != null ? mbps.toFixed(2) : '?'} Mbps, ${data.network_error_pct != null ? data.network_error_pct.toFixed(2) : '?'}% errors/drops.`;
+        }
+      } catch (e) { /* transient -- next tick retries */ }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      hmPollOnce();
+      setInterval(hmPollOnce, 10000);
     });
 
       function updateSlider() {

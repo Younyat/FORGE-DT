@@ -32,6 +32,10 @@ const NH = {
   btnCleanupSelected: document.getElementById("nh-cleanup-selected"),
   btnPowerOnStopped: document.getElementById("nh-power-on-stopped"),
   btnRestartOpenstack: document.getElementById("nh-restart-openstack"),
+  btnFreeHostMemory: document.getElementById("nh-free-host-memory"),
+  btnRefreshMemoryPressure: document.getElementById("nh-refresh-memory-pressure"),
+  memoryPressureCard: document.getElementById("nh-memory-pressure-card"),
+  memoryPressureEvents: document.getElementById("nh-memory-pressure-events"),
   btnOpenHealthAlertCenter: document.getElementById("nh-open-health-alert-center"),
   btnClearConsole: document.getElementById("nh-clear-console"),
 };
@@ -317,6 +321,7 @@ function renderScenarioOverview(summary, nodes) {
     <div>Total: <span class="font-bold">${esc(host.mem_total_mb ?? "not_available")} MB</span></div>
     <div class="mt-2">Used: <span class="font-bold">${esc(host.mem_used_mb ?? "not_available")} MB</span></div>
     <div class="mt-1">Available: <span class="font-bold">${esc(host.mem_avail_mb ?? "not_available")} MB</span></div>
+    <div class="mt-1">Swap: <span class="font-bold">${esc(host.swap_used_mb ?? "not_available")} / ${esc(host.swap_total_mb ?? "not_available")} MB</span></div>
   `;
 
   NH.diskCard.innerHTML = `
@@ -1156,6 +1161,36 @@ async function loadHealthSummary(refresh = false) {
   return payload;
 }
 
+async function loadMemoryPressure() {
+  try {
+    const payload = await fetchJson("/api/node-health/host/memory-pressure", "memory pressure");
+    const swapPct = payload.swap_used_pct;
+    const overThreshold = typeof swapPct === "number" && swapPct >= (payload.threshold_swap_pct ?? 80);
+    const swapColor = overThreshold ? "text-red-300" : (typeof swapPct === "number" && swapPct >= 60 ? "text-amber-300" : "text-emerald-300");
+    NH.memoryPressureCard.innerHTML = `
+      <div class="grid grid-cols-2 gap-3">
+        <div>Swap used: <span class="font-bold ${swapColor}">${esc(swapPct ?? "not_available")}%</span> <span class="text-slate-500">(threshold ${esc(payload.threshold_swap_pct ?? 80)}%)</span></div>
+        <div>Swap: <span class="font-bold">${esc(payload.swap_used_mb ?? "not_available")} / ${esc(payload.swap_total_mb ?? "not_available")} MB</span></div>
+        <div>RAM available: <span class="font-bold">${esc(payload.mem_available_pct ?? "not_available")}%</span></div>
+        <div>PSI (memory pressure): <span class="font-bold">${payload.psi_supported ? esc(payload.psi_some_avg10 ?? "not_available") + " (some avg10)" : "not supported by this kernel"}</span></div>
+      </div>
+    `;
+    const events = payload.recent_watchdog_events || [];
+    if (!events.length) {
+      NH.memoryPressureEvents.innerHTML = `<div class="text-slate-500">No watchdog actions recorded yet (swap has not crossed ${esc(payload.threshold_swap_pct ?? 80)}% since this worker started).</div>`;
+    } else {
+      NH.memoryPressureEvents.innerHTML = `<div class="text-slate-500 font-black uppercase tracking-[0.2em] text-[10px]">Recent watchdog actions</div>` + events.map(ev => `
+        <div class="rounded border border-slate-800 bg-slate-950 px-2 py-1">
+          ${esc(ev.ts_utc || "")} -- swap ${esc(ev.swap_used_pct_before ?? "?")}% -> ${esc(ev.swap_used_pct_after ?? "?")}% -- gc_collected=${esc(ev.gc_collected_objects ?? "?")} drop_caches_ok=${esc(ev.drop_caches_ok ?? "?")}
+        </div>
+      `).join("");
+    }
+    return payload;
+  } catch (error) {
+    NH.memoryPressureCard.innerHTML = `<div class="text-red-300">Failed to load: ${esc(error.message)}</div>`;
+  }
+}
+
 function scheduleTimeSyncPolling(nodeId) {
   stopTimeSyncPolling();
   STATE.timeSyncPollTimer = window.setTimeout(async () => {
@@ -1356,6 +1391,44 @@ async function startPowerOnStopped() {
   }
 }
 
+async function startFreeHostMemory() {
+  const confirmed = window.confirm(
+    "Free memory on THIS host (the OpenStack/gunicorn server itself, not the scenario VMs)?\n\n" +
+    "This runs gc.collect() on the worker handling this request and drops the kernel page " +
+    "cache/dentries/inodes (sync + echo 1 > /proc/sys/vm/drop_caches). It never deletes files " +
+    "and never touches swap."
+  );
+  if (!confirmed) return;
+  setStatus("Freeing host memory", "warn");
+  consoleWrite("Requesting host memory free (gc.collect + drop_caches)...");
+  try {
+    const response = await fetch("/api/node-health/host/free-memory", { method: "POST" });
+    const payload = await response.json();
+    if (!response.ok) {
+      consoleWrite(`Free-memory request failed: ${payload?.error || "not_available"}`);
+      setStatus("Free-memory failed", "error");
+      return;
+    }
+    consoleWrite(`gc.collect() released ${payload.gc_collected_objects} objects in this worker.`);
+    if (payload.drop_caches?.ok) {
+      consoleWrite("drop_caches: ok.");
+    } else if (payload.drop_caches?.attempted) {
+      consoleWrite(`drop_caches failed: ${payload.drop_caches.error || "unknown error"}. Install the NOPASSWD sudoers rule via start_dashboard.sh ("[2.9/6]") and retry.`);
+    } else {
+      consoleWrite("drop_caches script not found — only gc.collect() ran.");
+    }
+    const before = payload.before || {};
+    const after = payload.after || {};
+    consoleWrite(`mem_avail_mb: ${before.mem_avail_mb ?? "n/a"} -> ${after.mem_avail_mb ?? "n/a"} (delta ${payload.mem_avail_mb_delta ?? "n/a"})`);
+    consoleWrite(`swap_used_mb: ${before.swap_used_mb ?? "n/a"} -> ${after.swap_used_mb ?? "n/a"} (swap is intentionally left untouched by this button)`);
+    setStatus("Host memory free requested", "ok");
+    await loadNodes(false);
+  } catch (error) {
+    consoleWrite(`Free-memory request failed: ${error.message}`);
+    setStatus("Free-memory failed", "error");
+  }
+}
+
 function startOpenstackRestart() {
   const confirmed = window.confirm("Restart OpenStack services from Node Health? This can temporarily degrade Horizon, Keystone, Nova and Neutron while containers restart.");
   if (!confirmed) return;
@@ -1417,16 +1490,19 @@ NH.btnFixTimeSync.addEventListener("click", () => runTimeSync(true).catch(error 
 NH.btnCleanupSelected.addEventListener("click", startCleanup);
 NH.btnPowerOnStopped.addEventListener("click", startPowerOnStopped);
 NH.btnRestartOpenstack.addEventListener("click", startOpenstackRestart);
+NH.btnFreeHostMemory.addEventListener("click", startFreeHostMemory);
+NH.btnRefreshMemoryPressure.addEventListener("click", () => loadMemoryPressure().catch(() => {}));
 NH.btnCleanupFloatingIps.addEventListener("click", startFloatingIpCleanup);
 NH.btnOpenHealthAlertCenter.addEventListener("click", openHealthAlertCenter);
 NH.btnClearConsole.addEventListener("click", () => { NH.console.textContent = ""; });
 
 document.addEventListener("DOMContentLoaded", () => {
-  Promise.allSettled([loadNodes(false), loadHealthSummary(true)]).then(results => {
+  Promise.allSettled([loadNodes(false), loadHealthSummary(true), loadMemoryPressure()]).then(results => {
     const firstError = results.find(result => result.status === "rejected");
     if (firstError) {
       setStatus("Load Error", "error");
       consoleWrite(`Failed to load node health module: ${firstError.reason.message}`);
     }
   });
+  window.setInterval(() => loadMemoryPressure().catch(() => {}), 30000);
 });

@@ -1,0 +1,20 @@
+{
+  "instance_id": "21bba783-8c13-4013-a0c2-82d9fa02aa54",
+  "instance_name": "FUXA_Instance",
+  "installed_tools": {
+    "suricata": "2026-10-09T02:51:04.493081+00:00",
+    "wazuh_agent": "2026-10-09T02:53:26.710533+00:00",
+    "rollback_suricata_ping_detection": "2026-10-09T02:55:45.258455+00:00",
+    "rollback_suricata_modbus_register_detection": "2026-10-09T02:56:07.591226+00:00",
+    "rollback_wazuh_suricata_integration": "2026-10-09T02:56:31.713642+00:00",
+    "wazuh_fim_realtime": "2026-10-09T02:56:57.806910+00:00"
+  },
+  "install_started_utc": {
+    "suricata": "2026-10-09T02:50:26.395315+00:00",
+    "wazuh_agent": "2026-10-09T02:51:04.502199+00:00",
+    "rollback_suricata_ping_detection": "2026-10-09T02:55:29.075660+00:00",
+    "rollback_suricata_modbus_register_detection": "2026-10-09T02:55:45.365067+00:00",
+    "rollback_wazuh_suricata_integration": "2026-10-09T02:56:07.594428+00:00",
+    "wazuh_fim_realtime": "2026-10-09T02:56:31.720799+00:00"
+  }
+}

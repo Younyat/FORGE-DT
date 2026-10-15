@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-10-10T13:10:03.456520+00:00",
+  "cases": [
+    {
+      "repetition_number": 1,
+      "execution_id": "EXEC-0001",
+      "case_id": "case-f93fc233",
+      "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20261010-110152",
+      "forensic_result_card": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20261010-101053-B301/level_B/EXEC-0001/forensic_result_card.json",
+      "forensic_comparison_profile": "app_core/infrastructure/forensics/evidence_store/repetition_campaigns/CMP-20261010-101053-B301/level_B/EXEC-0001/forensic_comparison_profile.json",
+      "nested_level_a_campaign_id": "CMP-20261010-121955-53D8",
+      "nested_level_a_report_path": "app_core/infrastructure/forensics/scientific_reports/level_a_repetitions/case-f93fc233/CMP-20261010-121955-53D8/level_A_2026-10-10T121955.730562_0000"
+    }
+  ]
+}

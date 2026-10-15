@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import contextlib
 import csv
+import gc
 import json
+import logging
 import math
 import os
 import shutil
@@ -10,6 +12,7 @@ import statistics
 import subprocess
 import threading
 import time
+import tracemalloc
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -27,6 +30,7 @@ from .level_b_orchestrator import (
     _build_alert_matcher,
     _case_id_for_case_dir,
     _launch_attack,
+    _resolve_injected_attack_parameters,
     _resolve_real_targets,
     _sha256_path,
     _wait_for_lifecycle_job,
@@ -58,6 +62,30 @@ from ..forensics.network_context_importer import (
 )
 from ..monitor.alerts_logger import run_monitor_session
 from ..node_health.node_health_api import cleanup_node_free_space
+
+# OT State Twin (gemelo digital forense, piloto) -- capa opcional y aditiva: importada de forma
+# defensiva para que un fallo en ese modulo nuevo (PLC inalcanzable, mbpoll ausente, etc.) nunca
+# impida importar este orquestador ni tumbe una repeticion Level B/C real. Ver
+# investigacion_y_novedad/06_implementacion_forge_dt.md para el porque de este enganche.
+try:
+    from ..ot_state_twin.service import (
+        capture_baseline_for_repetition,
+        compute_corroboration_verdict,
+        poll_burst_and_compare_for_repetition,
+        repetition_scope_id,
+    )
+except Exception:
+    def capture_baseline_for_repetition(campaign_id: str, execution_id: str) -> dict:
+        return {"ok": False, "reason": "ot_state_twin_unavailable"}
+
+    def poll_burst_and_compare_for_repetition(campaign_id: str, execution_id: str, **_kwargs) -> dict:
+        return {"ok": False, "reason": "ot_state_twin_unavailable"}
+
+    def repetition_scope_id(campaign_id: str, execution_id: str) -> str:
+        return f"{campaign_id}__{execution_id}"
+
+    def compute_corroboration_verdict(scope_id: str) -> dict:
+        return {"scope_id": scope_id, "verdict": "ot_state_twin_unavailable"}
 
 RUNTIME_ROOT = project_path("runtime", "level_b_repetitions")
 VALIDATION_REPORTS_ROOT = EVIDENCE_STORE_ROOT / "validation_reports"
@@ -1758,6 +1786,60 @@ def _observed_case_state(case_id: str | None, case_dir: Path | None) -> dict:
     }
 
 
+def _current_rss_mb() -> float | None:
+    """Memoria residente (RSS) real del proceso actual, leida directamente de
+    /proc/self/status -- sin depender de psutil (no instalado en este entorno).
+    Solo funciona en Linux; devuelve None en cualquier otro caso, sin lanzar nunca."""
+    try:
+        with open("/proc/self/status", "r", encoding="utf-8") as fh:
+            for line in fh:
+                if line.startswith("VmRSS:"):
+                    return int(line.split()[1]) / 1024.0
+    except Exception:
+        pass
+    return None
+
+
+def _tracemalloc_events_path(job_id: str) -> Path:
+    return RUNTIME_ROOT / job_id / "tracemalloc_diff.jsonl"
+
+
+def _append_tracemalloc_diff(job_id: str, phase_hint: str, baseline, snapshot, rss_mb: float | None) -> None:
+    """Diffs a tracemalloc snapshot against the baseline taken when this
+    `_heartbeat_during` block started, and appends the top 15 growers (by
+    real bytes, not guessed) to a per-job JSONL file. Read-only/append-only,
+    never raises -- this is pure diagnostics, must never affect the actual
+    job. Motivated directly by the 2026-09-24 incident: five consecutive
+    real campaign failures with the same RSS-climbs-then-worker-dies shape,
+    across TWO different phases (analysis, then reconstruction after the
+    first fix), where reading the code by eye correctly found one real bug
+    (`foc_indexer.py`) but missed a second one -- this gives a live,
+    per-line answer instead of guessing again."""
+    try:
+        top_stats = snapshot.compare_to(baseline, "lineno")[:15]
+        path = _tracemalloc_events_path(job_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        event = {
+            "ts_utc": datetime.now(timezone.utc).isoformat(),
+            "phase_hint": phase_hint,
+            "rss_mb": rss_mb,
+            "top_growers": [
+                {
+                    "traceback": str(stat.traceback),
+                    "size_diff_mb": round(stat.size_diff / (1024 * 1024), 2),
+                    "size_mb": round(stat.size / (1024 * 1024), 2),
+                    "count_diff": stat.count_diff,
+                    "count": stat.count,
+                }
+                for stat in top_stats
+            ],
+        }
+        with open(path, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(event, default=str) + "\n")
+    except Exception:
+        pass
+
+
 @contextlib.contextmanager
 def _heartbeat_during(job_id: str, job_path: Path, interval: int = 30):
     """Keep a job's heartbeat (`updated_at`) fresh for the duration of a long
@@ -1781,15 +1863,57 @@ def _heartbeat_during(job_id: str, job_path: Path, interval: int = 30):
     `update_job(job_id, job_path)` with zero changes still stamps
     `updated_at` unconditionally, so this is a true heartbeat-only touch —
     it does not alter any other job field.
-    """
+
+    2026-09-23: cada latido ahora tambien persiste `heartbeat_rss_mb` (memoria residente real del
+    proceso, ver _current_rss_mb) y lo registra en app.log -- puramente informativo, no cambia el
+    comportamiento del heartbeat en si. Motivado por un fallo real donde el hilo entero (heartbeat
+    incluido) dejo de responder sin ningun aviso previo; con esto, la proxima vez habria un rastro
+    real de memoria justo antes de que ocurriera, sin depender de reconstruirlo a posteriori.
+
+    2026-09-24: si `tracemalloc` esta activo en este proceso (ver app.py::create_app()), cada latido
+    tambien toma un snapshot y lo compara contra el snapshot tomado al ENTRAR a este bloque
+    concreto -- es decir, el diff acumulado de asignaciones Python vivas desde que empezo justo esta
+    llamada (adquisicion, espera del ciclo de vida, adjuntar el caso, etc.), no desde el arranque del
+    proceso. El top-15 de "quien crecio mas" (fichero:linea, MB reales) se anexa a
+    runtime/level_b_repetitions/<job_id>/tracemalloc_diff.jsonl. Motivado por: el fix del
+    2026-09-24 en foc_indexer.py arreglo el crecimiento de memoria durante `repetition_1_analysis`,
+    pero el MISMO patron reaparecio inmediatamente despues en `repetition_1_reconstruction` (RSS
+    21GB->38GB, worker muerto) -- la lectura de codigo encontro un culpable real pero no el unico, y
+    seguir adivinando por lectura de codigo no escala. Coste: tracemalloc tiene overhead real de
+    memoria/CPU mientras esta activo -- aceptado deliberadamente por el usuario para esta
+    investigacion, no es el estado por defecto deseado a largo plazo."""
     stop = threading.Event()
+    tracing_active = False
+    try:
+        tracing_active = tracemalloc.is_tracing()
+    except Exception:
+        tracing_active = False
+    baseline_snapshot = None
+    if tracing_active:
+        try:
+            baseline_snapshot = tracemalloc.take_snapshot()
+        except Exception:
+            baseline_snapshot = None
 
     def _beat():
         while not stop.wait(interval):
+            rss_mb = None
             try:
-                update_job(job_id, job_path)
+                rss_mb = _current_rss_mb()
+                extra = {"heartbeat_rss_mb": round(rss_mb, 1)} if rss_mb is not None else {}
+                update_job(job_id, job_path, **extra)
+                if rss_mb is not None:
+                    logging.getLogger("app_logger").info(
+                        f"[HEARTBEAT] job_id={job_id} rss_mb={rss_mb:.1f}"
+                    )
             except Exception:
                 pass
+            if baseline_snapshot is not None:
+                try:
+                    snapshot = tracemalloc.take_snapshot()
+                    _append_tracemalloc_diff(job_id, job_path.stem if hasattr(job_path, "stem") else str(job_path), baseline_snapshot, snapshot, rss_mb)
+                except Exception:
+                    pass
 
     t = threading.Thread(target=_beat, daemon=True, name=f"heartbeat-{job_id}")
     t.start()
@@ -1926,6 +2050,55 @@ def _refresh_manifest_hash_if_stale(case_dir: Path, rel_path: str, artifact_type
         pass
 
 
+def _fresh_causal_view(case_id: str | None, case_dir: Path | None, stale_causal: dict, stale_warnings: list) -> tuple[dict, list]:
+    """Prefers the REAL, current on-disk causal-reconstruction state over
+    whatever snapshot was frozen into forensic_comparison_profile.json /
+    forensic_result_card.json by the attach step -- confirmed live
+    (2026-10-05, campaign CMP-20261005-162758-9477) that those are written
+    BEFORE causal reconstruction actually finishes, so a case that completed
+    successfully (CPR=0.875) kept reporting "reconstruction blocked, 0
+    recovered" forever afterward in this report, because
+    summarize_case_causal_state() -- the function that already self-heals by
+    re-reading the real on-disk causal_status.json -- was never called again
+    after reconstruction completed. Falls back to the original frozen
+    snapshot unchanged if anything here fails or the fresh state isn't
+    actually more complete, so this can only correct a report, never make it
+    worse than before."""
+    if not case_id or not case_dir:
+        return stale_causal, stale_warnings
+    try:
+        from ..foc_causal_reconstruction.service import summarize_case_causal_state
+        fresh = summarize_case_causal_state(case_id, case_dir)
+    except Exception:
+        return stale_causal, stale_warnings
+    fresh_status = str(fresh.get("status") or fresh.get("state") or "")
+    if fresh_status not in {"completed", "completed_with_degradation"}:
+        return stale_causal, stale_warnings
+    metrics = fresh.get("metrics_preview") or {}
+    fresh_causal = {
+        "status": fresh_status,
+        "expected_edges": metrics.get("expected_edges"),
+        "recovered_edges": metrics.get("recovered_edges"),
+        "degraded_edges": metrics.get("degraded_edges"),
+        "ambiguous_edges": metrics.get("ambiguous_edges"),
+        "missing_edges": metrics.get("missing_edges"),
+        "cpr": metrics.get("causal_path_recoverability"),
+        "weighted_cpr": metrics.get("weighted_cpr"),
+        "reconstruction_confidence": metrics.get("reconstruction_confidence"),
+    }
+    # The stale result_card's "scientific_limitations" can include a
+    # "Causal reconstruction is blocked..."/"has not been generated" message
+    # left over from before reconstruction ran -- now factually false once we
+    # know it completed. Drop only those specific stale lines; every other
+    # real warning (temporal ambiguity, etc.) passes through unchanged.
+    fresh_warnings = [
+        w for w in stale_warnings
+        if "reconstruction is blocked" not in str(w).lower()
+        and "has not been generated" not in str(w).lower()
+    ]
+    return fresh_causal, fresh_warnings
+
+
 def _repetition_result_from_case(
     *,
     repetition_number: int,
@@ -1984,6 +2157,7 @@ def _repetition_result_from_case(
             f"nested Level A scientific report did not complete successfully for this Level B case "
             f"(status={nested_level_a.get('status') or 'unknown'}){reason}"
         )
+    causal, warnings = _fresh_causal_view(case_id, case_dir, causal, warnings)
     blockers = []
     blockers.extend([str(item) for item in ((lifecycle_result or {}).get("errors") or []) if item])
     trigger_ts = trigger_primary.get("ts_utc") or trigger_primary.get("timestamp")
@@ -2347,14 +2521,25 @@ def _run_nested_level_a_report_for_case(
     if not child_job_id:
         return {"status": "failed", "reason": "nested_level_a_job_not_created", "campaign_id": child_campaign_id}
 
-    child = _wait_for_child_job(
-        child_job_id,
-        parent_job_id=job_id,
-        parent_job_path=job_path,
-        current_phase=f"repetition_{rep_idx}_store",
-        current_phase_label="Store repetition result",
-        current_detail_prefix=f"Nested Level A {repetition_number}/{total_repetitions}",
-    )
+    # Sin _heartbeat_during aqui, este job PADRE (el propio Level B, no el hijo Level A) se queda
+    # sin ningun update_job() propio durante toda la espera de abajo -- confirmado en vivo
+    # (2026-09-22/23): _wait_for_child_job's docstring ya avisaba de que un informe Level A
+    # anidado "rutinariamente supera 90 minutos", pero solo cubria el caso de que el HIJO muriera
+    # de verdad; no cubria que el propio PADRE se quede con `updated_at` viejo mientras espera,
+    # que un get_job() desde OTRO worker de gunicorn (p.ej. un chequeo de estado periodico) lee
+    # como huerfano via _ORPHAN_JOB_GRACE_SECONDS (180s) y lo declara `failed` -- exactamente el
+    # mismo patron de bug ya identificado y arreglado dos veces en este fichero (adquisicion,
+    # linea ~3339; espera del analisis, linea ~3879), aqui simplemente sin aplicar todavia a este
+    # tercer punto de espera bloqueante.
+    with _heartbeat_during(job_id, job_path):
+        child = _wait_for_child_job(
+            child_job_id,
+            parent_job_id=job_id,
+            parent_job_path=job_path,
+            current_phase=f"repetition_{rep_idx}_store",
+            current_phase_label="Store repetition result",
+            current_detail_prefix=f"Nested Level A {repetition_number}/{total_repetitions}",
+        )
     child_status = str(child.get("status") or "failed").lower()
     report = dict(child.get("level_a_report") or {})
     return {
@@ -2371,6 +2556,58 @@ def _run_nested_level_a_report_for_case(
         "report_markdown_path": report.get("report_markdown_path"),
         "completed_repetitions": report.get("completed_repetitions"),
         "requested_repetitions": report.get("requested_repetitions") or nested_level_a_repetitions,
+    }
+
+
+def _attach_and_aggregate_twin_verdicts(campaign_id: str, results: list[dict]) -> dict:
+    """Adjunta a cada repeticion su veredicto de corroboracion del gemelo digital
+    (ot_state_twin::compute_corroboration_verdict, seccion 'novedad cientifica' de
+    investigacion_y_novedad/05_nombre_y_evolucion.md) bajo la clave nueva
+    `ot_state_twin_verdict`, y devuelve un agregado de campana para `aggregate_twin_metrics`.
+    Puramente aditivo: nunca modifica ninguna clave ya existente de `results`, y un fallo al
+    calcular el veredicto de una repeticion concreta (gemelo no disponible, sin datos para ese
+    scope, etc.) solo dota a esa repeticion de `ot_state_twin_verdict: None` -- nunca rompe la
+    generacion del informe."""
+    verdicts: list[dict] = []
+    for item in results:
+        execution_id = item.get("execution_id")
+        verdict = None
+        if execution_id:
+            try:
+                scope_id = repetition_scope_id(campaign_id, execution_id)
+                verdict = compute_corroboration_verdict(scope_id)
+            except Exception:
+                verdict = None
+        item["ot_state_twin_verdict"] = verdict
+        if verdict is not None:
+            verdicts.append(verdict)
+
+    verdict_counts: dict[str, int] = {}
+    total_control_law_violations = 0
+    total_state_divergences = 0
+    for v in verdicts:
+        key = str(v.get("verdict") or "unknown")
+        verdict_counts[key] = verdict_counts.get(key, 0) + 1
+        total_control_law_violations += int(v.get("control_law_violation_count") or 0)
+        total_state_divergences += int(v.get("state_divergence_count") or 0)
+
+    known_window_verdicts = [v for v in verdicts if v.get("verdict") != "attack_window_unknown"]
+    corroborated = verdict_counts.get("corroborado", 0)
+    corroboration_rate = (
+        corroborated / len(known_window_verdicts) if known_window_verdicts else None
+    )
+
+    return {
+        "n_repetitions_with_twin_data": len(verdicts),
+        "verdict_counts": verdict_counts,
+        "corroboration_rate": corroboration_rate,
+        "total_control_law_violations": total_control_law_violations,
+        "total_state_divergences": total_state_divergences,
+        "note": (
+            "corroboration_rate = repeticiones con veredicto 'corroborado' / repeticiones con "
+            "ventana de ataque conocida (excluye 'attack_window_unknown'). None si ninguna "
+            "repeticion tuvo ventana de ataque conocida."
+        ),
     }
 
 
@@ -2718,6 +2955,7 @@ def _store_level_b_report(
     generated_at = utc_now()
     job_snapshot = get_job(job_id) or {}
     aggregate_timing, aggregate_reconstruction = _aggregate_metrics(results)
+    aggregate_twin = _attach_and_aggregate_twin_verdicts(campaign_id, results)
     completed_repetitions = sum(1 for item in results if item.get("execution_status") == "completed")
     partial_repetitions = sum(1 for item in results if item.get("execution_status") == "partial")
     failed_repetitions = sum(1 for item in results if item.get("execution_status") == "failed")
@@ -2754,6 +2992,7 @@ def _store_level_b_report(
         },
         "aggregate_timing_metrics": aggregate_timing,
         "aggregate_reconstruction_metrics": aggregate_reconstruction,
+        "aggregate_twin_metrics": aggregate_twin,
         "structured_metrics": {
             "level": "B",
             "n_repetitions": len(results),
@@ -3057,12 +3296,37 @@ def _run_single_repetition(
     effective_attack_status = "queued"
     effective_alert_status = "queued"
 
+    # OT State Twin (piloto): captura del estado real del PLC como "esperado" de ESTA
+    # repeticion, justo antes de su ataque -- nunca bloquea ni falla la repeticion si el PLC
+    # no es alcanzable o el modulo no esta disponible, solo queda como aviso no bloqueante.
+    ot_twin_baseline = capture_baseline_for_repetition(campaign_id, execution_id)
+    if not ot_twin_baseline.get("ok"):
+        append_job_list(
+            job_id,
+            job_path,
+            "warnings",
+            {
+                "message": (
+                    "OT state twin baseline capture failed before this repetition's attack; "
+                    "state-divergence detection will be unavailable for this repetition."
+                ),
+                "repetition": repetition_number,
+                "reason": ot_twin_baseline.get("reason"),
+            },
+        )
+
     for attempt_number in range(1, MAX_TRIGGER_ARMING_ATTEMPTS + 1):
         raise_if_cancelled(job_id, job_path, phase_key=f"repetition_{rep_idx}_attack", phase_label="Execute OT register-modification attack", detail="Level B repetition batch cancellation was requested during repeated trigger arming attempts.")
         attempt_suffix = f"attempt {attempt_number}/{MAX_TRIGGER_ARMING_ATTEMPTS}"
         _emit_phase(job_id, job_path, phase_key=f"repetition_{rep_idx}_attack", phase_label="Execute OT register-modification attack", status="running", detail=f"Launching {attack.get('attack_id')} against PLC target {target.get('vm_ip')} ({attempt_suffix}).", category="repetition", index=1, repetition_number=rep_idx, total_repetitions=total_repetitions, extra={"current_attack_status": "running", "trigger_attempt": attempt_number, **phase_extra})
         current_attack_started_at = utc_now()
-        current_attack_result = _launch_attack(attack, target.get("vm_ip"), target.get("role"))
+        # Same fix as level_b_orchestrator._run_real_level_b_execution: reads
+        # config["injected_faults"] (fault_injection module) to decide whether
+        # this attack carries a real, explicit `value` or the usual {} --
+        # ensures Level C campaigns (which arrive here, not through
+        # level_b_orchestrator) also respect the fault-injection
+        # configuration.
+        current_attack_result = _launch_attack(attack, target.get("vm_ip"), target.get("role"), parameters=_resolve_injected_attack_parameters(config, attack))
         current_attack_completed_at = utc_now()
         if not current_attack_result.get("ok"):
             reason = current_attack_result.get("reason") or "Attack execution failed."
@@ -3103,6 +3367,51 @@ def _run_single_repetition(
         attack_result = current_attack_result
         effective_attack_status = "completed"
         _emit_phase(job_id, job_path, phase_key=f"repetition_{rep_idx}_attack", phase_label="Execute OT register-modification attack", status="completed", detail=f"Attack completed successfully ({attempt_suffix}). Output directory: {attack_result.get('_output_dir') or 'not_available'}.", category="repetition", index=1, repetition_number=rep_idx, total_repetitions=total_repetitions, extra={"current_attack_status": "completed", "trigger_attempt": attempt_number, **phase_extra})
+
+        # OT State Twin (piloto): una rafaga de varias lecturas reales en sucesion rapida justo
+        # tras el ataque (no "durante" -- _launch_attack() es sincrono/bloqueante, ver
+        # poll_burst_and_compare() para el porque), cada una comparada contra el baseline
+        # capturado antes de este ataque y contra la ley de control real del tanque. Nunca bloquea
+        # ni falla la repeticion; una divergencia detectada queda como aviso informativo -- es
+        # evidencia adicional de la capa "ot", separada a proposito de las alertas de
+        # Suricata/Wazuh (seccion 12).
+        ot_twin_result = poll_burst_and_compare_for_repetition(
+            campaign_id,
+            execution_id,
+            attack_started_at=current_attack_started_at,
+            attack_completed_at=current_attack_completed_at,
+        )
+        if not ot_twin_result.get("ok"):
+            append_job_list(
+                job_id,
+                job_path,
+                "warnings",
+                {
+                    "message": "OT state twin poll burst failed after this repetition's attack.",
+                    "repetition": repetition_number,
+                    "reason": ot_twin_result.get("reason"),
+                },
+            )
+        elif ot_twin_result.get("diverged_any"):
+            diffs = []
+            for poll_result in ot_twin_result.get("results") or []:
+                diffs.extend((poll_result.get("comparison") or {}).get("differences") or [])
+                diffs.extend((poll_result.get("control_law_check") or {}).get("differences") or [])
+            append_job_list(
+                job_id,
+                job_path,
+                "warnings",
+                {
+                    "message": (
+                        "OT state twin detected a real-state divergence (baseline and/or control-law "
+                        "consistency) during the post-attack poll burst for this repetition "
+                        "(evidence_layer=ot, independent of IDS/SIEM alerts)."
+                    ),
+                    "repetition": repetition_number,
+                    "burst_count": ot_twin_result.get("burst_count"),
+                    "differences": diffs,
+                },
+            )
 
         raise_if_cancelled(job_id, job_path, phase_key=f"repetition_{rep_idx}_alert", phase_label="Wait for high-severity alert", detail="Level B repetition batch cancellation was requested before alert waiting.")
         _emit_phase(job_id, job_path, phase_key=f"repetition_{rep_idx}_alert", phase_label="Wait for high-severity alert", status="running", detail=f"Watching monitor {monitor.get('vm_ip')} for a HIGH/CRITICAL alert matching the OT attack profile ({attempt_suffix}).", category="repetition", index=2, repetition_number=rep_idx, total_repetitions=total_repetitions, extra={"current_alert_status": "running", "trigger_attempt": attempt_number, **phase_extra})
@@ -3787,13 +4096,22 @@ def _run_single_repetition(
         "acquisition_executed": {"status": "completed" if (memory_result.get("ok") or disk_result.get("ok")) else "completed_with_degradation", "reason": "automatic forensic acquisition ran after the trigger"},
         "evidence_preserved": {"status": "completed", "reason": "the generated case preserves the fresh evidence set and custody records"},
     }
-    attach_result = attach_real_case_to_execution(
-        campaign_id,
-        execution_id,
-        case_id=case_id,
-        attack_record_override=attack_record_override,
-        stage_overrides=stage_overrides,
-    )
+    # Confirmado en vivo (2026-09-22/23): esta llamada construye los perfiles reales de la
+    # ejecucion (build_execution_profiles -> baseline_noise/ground_truth_seal sobre el caso recien
+    # adquirido, potencialmente varios hosts de memoria/disco/red) sin ningun update_job() propio
+    # mientras tanto -- el job PADRE se quedo con `updated_at` viejo aqui mismo (fase quedo
+    # congelada en "repetition_1_reconstruction" con este mismo detalle) y un get_job() desde otro
+    # worker de gunicorn lo declaro huerfano/`failed` via _ORPHAN_JOB_GRACE_SECONDS (180s), aunque
+    # el hilo seguia vivo. Mismo patron de bug ya arreglado dos veces en este fichero (adquisicion,
+    # espera del analisis) -- aqui era la tercera llamada bloqueante sin proteger.
+    with _heartbeat_during(job_id, job_path):
+        attach_result = attach_real_case_to_execution(
+            campaign_id,
+            execution_id,
+            case_id=case_id,
+            attack_record_override=attack_record_override,
+            stage_overrides=stage_overrides,
+        )
     _emit_phase(job_id, job_path, phase_key=f"repetition_{rep_idx}_reconstruction", phase_label="Run reconstruction/dependency analysis", status="completed" if attach_result.get("status") == "completed" else "completed_with_degradation", detail=f"Execution {execution_id} now points to case {case_id} with comparison family {attach_result.get('comparison_family_id')}.", category="repetition", index=7, repetition_number=rep_idx, total_repetitions=total_repetitions, extra={"current_reconstruction_status": attach_result.get("status"), **phase_extra})
 
     nested_level_a = _run_nested_level_a_report_for_case(
@@ -3967,7 +4285,14 @@ def _run_level_b_repetitions_job(
 
     raise_if_cancelled(job_id, job_path, phase_key="optional_cleanup", phase_label="Clean previous heavy cases", detail="Level B repetition batch was cancelled before mandatory cleanup of previous heavy cases.")
     _emit_phase(job_id, job_path, phase_key="optional_cleanup", phase_label="Clean previous heavy cases", status="running", detail="Inspecting and deleting previous heavy forensic cases before launching the independent Level B repetitions. This is mandatory so two heavy cases never coexist.", category="setup", index=1, total_repetitions=requested_repetitions)
-    cleanup_manifest = _run_cleanup(runtime_dir, enabled=True)
+    # 2026-09-24: envuelto en _heartbeat_during -- fallo real observado: este borrado
+    # (decenas de GB, un solo caso pesado) puede tardar mas de los 900s de gracia del
+    # vigilante de trabajos huerfanos sin tocar el heartbeat del job ni una sola vez,
+    # ya que _run_cleanup() es una unica llamada bloqueante sin progreso intermedio --
+    # misma forma exacta que acquisition/attach_real_case_to_execution/etc., que ya
+    # tenian este mismo arreglo; a este punto de llamada se le habia olvidado antes.
+    with _heartbeat_during(job_id, job_path):
+        cleanup_manifest = _run_cleanup(runtime_dir, enabled=True)
     if cleanup_manifest.get("cleanup_status") == "failed":
         _emit_phase(job_id, job_path, phase_key="optional_cleanup", phase_label="Clean previous heavy cases", status="failed", detail="Mandatory cleanup of previous heavy cases failed. The workflow stops before launching any repetition to avoid coexistence of two heavy cases.", category="setup", index=1, total_repetitions=requested_repetitions)
         update_job(job_id, job_path, status="failed", finished_at=utc_now(), current_phase="optional_cleanup", current_phase_label="Clean previous heavy cases", current_phase_detail="Mandatory cleanup of previous heavy cases failed. No repetition was launched.", progress_percent=100.0, level_b_cleanup_manifest_path=relative_path(runtime_dir / "cleanup_manifest.json"))
@@ -4060,6 +4385,14 @@ def _run_level_b_repetitions_job(
 
     for repetition_number in range(1, requested_repetitions + 1):
         raise_if_cancelled(job_id, job_path, phase_key="start_repetition", phase_label=f"Start repetition {repetition_number}/{requested_repetitions}", detail="Level B repetition batch cancellation was requested before launching the next repetition.")
+        # Re-reads config.json on every repetition (previously loaded ONCE for
+        # the whole job) -- a cheap read of an already-trusted file, and this
+        # is what lets the Fault Injection dashboard toggle `injected_faults`
+        # (e.g. modbus_payload_precision) mid-campaign across several
+        # repetitions and have the change actually apply starting from the
+        # next repetition, instead of staying frozen at whatever value was
+        # set when the job was launched.
+        config = _json_load(campaign_config_path(campaign_id)) or config
         if repetition_number > 1 and results:
             pre_cleanup = _cleanup_previous_heavy_case_before_next_repetition(
                 job_id=job_id,
@@ -4239,8 +4572,8 @@ def _run_level_b_repetitions_job(
 
     # 2026-09-04: rebuild the consolidated forensic package after EVERY job
     # invocation, not just the final one -- at the user's explicit request
-    # ("que se haga de forma automatizada al acabar la campaña o mientras
-    # que la campaña está dando vueltas"), so the package folder updates
+    # ("do it automatically when the campaign finishes or while the campaign
+    # is still running"), so the package folder updates
     # incrementally as repetitions complete instead of only appearing once
     # at the very end. Safe to call this often: build_campaign_forensic_package
     # is idempotent (copytree with dirs_exist_ok=True, and it simply finds

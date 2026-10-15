@@ -3,22 +3,22 @@
   "scenario_id": "scn-b83dbbfb",
   "scenario_name": "industrial_file",
   "created_at": "2026-06-10T10:46:25.396668+00:00",
-  "updated_at": "2026-09-16T05:40:09.403035+00:00",
-  "reconstructed_at": "2026-09-16T05:40:09.403058+00:00",
+  "updated_at": "2026-10-10T16:11:26.230270+00:00",
+  "reconstructed_at": "2026-10-10T16:11:26.230292+00:00",
   "lifecycle_state": "active",
   "read_only_reconstruction": true,
   "bootstrap_mode": true,
   "scenario_bom": {
     "path": "foc-reconstruction/scenario_bom.json",
-    "sha256": "c80146e4a207ea6aad93bd6001b28f5933534e0d951b5ff8b8c39bf9fd83e31d"
+    "sha256": "d5127d975cbd801ac8fbb167bfb204bae66c11754f55f3ab04e913affba4e61c"
   },
   "tools_bom": {
     "path": "foc-reconstruction/tools_bom.json",
-    "sha256": "692bf6ff944544e020990d67b4d65362a18c57b936028e5dc538df9ab19ac0c0"
+    "sha256": "17e7e391e1c009815f44c76a3b710a5748346aed3ccfeea9ff89794880445bd4"
   },
   "timeline": {
     "path": "foc-reconstruction/timeline.json",
-    "sha256": "49248efd343eba2de36a2cf9a736711aedb199f5025e7b932bf462ecc87d119b"
+    "sha256": "22fe199aca0cb66633e464cd334450dd77d2e7aef5e79bea138c982e0165256a"
   },
   "id_mapping_path": "foc-reconstruction/indexes/id_mapping.json",
   "source_indexes": {

@@ -1,0 +1,30 @@
+{
+  "deleted_cases": [
+    "case-0e641a7c",
+    "case-731b2b03"
+  ],
+  "deleted_paths": [
+    "app_core/infrastructure/forensics/evidence_store/CASE-20260926-144041",
+    "app_core/infrastructure/forensics/evidence_store/CASE-20260926-130320"
+  ],
+  "freed_bytes_estimated": 5656278,
+  "freed_bytes_actual": 5656278,
+  "preserved_metadata": [
+    {
+      "case_id": "case-0e641a7c",
+      "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-144041",
+      "size_bytes": 2862691,
+      "lightweight_bundle_path": "runtime/level_b_repetitions/exp-d1759d62ee4e/retained_case_lightweight_bundle/case-0e641a7c",
+      "lightweight_bundle_copied_files": 37
+    },
+    {
+      "case_id": "case-731b2b03",
+      "case_path": "app_core/infrastructure/forensics/evidence_store/CASE-20260926-130320",
+      "size_bytes": 2793587,
+      "lightweight_bundle_path": "runtime/level_b_repetitions/exp-d1759d62ee4e/retained_case_lightweight_bundle/case-731b2b03",
+      "lightweight_bundle_copied_files": 37
+    }
+  ],
+  "cleanup_status": "completed",
+  "warnings": []
+}

@@ -132,8 +132,20 @@ pick_ssh_user() {
 }
 
 chrony_exists() {
+  # Real bug found live: this only checked whether the chronyc BINARY was
+  # installed, not whether the chronyd DAEMON was actually running and
+  # reachable. With the daemon stopped (e.g. fault_injection's
+  # inject_clock_skew.sh now deliberately stops it so an injected offset
+  # isn't instantly self-corrected), `chronyc tracking` fails, but this
+  # function still reported "chrony available" -- so the script kept
+  # retrying the chrony-based measurement and never fell back to
+  # measure_offset_fallback (the plain SSH-epoch comparison, which doesn't
+  # need chronyd at all), ending in a reported "unknown"/no-offset failure
+  # even while a real, measurable clock offset existed. Now checks that
+  # chronyc can actually talk to the daemon, not just that the binary
+  # exists.
   local user="$1" ip="$2"
-  ssh_run "$user" "$ip" "command -v chronyc >/dev/null 2>&1" >/dev/null 2>&1
+  ssh_run "$user" "$ip" "command -v chronyc >/dev/null 2>&1 && chronyc tracking >/dev/null 2>&1" >/dev/null 2>&1
 }
 
 install_and_enable_chrony() {

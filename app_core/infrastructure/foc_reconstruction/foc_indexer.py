@@ -1,7 +1,7 @@
-import hashlib
 from pathlib import Path
 
 from .foc_bootstrap import make_id, read_id_mapping
+from .foc_hashing import hash_file
 from .foc_paths import project_path, relative_path
 from .foc_schema import clone, empty_artifact_reference, empty_relationship_edge
 from .foc_sources import read_json_file, read_jsonl_file, utc_now
@@ -178,6 +178,21 @@ def _infer_case_analysis_artifacts(case_dir: Path, case_id: str) -> list[dict]:
         if artifact_class != "analysis_outputs":
             continue
         ref = clone(empty_artifact_reference())
+        # 2026-09-24: era `hashlib.sha256(path.read_bytes())` -- carga el fichero
+        # ENTERO en memoria de golpe (hasta 8MB) por cada artefacto de analisis
+        # indexado, en un bucle que puede recorrer miles de ficheros para un solo
+        # caso. Cambiado a `hash_file()` (ya existente en foc_hashing.py, la misma
+        # que usa collect_sources() para el resto de la plataforma), que lee en
+        # trozos de 1MB -- resultado identico (mismo algoritmo, mismos bytes),
+        # solo cambia como se lee. Motivado por un fallo real: un caso de 51GB
+        # (CASE-20260924-104434) hizo que el RSS de este worker subiera de 21GB a
+        # 37.6GB en ~5 minutos durante exactamente esta fase (regenerate_foc_context),
+        # matando el worker -- documentado con evidencia real (log de heartbeat)
+        # en foc_reconstruction/README.md. No confirmado con profiling en vivo que
+        # esta linea sea la causa unica, pero es el candidato mas fuerte encontrado
+        # por lectura de codigo, y este cambio es estrictamente mas seguro (menos
+        # memoria pico, mismo resultado) sin ningun caso en que pueda ser peor.
+        file_size = path.stat().st_size
         ref.update(
             {
                 "artifact_id": _artifact_id(case_dir.name, relative_path(path)),
@@ -190,8 +205,8 @@ def _infer_case_analysis_artifacts(case_dir: Path, case_id: str) -> list[dict]:
                 "case_id": case_id,
                 "related_instance_id": "unresolved",
                 "related_node_id": "unresolved",
-                "sha256": hashlib.sha256(path.read_bytes()).hexdigest() if path.stat().st_size <= 8 * 1024 * 1024 else "",
-                "size": path.stat().st_size,
+                "sha256": hash_file(path) if file_size <= 8 * 1024 * 1024 else "",
+                "size": file_size,
                 "status": "indexed",
                 "details": {"analysis_output": True},
             }

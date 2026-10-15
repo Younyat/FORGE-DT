@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-10-09T18:50:10.037045+00:00",
+  "warnings": [
+    "6 of 8 expected causal edges were recovered. The reconstruction is partially supported and should be presented with explicit caveats on the degraded or ambiguous edges.",
+    "At least one causal edge is temporally ambiguous under the preserved uncertainty window.",
+    "Some causal edges could not be temporally ordered because the required artifact timestamps were not available or not resolvable.",
+    "Modbus traffic is observed, but register and value precision are not confirmed by packet-level parsing.",
+    "Modbus register and value precision (declared in ground truth as register=4, expected_value=30) is not confirmed by packet-level parsing; only the presence of Modbus traffic is verified here.",
+    "This was the final repetition of the campaign -- case case-116ef95c was kept fully intact as a complete result sample instead of being reduced to the lightweight bundle."
+  ],
+  "blockers": []
+}

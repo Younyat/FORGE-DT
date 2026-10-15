@@ -362,8 +362,23 @@ def _match_asset(entries: Iterable[dict], role: str) -> dict:
 
 
 def discover_runtime_assets() -> dict:
+    # Capturado ANTES de llamar a read_industrial_state(): esa funcion tambien escribe en
+    # RUNTIME_ASSETS_PATH (con un payload parcial, sin `inventory_candidates`) como efecto
+    # colateral -- si se lee el "ultimo bueno conocido" despues de esa llamada, ya estaria pisado.
+    previous_payload = _read_json(RUNTIME_ASSETS_PATH, {})
+
     runtime_assets = read_industrial_state()
     entries = _openstack_server_entries()
+    # Si la consulta EN VIVO a OpenStack no devuelve nada (credenciales no disponibles en este
+    # proceso concreto, API caida, timeout, etc.), no hay que destruir el ultimo inventario real ya
+    # conocido: sin este fallback, un fallo transitorio de OpenStack sobreescribia
+    # industrial_runtime_assets.json con `inventory_candidates: []` y IPs a null, perdiendo datos
+    # reales (nombre/rol/IP de cada maquina desplegada) que otros consumidores del fichero (p.ej.
+    # la atribucion de origen de alertas en monitor/alerts_logger.py) siguen necesitando leer. Solo
+    # se usa como respaldo -- si la consulta en vivo SI devuelve datos, el comportamiento es
+    # identico al de antes de este cambio.
+    if not entries:
+        entries = previous_payload.get("inventory_candidates") or []
     plc_entry = _match_asset(entries, "plc")
     scada_entry = _match_asset(entries, "scada")
 

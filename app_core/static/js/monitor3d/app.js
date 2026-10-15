@@ -4,6 +4,11 @@ import { applyRowLayout } from "./layout.js";
 import { attachInteraction } from "./interaction.js";
 import { startPolling, stopPolling, fetchHostVitals, fetchRepetitionDetail } from "./api.js";
 import * as reconstruction from "./reconstruction.js";
+import * as liveAttack from "./live_attack.js";
+import * as digitalTwin from "./digital_twin_view.js";
+import { buildHostVisual } from "./host-visuals.js";
+import { buildCaseVisual } from "./case-visuals.js";
+import { renderPhaseTimelineHtml } from "./phase_timeline.js";
 
 const viewport = document.getElementById("viewport");
 const three = createScene(viewport);
@@ -51,6 +56,16 @@ function fmtBytes(bytes) {
 function badge(status, label) {
   const s = String(status || "unknown").toLowerCase();
   return `<span class="badge b-${esc(s)}">${esc(label || status || "unknown")}</span>`;
+}
+// Real alert severity, color-coded for a non-specialist reading at a
+// glance -- the generic `.badge`/`b-*` CSS classes don't cover severity
+// words (critical/high/medium/low), so this inlines its own colors instead
+// of silently falling back to no color.
+const SEVERITY_COLORS = { critical: "var(--red)", high: "var(--red)", medium: "var(--amber)", low: "var(--cyan)" };
+function severityBadge(sev) {
+  const s = String(sev || "unknown").toLowerCase();
+  const color = SEVERITY_COLORS[s] || "var(--text-dim)";
+  return `<span style="display:inline-block;padding:1px 9px;border-radius:999px;font-size:10px;font-weight:700;text-transform:uppercase;color:${color};border:1px solid ${color};">${esc(s)}</span>`;
 }
 function bar(pct) {
   const p = Math.max(0, Math.min(100, Number(pct) || 0));
@@ -313,6 +328,11 @@ function renderOverview() {
     applyRowLayout(repBoxes, { y: 18, spacing: 6, maxPerRow: 10 });
   }
 
+  // Case sits BELOW the hosts, not above them -- matches the real
+  // chronological order this whole hierarchy otherwise reads top-to-bottom
+  // (scenario/campaign created first, then machines, then only once an
+  // attack is detected does a case get created) and stops its cables from
+  // crossing back up through the host row to reach it.
   let caseBox = null;
   if (focusCase) {
     const integ = focusCase.integrity || {};
@@ -328,11 +348,14 @@ function renderOverview() {
       statLines: [`${evidenceSteps.filter((s) => s.status === "completed").length}/${evidenceSteps.length} evidence steps`, `${fmt(integ.artifacts_with_hash)}/${fmt(integ.artifacts_total)} artifacts`],
       ringPct: completionPct(evidenceSteps, (s) => s.status === "completed"),
       width: 12, height: 6, depth: 8, raw: focusCase,
+      visualModel: buildCaseVisual(12, 6, 8),
     });
-    caseBox.position.set(0, 10, 0);
+    caseBox.position.set(0, -6, 0);
     three.scene.add(caseBox);
     entityGroups.push(caseBox);
-    addConnector(focusRepBox || campaignBox, caseBox);
+    // Connected below, once the host boxes exist -- one real cable per
+    // host straight into the case (evidence from all 5 machines feeding
+    // the same case), not a single case<-repetition link.
   }
 
   // Role (attacker/victim/plc/...) is stable scenario topology, so it's
@@ -369,13 +392,22 @@ function renderOverview() {
       statusLabel: isAttackTarget ? "attack target" : (rawStatus === "ACTIVE" ? "online" : rawStatus),
       statLines, width: 10, height: 5.5, depth: 7, raw: infra ? { ...h, ...infra, tools: infra.tools } : h,
       boxColor: h.role === "attacker" ? BOX_COLOR_ATTACKER : BOX_COLOR_DEFAULT,
+      visualModel: buildHostVisual(h.role, 10, 5.5, 7),
     });
     entityGroups.push(box);
     three.scene.add(box);
-    addConnector(caseBox || focusRepBox || campaignBox, box);
+    addConnector(focusRepBox || campaignBox, box);
     return box;
   });
-  applyRowLayout(hostBoxes, { y: -6, spacing: 13, maxPerRow: 5 });
+  applyRowLayout(hostBoxes, { y: 10, spacing: 13, maxPerRow: 5 });
+
+  // Evidentiary cables: one per host, straight down into the case -- a
+  // violet tint (matches this dashboard's existing "evidence source link"
+  // color elsewhere) distinguishes them from the structural campaign/
+  // repetition/host cables above, which keep their normal status tint.
+  if (caseBox) {
+    for (const host of hostBoxes) addConnector(host, caseBox, { colorHex: 0x6366f1 });
+  }
 
   renderRelationOverlays(hostBoxes, caseBox, focusLevelB);
 }
@@ -676,11 +708,22 @@ function rebuildScene() {
   updateBreadcrumb();
 }
 
+// True while a sibling full-scene mode (Live Attack View / Digital Twin
+// View) owns the 3D view. The default overview's own navigation (drill-down,
+// breadcrumb, back button, right-click) must no-op while one of these is
+// active -- otherwise it silently rebuilds the default campaign/cases/hosts
+// scene underneath a sibling mode that never got told to exit(), leaving
+// its polling running invisibly and the view stuck showing the wrong scene.
+function sideModeActive() {
+  return liveAttack.isActive() || digitalTwin.isActive();
+}
+
 // The breadcrumb doubles as a level switcher: every level that currently
 // exists (Overview, the campaign/Level C, the case/Level B if one exists,
 // and a drilled host if any) is its own clickable segment, so jumping
 // between levels never requires re-finding and double-clicking a 3D box.
 function goToLevel(target) {
+  if (sideModeActive()) return;
   drilledHostId = target.host ? drilledHostId : null;
   drilledCase = !!target.case;
   drilledCampaign = !!target.campaign;
@@ -874,13 +917,16 @@ function resourceLine(label, pct) {
 // pipeline stages and per-data-type evidence). Only one of host/case can be
 // drilled into at a time. Double-clicking the same box again (or the
 // breadcrumb/back button) returns to the overview.
-attachInteraction(three.renderer.domElement, three.camera, () => entityGroups, {
+attachInteraction(three.renderer.domElement, three.camera, () => (liveAttack.isActive() ? liveAttack.getAllRenderedGroups() : digitalTwin.isActive() ? digitalTwin.getAllRenderedGroups() : entityGroups), {
   onSelect(hit) {
+    if (liveAttack.isActive()) { liveAttack.handleSelect(hit); return; }
+    if (digitalTwin.isActive()) { digitalTwin.handleSelect(hit); return; }
     selectedId = hit.id;
     refreshVisualState();
     renderDetail(hit);
   },
   onDrillDown(hit) {
+    if (sideModeActive()) return; // a sibling mode owns the scene -- never fall back to the default drill-down/overview underneath it
     if (hit.kind === "host") {
       const instanceId = hit.raw.instance_id;
       drilledHostId = drilledHostId === instanceId ? null : instanceId;
@@ -925,6 +971,7 @@ attachInteraction(three.renderer.domElement, three.camera, () => entityGroups, {
 });
 
 document.getElementById("collapse-btn").addEventListener("click", () => {
+  if (sideModeActive()) return;
   drilledHostId = null;
   drilledCase = false;
   drilledCampaign = false;
@@ -958,7 +1005,7 @@ function startLivePolling() {
       // the live scene can still resolve afterward -- without this guard its
       // callback would silently repaint live-mode boxes into what's supposed
       // to be an empty (or partially built) reconstruction scene.
-      if (reconstruction.isReconstructionActive()) return;
+      if (reconstruction.isReconstructionActive() || liveAttack.isActive() || digitalTwin.isActive()) return;
       if (data.unchanged) { connDot.className = "conn-dot"; connText.textContent = "live · no changes"; return; }
       if (repFocusOverride && data.campaign?.job_id !== snapshot?.job_id) repFocusOverride = null; // stale cross-campaign override
       snapshot = data.campaign;
@@ -998,6 +1045,7 @@ export const monitorBridge = {
   startLivePolling,
   addObject: (obj) => three.scene.add(obj),
   removeObject: (obj) => three.scene.remove(obj),
+  getCamera: () => three.camera,
   clearLiveScene: clearScene, // empties ONLY the live-mode arrays -- never touches snapshot/drill flags
   setConnStatus(text, { reconstructing = false, error = false } = {}) {
     connText.textContent = text;
@@ -1008,13 +1056,44 @@ export const monitorBridge = {
 // While reconstruction owns the viewport, its own boxes -- not live-mode's
 // entityGroups (empty during a replay) -- are what needs CSS2D visibility
 // culling; see scene.js's updateEntityVisibility().
-three.setEntities(() => (reconstruction.isReconstructionActive() ? reconstruction.getAllRenderedGroups() : entityGroups));
+three.setEntities(() => (reconstruction.isReconstructionActive() ? reconstruction.getAllRenderedGroups() : liveAttack.isActive() ? liveAttack.getAllRenderedGroups() : digitalTwin.isActive() ? digitalTwin.getAllRenderedGroups() : entityGroups));
 
 function animate() {
   requestAnimationFrame(animate);
   three.render();
 }
 animate();
+
+// ---------------------------------------------------------------------
+// Fullscreen toggle -- a corner control living IN the viewport itself
+// (YouTube-style), not a top-bar text button. Standard browser Fullscreen
+// API on the whole document, so it works identically in live mode and
+// reconstruction mode (both share the same page; this has no notion of
+// which one is active).
+// ---------------------------------------------------------------------
+const fullscreenBtn = document.getElementById("fullscreen-toggle-btn");
+const expandIcon = fullscreenBtn.querySelector(".icon-expand");
+const compressIcon = fullscreenBtn.querySelector(".icon-compress");
+function updateFullscreenIcon() {
+  const active = !!document.fullscreenElement;
+  // SVGElement doesn't reliably expose the `.hidden` IDL property the way
+  // HTMLElement does (it reads back `undefined` even with the `hidden`
+  // attribute present in markup) -- style.display works on any element
+  // and is what actually toggles visibility here.
+  expandIcon.style.display = active ? "none" : "";
+  compressIcon.style.display = active ? "" : "none";
+  fullscreenBtn.title = active ? "Exit fullscreen" : "Fullscreen";
+  fullscreenBtn.setAttribute("aria-label", fullscreenBtn.title);
+}
+fullscreenBtn.addEventListener("click", () => {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    document.documentElement.requestFullscreen().catch(() => {});
+  }
+});
+document.addEventListener("fullscreenchange", updateFullscreenIcon);
+updateFullscreenIcon();
 
 // ---------------------------------------------------------------------
 // Reconstruction mode UI -- thin glue between the DOM controls and
@@ -1027,12 +1106,15 @@ const reconBar = document.getElementById("reconstruction-bar");
 const reconSelect = document.getElementById("reconstruction-campaign-select");
 const reconPlayBtn = document.getElementById("reconstruction-play-btn");
 const reconPauseBtn = document.getElementById("reconstruction-pause-btn");
+const reconStepBackBtn = document.getElementById("reconstruction-step-back-btn");
+const reconStepFwdBtn = document.getElementById("reconstruction-step-fwd-btn");
 const reconResetBtn = document.getElementById("reconstruction-reset-btn");
 const reconExitBtn = document.getElementById("reconstruction-exit-btn");
 const reconBeatLabel = document.getElementById("reconstruction-beat-label");
 const reconProgress = document.getElementById("reconstruction-progress");
 const reconSpeedInput = document.getElementById("reconstruction-speed");
 const reconSpeedLabel = document.getElementById("reconstruction-speed-label");
+const realityGapToggle = document.getElementById("reality-gap-toggle");
 
 // The two side panels swap their whole content between live mode's own
 // (unchanged) click-to-inspect behavior and reconstruction's own
@@ -1040,6 +1122,8 @@ const reconSpeedLabel = document.getElementById("reconstruction-speed-label");
 // rebuilding either side, so live mode's DOM/listeners are never disturbed.
 const liveSourcesPanel = document.getElementById("live-sources-panel");
 const reconProgressPanel = document.getElementById("recon-progress-panel");
+const reconFailurePanel = document.getElementById("recon-failure-panel");
+const reconFailureBody = document.getElementById("recon-failure-body");
 const liveDetailPanel = document.getElementById("live-detail-panel");
 const reconStagePanel = document.getElementById("recon-stage-panel");
 const reconProgressBody = document.getElementById("recon-progress-body");
@@ -1059,6 +1143,8 @@ function setReconPanelsVisible(active) {
 function setTransportEnabled(loaded) {
   reconPlayBtn.disabled = !loaded;
   reconPauseBtn.disabled = !loaded;
+  reconStepBackBtn.disabled = !loaded;
+  reconStepFwdBtn.disabled = !loaded;
   reconResetBtn.disabled = !loaded;
   reconExitBtn.disabled = !loaded;
 }
@@ -1069,6 +1155,22 @@ function kv(k, v) {
 }
 function sectionHeading(text) {
   return `<div style="margin-top:10px;font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;">${esc(text)}</div>`;
+}
+
+// Plain-language reading of a raw result -- not just the number, what it
+// means in practice, for a non-specialist. User's explicit, generalized
+// request: every dashboard/mode, not just one. tone: "good"|"mixed"|"bad".
+function interpretationBox(tone, text) {
+  const colors = { good: "var(--green)", mixed: "var(--amber)", bad: "var(--red)" };
+  const color = colors[tone] || "var(--text-dim)";
+  return `<div style="margin-top:6px;padding:7px 9px;border-radius:6px;border-left:3px solid ${color};color:${color};background:rgba(255,255,255,0.03);font-size:11px;line-height:1.4;">${esc(text)}</div>`;
+}
+
+function interpretCpr(cpr) {
+  if (cpr == null) return null;
+  if (cpr >= 0.9) return { tone: "good", text: "Almost the entire real attack chain could be rebuilt from evidence after the fact -- strong forensic reconstruction." };
+  if (cpr >= 0.6) return { tone: "mixed", text: "Most of the real attack chain could be rebuilt, but real gaps remain -- some steps couldn't be proven from evidence alone." };
+  return { tone: "bad", text: "Only a small part of the real attack chain could be rebuilt from evidence -- most of what happened can't be proven forensically from this case." };
 }
 
 // Left panel: cumulative, campaign-wide counters -- "how far has this whole
@@ -1083,19 +1185,71 @@ function renderReconProgress() {
   html += kv("Repetition", `${s.currentRepetition ?? "—"} / ${s.totalRepetitions || "—"}`);
   html += kv("Repetitions completed", `${s.repetitionsCompleted} (${repPct}%)`);
   html += kv("Overall beat progress", `${s.beatIndex + 1} / ${s.totalBeats} (${beatPct}%)`);
+  // Alert Center -- the real events worth emphasizing (attacks, detections,
+  // fault-injection outcomes, computed metrics), newest first, each one the
+  // SAME real data the 3D callout/camera spotlight just showed (see
+  // reconstruction.js::triggerAlert) -- kept here too since a held camera
+  // shot is transient but this list stays scrollable/reviewable at any pace.
+  if (s.alertFeed?.length) {
+    html += sectionHeading("Alert center");
+    html += `<div class="events-list">`;
+    for (const a of [...s.alertFeed].reverse()) {
+      html += `<div class="alert-feed-row sev-${esc(a.severity)}">` +
+        `<div class="afr-kind">${esc(a.kind)}</div>` +
+        `<div class="afr-title">${esc(a.title)}</div>` +
+        (a.detail ? `<div class="afr-detail">${esc(a.detail)}</div>` : "") +
+        `</div>`;
+    }
+    html += `</div>`;
+  }
   html += sectionHeading("Construction");
   html += kv("Hosts deployed", s.hostsDeployed);
   html += kv("Tools installed", s.toolsInstalled);
   html += sectionHeading("Attack & detection");
   html += kv("Attacks executed", s.attacksExecuted);
   html += kv("Detections", `${s.detectionsTriggered} detected / ${s.detectionsMissed} missed`);
+  if (s.interventionsReplayed) html += kv("Real interventions (Ledger)", s.interventionsReplayed);
   html += sectionHeading("Forensics");
   html += kv("Cases created", s.casesCreated);
   html += kv("Cases sealed", s.casesSealed);
-  html += kv("Artifacts preserved", s.artifactsPreserved);
-  html += kv("Evidence volume", fmtBytes(s.artifactBytesTotal));
+  // "This case" (resets every case_created, grows artifact by artifact as
+  // that case's own preservation_step beats fire) vs. the campaign-wide
+  // running total across every repetition's case so far -- two different
+  // real numbers that were previously collapsed into one, reading as
+  // "stuck" once a case finished and the next repetition's own count
+  // hadn't caught up to the same total yet.
+  if (s.currentCaseId) {
+    html += kv("This case's artifacts", s.currentCaseArtifacts);
+    html += kv("This case's volume", fmtBytes(s.currentCaseBytes));
+    if (s.lastArtifactLabel) {
+      html += kv("Last artifact preserved", `${esc(s.lastArtifactLabel)}${s.lastArtifactBytes != null ? ` (${fmtBytes(s.lastArtifactBytes)})` : ""}`);
+    }
+  }
+  html += kv("Artifacts preserved (campaign)", s.artifactsPreserved);
+  html += kv("Evidence volume (campaign)", fmtBytes(s.artifactBytesTotal));
   html += kv("Analysis phases done", s.analysisPhasesCompleted);
   html += kv("Avg. CPR so far", s.avgCpr != null ? s.avgCpr.toFixed(3) : "—");
+  // CPR per repetition, in order -- the actual number this whole platform's
+  // reproducibility question hinges on. A flat trend across many reps is
+  // itself a real finding; a sudden drop stands out immediately here
+  // instead of needing to remember and compare each repetition beat by
+  // beat.
+  if (s.cprValues?.length) {
+    html += sectionHeading("CPR per repetition");
+    for (const v of s.cprValues) html += kv(`Rep ${v.rep}`, v.cpr.toFixed(3));
+  }
+  // Short scrollback of what just happened -- independent of whatever beat
+  // the Stage Detail panel is showing right now, useful once played past
+  // it or after jumping around.
+  if (s.recentBeats?.length) {
+    html += sectionHeading("Recent beats");
+    html += `<div class="events-list">`;
+    for (const b of [...s.recentBeats].reverse()) {
+      const ts = b.started_at ? esc(fmt(b.started_at)) : "";
+      html += `<div class="event-row"><b>${esc(b.title)}</b>${b.repetition_number ? ` · Rep ${b.repetition_number}` : ""}${ts ? `<br>${ts}` : ""}</div>`;
+    }
+    html += `</div>`;
+  }
   reconProgressBody.innerHTML = html;
 }
 
@@ -1124,25 +1278,160 @@ function renderReconStageDetail(beat) {
   } else if (beat.kind === "attack") {
     const a = p.attack || {};
     html += kv("Attack", esc(a.attack_name));
-    html += kv("MITRE/profile", esc(a.attack_profile_id));
+    html += kv("Catalog ID (MITRE-aligned)", esc(a.attack_profile_id));
     html += kv("Protocol", esc(a.protocol));
     html += kv("Function code", esc(a.function_code));
     html += kv("Register", esc(a.register));
-    html += kv("Value", esc(a.value));
+    html += kv("Value written", esc(a.value));
     html += kv("Target", esc(a.target_node));
+    // Real absolute timestamps, not just the elapsed duration -- the user
+    // explicitly asked for "the times of each thing, when it happened", not
+    // just a summary number.
+    html += kv("Started (real)", esc(fmt(a.started_at)));
+    html += kv("Completed (real)", esc(fmt(a.completed_at)));
     if (beat.real_duration_seconds != null) html += kv("Duration", fmtElapsed(beat.real_duration_seconds));
+    html += interpretationBox("mixed", "This is the real command sent to the industrial process -- the next beat (Detection) shows whether the security monitoring actually caught it, and the full real history of every attempt it took to get a reliable alert match, not just the final outcome.");
+  } else if (beat.kind === "intervention") {
+    // Explicit "did this fault injection actually work, and was it
+    // detected" callout -- user feedback 2026-10-14: this real data was
+    // already flowing in (effect_verified's status/detail IS fault_injection's
+    // own measure_effectiveness() result, twin_observed IS the digital twin
+    // genuinely noticing it) but was only visible buried inside the generic
+    // 6-phase strip below, with no explicit success/detection verdict. Reads
+    // directly from the SAME phase_timeline the strip below also renders --
+    // nothing new fetched, just surfaced plainly before it.
+    const pt = p.phase_timeline || {};
+    const phases = pt.phases || [];
+    const findPhase = (name) => phases.find((ph) => ph.phase === name);
+    const effectPhase = findPhase("effect_verified");
+    const twinPhase = findPhase("twin_observed");
+    html += kv("Fault injection", esc(pt.type || "intervention"));
+    html += kv("Target", esc(pt.target_node_name || pt.target_node_id));
+    if (effectPhase) {
+      const effBadge = effectPhase.status === "done" ? badge("ok", "Effective -- yes")
+        : effectPhase.status === "failed" ? badge("failed", "Effective -- no")
+        : badge("pending", "Effect not yet measured");
+      html += kv("Did it succeed?", effBadge);
+      if (effectPhase.detail) html += kv("Effect evidence (real)", esc(effectPhase.detail));
+    }
+    if (twinPhase) {
+      const detBadge = twinPhase.status === "done" ? badge("ok", "Detected by digital twin") : badge("pending", "Not detected yet");
+      html += kv("Was it detected?", detBadge);
+    }
+    let interpTone = "mixed", interpText;
+    if (effectPhase?.status === "failed") {
+      interpTone = "bad";
+      interpText = "This fault injection did not actually take hold on the real machine -- the measured effect never matched what was expected.";
+    } else if (effectPhase?.status !== "done") {
+      interpText = "This fault injection's real effect has not been measured yet at this point in the replay." +
+        (twinPhase?.status === "done" ? " The digital twin has already recorded noticing something on this node independently of that measurement." : "");
+    } else if (twinPhase?.status === "done") {
+      interpTone = "good";
+      interpText = "This fault injection took real effect AND the digital twin genuinely noticed the resulting divergence -- both the injection and the detection mechanism worked as intended.";
+    } else {
+      interpText = "This fault injection took real effect, but the digital twin has not (yet, at this point in the replay) recorded noticing a divergence from it.";
+    }
+    html += interpretationBox(interpTone, interpText);
+    // Same real phase-timeline widget already verified live in Digital Twin
+    // View's node panel -- reused unchanged here, fed from this beat's own
+    // already-fetched payload instead of a fresh API call, since the whole
+    // point of reconstruction mode is replaying data already on disk.
+    html += renderPhaseTimelineHtml(p.phase_timeline);
   } else if (beat.kind === "detection") {
     const d = p.detection || {};
+    html += interpretationBox(
+      d.outcome === "detected" ? "good" : "bad",
+      d.outcome === "detected"
+        ? "The security monitoring (Suricata/Wazuh) caught this real attack on its own, in time to trigger evidence preservation."
+        : "The security monitoring did NOT catch this real attack -- it happened without raising an alert, so nothing automatically preserved evidence for it."
+    );
     html += kv("Historical outcome", badge(d.outcome));
-    html += kv("Alert rule", esc(d.trigger_alert_rule));
-    html += kv("Severity", esc(d.trigger_alert_severity));
-    html += kv("Alert timestamp", esc(fmt(d.trigger_alert_timestamp)));
-    html += kv("Trigger attempts", esc(d.trigger_attempts_total));
+    html += kv("Matched alert rule", esc(d.trigger_alert_rule));
+    html += kv("Severity", severityBadge(d.trigger_alert_severity));
+    html += kv("Alert timestamp (real)", esc(fmt(d.trigger_alert_timestamp)));
+    // trigger_alert_mitre is the SIEM/IDS's OWN real-time technique tag on
+    // the matched alert (Wazuh/Suricata's own mitre_mapping field) -- a
+    // DIFFERENT real evidence trail than the attack's own catalog ID above
+    // or forensic_twin's post-hoc mapping (see digital_twin_view.js /
+    // forensic_twin's own MITRE badges) -- shown distinctly so it reads as
+    // "what the detector itself concluded", not a duplicate of the other two.
+    if (d.trigger_alert_mitre?.length) {
+      html += kv("MITRE technique (SIEM-detected)", d.trigger_alert_mitre.map((t) => `<span style="display:inline-block;margin-right:4px;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:700;color:var(--cyan);border:1px solid var(--cyan);">${esc(t)}</span>`).join(""));
+    }
+    html += kv("Trigger attempts (real)", esc(d.trigger_attempts_total));
+
+    // Full real history of every attempt it took to get a reliable alert
+    // match -- not just the final outcome. Each attempt already carries its
+    // OWN real attack window and its own detection result; user explicitly
+    // asked for "the complete history including the times of each thing,
+    // when it happened", since a campaign that needed 3 retries to get a
+    // clean alert match is itself an important real finding this view was
+    // previously hiding.
+    const trace = d.trigger_attempt_trace || [];
+    if (trace.length) {
+      html += sectionHeading(`Full detection history -- ${trace.length} real attempt(s)`);
+      if (trace.length > 1) {
+        html += interpretationBox("mixed", `Detection did not succeed on the first try -- it took ${trace.length} real attempts before a reliable alert match was found. Each attempt below re-launched the real attack and re-waited for a real Wazuh/Suricata alert.`);
+      }
+      trace.forEach((t) => {
+        const detected = !!t.trigger_alert_detected;
+        html += `<div class="event-row" style="border-left:3px solid ${detected ? "var(--green)" : "var(--red)"};padding-left:9px;margin:4px 0 10px;">`;
+        html += `<div><b>Attempt ${esc(t.attempt_number)}</b> -- attack ${esc(t.attack_status)}</div>`;
+        html += `<div style="font-size:11px;opacity:0.85;">Attack window (real): ${esc(fmt(t.attack_started_at))} &rarr; ${esc(fmt(t.attack_completed_at))}</div>`;
+        if (detected) {
+          html += `<div style="font-size:11px;margin-top:3px;">Alert matched: <b>${esc(t.trigger_alert_rule || "n/a")}</b> (severity ${severityBadge(t.trigger_alert_severity)}, id ${esc(t.trigger_alert_id || "n/a")})</div>`;
+        } else {
+          html += `<div style="font-size:11px;margin-top:3px;color:var(--red);">No alert matched -- ${esc(t.observed_alerts_count ?? 0)} real alert(s) observed in this window, none matched this attack</div>`;
+        }
+        html += `<div style="font-size:11px;opacity:0.85;">Eligible for forensic intervention: ${t.forensic_intervention_eligible ? "yes" : "no"}${t.eligibility_reason ? " -- " + esc(t.eligibility_reason) : ""}</div>`;
+        if (t.automatic_preservation_armed) html += `<div style="font-size:11px;color:var(--green);">Automatic evidence preservation armed</div>`;
+        if (t.fallback_reasons?.length) html += `<div style="font-size:11px;opacity:0.7;">Fallback: ${esc(t.fallback_reasons.join("; "))}</div>`;
+        if (t.background_case_detected) html += `<div style="font-size:11px;opacity:0.7;">Adopted background case: ${esc(t.background_case_detected.case_id || "n/a")}</div>`;
+        html += `</div>`;
+      });
+    }
   } else if (beat.kind === "case_created") {
     const c = p.case || {};
     html += kv("Case ID", esc(c.case_real_name || c.case_id));
     html += sectionHeading("Evidence pipeline");
-    for (const step of c.evidence_pipeline || []) html += kv(step.label, badge(step.status));
+    for (const step of c.evidence_pipeline || []) {
+      html += kv(step.label, badge(step.status));
+      // The actual reason a step is "partial"/"blocked" (real text, e.g.
+      // "forensic analysis has not been generated for this case") -- this
+      // is the concrete answer to "why isn't this at 100%", not just the
+      // status color.
+      if (step.detail && step.status !== "completed") {
+        html += `<div class="event-row" style="margin-top:-2px;margin-bottom:4px;">${esc(step.detail)}</div>`;
+      }
+    }
+    // Real TOTAL per acquisition phase, summed across every host that went
+    // through it -- each later preservation_step beat only shows ONE host's
+    // own slice (e.g. "Memory acquisition: 3m 3s"), which is accurate but
+    // reads as short in isolation when a case has 3+ hosts. User explicitly
+    // asked (2026-10-11) to re-verify these durations; this total was the
+    // real number missing, not a correction of a wrong one -- see
+    // monitor3d/README.md for the verification this came from.
+    const totals = p.phase_totals || [];
+    if (totals.length) {
+      html += sectionHeading("Real totals across all hosts (not just one)");
+      totals.forEach((t) => {
+        const spanNote = t.span_seconds != null && Math.abs(t.span_seconds - t.total_elapsed_seconds) > 5
+          ? ` (wall-clock span ${fmtElapsed(t.span_seconds)} -- hosts ran one after another, not in parallel)`
+          : "";
+        html += kv(`${t.label} (${t.host_count} host${t.host_count === 1 ? "" : "s"})`, `${fmtElapsed(t.total_elapsed_seconds)}${spanNote}`);
+      });
+    }
+    // Reality Gap (hueco #5, "contextual reality gap") -- opt-in only
+    // (#reality-gap-toggle), never computed by default: each check below
+    // triggers a real, fresh SSH probe per host, same cost tier as
+    // forensic_twin.html's own "Check a Node" button. Filled in
+    // asynchronously by loadRealityGap() right after this beat's main HTML
+    // is already on screen -- see its call site at the end of
+    // renderReconStageDetail.
+    if (realityGapToggle?.checked) {
+      html += sectionHeading("Reality Gap vs. current twin");
+      html += `<div id="reality-gap-mount"><div class="detail-empty">Checking the twin's current reference model against what it really was for this case (real SSH probe, a few seconds per host)&hellip;</div></div>`;
+    }
   } else if (beat.kind === "preservation_step" || beat.kind === "analysis_phase") {
     const e = p.stage_timeline_entry || {};
     html += kv("Stage", esc(e.label));
@@ -1154,15 +1443,70 @@ function renderReconStageDetail(beat) {
     if (e.rel_path) html += kv("Path", `<span style="font-size:9px;word-break:break-all;">${esc(e.rel_path)}</span>`);
     if (e.error_detail) html += kv("Error", `<span style="color:var(--red);">${esc(e.error_detail)}</span>`);
   } else if (beat.kind === "reconstruction") {
-    const metrics = p.causal_status?.metrics_preview || {};
-    html += kv("CPR", metrics.causal_path_recoverability ?? "—");
+    const status = p.causal_status || {};
+    const metrics = status.metrics_preview || {};
+    html += kv("CPR (C0 — forensic attestation)", metrics.causal_path_recoverability ?? "—");
     html += kv("Analysis coverage", metrics.analysis_coverage_ratio != null ? `${Math.round(metrics.analysis_coverage_ratio * 100)}%` : "—");
     html += kv("Ambiguous edges", metrics.ambiguous_edges ?? "—");
-    html += kv("Ground truth", esc(p.causal_status?.ground_truth_summary?.ground_truth_status));
+    html += kv("Ground truth", esc(status.ground_truth_summary?.ground_truth_status));
+    const cprVerdict = interpretCpr(metrics.causal_path_recoverability);
+    if (cprVerdict) html += interpretationBox(cprVerdict.tone, cprVerdict.text);
+    // Evidence strength per edge (foc_causal_reconstruction, 2026-10-10):
+    // how each recovered edge was actually proven -- a "causal" edge has a
+    // confirmed cause-before-effect order, a "co_occurrence" edge only shows
+    // both things happened without proving one caused the other. Purely a
+    // read of the already-computed `evidence_strength` field on each edge
+    // in this beat's own payload -- never recomputed here.
+    const edges = p.edges || [];
+    if (edges.length) {
+      const counts = { causal: 0, temporal: 0, co_occurrence: 0, unclassified: 0 };
+      for (const e of edges) counts[e.evidence_strength || "unclassified"] = (counts[e.evidence_strength || "unclassified"] || 0) + 1;
+      html += sectionHeading("Evidence strength per edge");
+      html += kv("Causal (cause confirmed before effect)", counts.causal);
+      html += kv("Temporal (order unconfirmed)", counts.temporal);
+      html += kv("Co-occurrence only (not proven causal)", counts.co_occurrence);
+      html += kv("Unclassified (missing evidence)", counts.unclassified);
+      html += interpretationBox(
+        counts.causal >= counts.co_occurrence + counts.unclassified ? "good" : "mixed",
+        "\"Causal\" means this edge's evidence proves the cause really happened before its effect, in order -- the strongest kind of forensic proof. \"Co-occurrence\" means the evidence only shows two things happened near each other in time, not that one caused the other."
+      );
+    }
+    // C3 CPR (forge_dt_metrics, 2026-10-10): the SAME edges re-checked
+    // against an independent evidence path (Intervention Ledger + post-hoc
+    // Linker + Evidence Bridge) instead of foc_causal_reconstruction's own
+    // attestation chain -- a real, substantive "second opinion" on the
+    // exact same case. Only ever moves CPR up from C0, never down.
+    const c3 = p.c3;
+    if (c3 && c3.ok) {
+      html += sectionHeading("CPR (C3 — independent twin corroboration)");
+      html += kv("C3 CPR", c3.c3_cpr ?? "—");
+      html += kv("Independently confirmed", c3.independently_confirmed ? "yes" : "no");
+      if (c3.independently_confirmed) html += kv("Confirming intervention", esc(c3.confirming_intervention_id));
+      if (c3.c3_cpr != null && c3.c0_cpr != null && c3.c3_cpr > c3.c0_cpr) {
+        html += interpretationBox("good", `Independent confirmation from the digital twin raised this case's recoverability from ${c3.c0_cpr} to ${c3.c3_cpr} -- real intervention data the twin itself observed proved a step the forensic attestation chain alone could not.`);
+      } else if (c3.independently_confirmed === false) {
+        html += interpretationBox("mixed", "Nothing new to confirm here independently -- either no real intervention was applied against this case's host, or C0's own attestation already covered everything.");
+      }
+    }
+    html += sectionHeading("Execution");
+    html += kv("Execution status", esc(status.execution_status));
+    html += kv("Degraded OK", status.degraded_ok ? "yes" : "no");
+    html += kv("Stale", status.is_stale ? "yes" : "no");
+    if (status.errors?.length) html += kv("Errors", `<span style="color:var(--red);">${esc(status.errors.join("; "))}</span>`);
   } else if (beat.kind === "seal") {
     const integ = p.integrity || {};
+    html += interpretationBox(
+      integ.case_sealed ? "good" : "bad",
+      integ.case_sealed
+        ? "This case's evidence is locked and fingerprinted -- if anyone tampers with a file afterward, that change would be detectable."
+        : "This case was never sealed -- its evidence has no tamper-evidence guarantee, so a later change to a file couldn't be proven to have happened."
+    );
     html += kv("Sealed", integ.case_sealed ? "yes" : "no");
     html += kv("Artifacts", `${fmt(integ.artifacts_with_hash)} / ${fmt(integ.artifacts_total)} hashed`);
+    html += kv("Manifest present", integ.manifest_present ? "yes" : "no");
+    if (integ.manifest_hash) html += kv("Manifest hash", `<span style="font-size:9px;">${esc(integ.manifest_hash.slice(0, 20))}&hellip;</span>`);
+    html += kv("Manifest verified live", integ.manifest_hash_verified_live ? "yes" : "no");
+    html += kv("Custody present", integ.custody_present ? "yes" : "no");
     html += kv("Custody entries", fmt(integ.custody_entries));
     html += kv("Last custody action", esc(fmt(integ.last_custody_action)));
   } else if (beat.kind === "repetition_summary") {
@@ -1171,13 +1515,33 @@ function renderReconStageDetail(beat) {
       : `<div class="detail-empty">No narrative report available for this repetition.</div>`;
   } else if (beat.kind === "campaign_finale") {
     const report = p.comparison_report || {};
+    if (report.verdict) html += interpretationBox(report.all_delta_wcpr_acceptable ? "good" : "bad", report.verdict);
     html += kv("All Δwcpr acceptable", report.all_delta_wcpr_acceptable ? "yes" : "no");
     for (const c of report.comparisons || []) {
       html += sectionHeading(`CPR A/B`);
       html += kv("CPR A", c.cpr_a);
       html += kv("CPR B", c.cpr_b);
       html += kv("ΔCPR", c.delta_cpr);
+      html += kv("Δwcpr acceptable", c.delta_wcpr_acceptable ? "yes" : "no");
+      // Real reproducibility diff between the two repetitions being
+      // compared -- exactly what "is this campaign reproducible" is
+      // actually checking, not just the headline CPR numbers.
+      const diff = c.diff_summary || {};
+      if (Object.keys(diff).length) {
+        html += sectionHeading("Reproducibility diff (A vs B)");
+        for (const [field, pair] of Object.entries(diff)) {
+          const same = JSON.stringify(pair?.a) === JSON.stringify(pair?.b);
+          html += kv(field.replace(/_/g, " "), same ? esc(fmt(pair?.a)) : `<span style="color:var(--amber);">${esc(fmt(pair?.a))} → ${esc(fmt(pair?.b))}</span>`);
+        }
+      }
     }
+  } else if (beat.kind === "campaign_failed") {
+    // The chronologically-correct "here it stopped" moment -- reuses the
+    // exact same renderFailureForensics() already built for
+    // campaign_failure_forensics, just reached through normal playback
+    // instead of shown up front. See renderFailureForensics's own comment
+    // for the full design history.
+    html += renderFailureForensics(beat.payload?.failure_report);
   } else {
     html = `<div class="detail-empty">No detail available for this beat.</div>`;
   }
@@ -1186,14 +1550,94 @@ function renderReconStageDetail(beat) {
     html += beat.detail_lines.map((l) => `<div class="event-row">${esc(l)}</div>`).join("");
   }
   reconStageBody.innerHTML = html;
+  if (beat.kind === "case_created" && realityGapToggle?.checked) loadRealityGap(beat);
 }
+
+// Reality Gap vs. current twin (hueco #5, Sammartino & Pasquini's
+// "contextual reality gap") -- queries, per real host in this case, whether
+// the twin's CURRENT Suricata/Wazuh config + expected-ports reference model
+// still matches what it really was when this case was built, or has
+// silently drifted since. One real SSH probe per host via
+// forensic_twin.compute_reality_gap -- never automatic, only when the
+// toggle is on, since it is genuinely not free. `as_of` is the case's own
+// real `case_created_utc`, not "now".
+function renderRealityGapKind(label, g) {
+  if (!g) return "";
+  if (!g.comparable) {
+    return `<div class="event-row" style="opacity:0.7;">${esc(label)}: ${esc(g.reason)}</div>`;
+  }
+  if (g.same_baseline) {
+    return `<div class="event-row" style="color:var(--green);">${esc(label)}: same reference model used then and now -- no drift.</div>`;
+  }
+  const note = g.drifted
+    ? `<span style="color:var(--amber);">drifted since then -- ${g.changed.length} changed, ${g.added.length} added, ${g.removed.length} removed vs. the reference that was really in effect for this case</span>`
+    : `<span style="color:var(--green);">reference was recaptured since, but the real content is unchanged -- no drift</span>`;
+  return `<div class="event-row">${esc(label)}: ${note}</div>`;
+}
+
+function renderRealityGapHost(hostName, data) {
+  if (!data || !data.ok) {
+    return `<div class="event-row" style="opacity:0.6;">${esc(hostName)}: ${esc((data && data.error) || "not reachable right now")}</div>`;
+  }
+  return `<div class="kv-row" style="flex-direction:column;align-items:flex-start;gap:2px;"><div class="k">${esc(hostName)}</div>${renderRealityGapKind("Config baseline", data.config)}${renderRealityGapKind("Network baseline", data.network)}</div>`;
+}
+
+async function loadRealityGap(beat) {
+  const mount = document.getElementById("reality-gap-mount");
+  if (!mount) return;
+  const hosts = (beat.payload?.hosts || []).filter((h) => h.name);
+  const asOf = beat.payload?.case?.case_created_utc;
+  if (!hosts.length || !asOf) {
+    mount.innerHTML = `<div class="detail-empty">No case/host data available to compare for this repetition.</div>`;
+    return;
+  }
+  const rows = [];
+  for (const h of hosts) {
+    try {
+      const res = await fetch(`/api/forensic-twin/reality-gap/${encodeURIComponent(h.name)}?as_of=${encodeURIComponent(asOf)}`, { method: "POST" });
+      rows.push(renderRealityGapHost(h.name, await res.json()));
+    } catch (e) {
+      rows.push(renderRealityGapHost(h.name, { ok: false, error: String(e) }));
+    }
+    // Re-check the mount still exists and the toggle is still on after each
+    // await -- the user may have navigated to a different beat or turned
+    // the toggle off mid-flight (several real SSH probes in sequence can
+    // take a while); stop silently instead of overwriting newer content.
+    if (!document.getElementById("reality-gap-mount") || !realityGapToggle?.checked) return;
+  }
+  mount.innerHTML = rows.join("") || `<div class="detail-empty">No comparable hosts for this case.</div>`;
+}
+
+let lastRenderedBeat = null;
 
 reconstruction.onBeatChange((beat, index, total) => {
   const ts = beat.started_at ? esc(beat.started_at) : "";
   reconBeatLabel.textContent = beat.available ? esc(beat.title) : `${esc(beat.title)} (not available)`;
   reconProgress.textContent = `Rep ${beat.repetition_number ?? "—"} · beat ${index + 1}/${total}${ts ? " · " + ts : ""}`;
   renderReconProgress();
+  lastRenderedBeat = beat;
   renderReconStageDetail(beat);
+  // The moment playback genuinely reaches the real failure beat (never
+  // before), pin a persistent copy of the same account into the always-on
+  // left panel -- so it stays available for further inspection even if the
+  // user later scrubs back to an earlier beat and Stage Detail (right
+  // panel) moves on to show that instead.
+  if (beat.kind === "campaign_failed") {
+    reconFailurePanel.hidden = false;
+    reconFailureBody.innerHTML = renderFailureForensics(beat.payload?.failure_report);
+  }
+});
+
+// Flipping the toggle while already looking at a case_created beat
+// re-renders immediately -- otherwise it would only take effect the next
+// time playback happens to land on a case_created beat again.
+realityGapToggle?.addEventListener("change", () => {
+  if (lastRenderedBeat?.kind === "case_created") renderReconStageDetail(lastRenderedBeat);
+});
+
+const forensicTwinWatcherToggle = document.getElementById("forensic-twin-watcher-toggle");
+forensicTwinWatcherToggle?.addEventListener("change", () => {
+  reconstruction.setTwinWatcherEnabled(forensicTwinWatcherToggle.checked);
 });
 
 reconToggleBtn.addEventListener("click", async () => {
@@ -1201,6 +1645,8 @@ reconToggleBtn.addEventListener("click", async () => {
   reconBar.classList.toggle("visible", willShow);
   reconToggleBtn.classList.toggle("active", willShow);
   if (willShow) {
+    if (liveAttackToggleBtn.classList.contains("active")) liveAttackToggleBtn.click(); // mutually exclusive
+    if (digitalTwinToggleBtn.classList.contains("active")) digitalTwinToggleBtn.click(); // mutually exclusive
     // Opening the panel is what enters reconstruction mode now -- the live
     // scene is cleared right here, not only once Play is first pressed.
     reconstruction.enter();
@@ -1212,7 +1658,7 @@ reconToggleBtn.addEventListener("click", async () => {
         const data = await res.json();
         const jobs = data.jobs || [];
         reconSelect.innerHTML = `<option value="">Select a campaign&hellip;</option>` + jobs.map(
-          (j) => `<option value="${esc(j.job_id)}">${esc(j.job_id)} · ${esc(j.status)} · ${esc(fmt(j.created_at))}</option>`
+          (j) => `<option value="${esc(j.job_id)}" data-status="${esc(j.status)}">${esc(j.job_id)} · ${esc(j.status)} · ${esc(fmt(j.created_at))}</option>`
         ).join("");
         reconSelect.dataset.loaded = "1";
       } catch (err) {
@@ -1229,14 +1675,137 @@ reconToggleBtn.addEventListener("click", async () => {
   }
 });
 
+const liveAttackToggleBtn = document.getElementById("live-attack-toggle-btn");
+liveAttackToggleBtn.addEventListener("click", async () => {
+  const willShow = !liveAttackToggleBtn.classList.contains("active");
+  liveAttackToggleBtn.classList.toggle("active", willShow);
+  if (willShow) {
+    if (reconBar.classList.contains("visible")) reconToggleBtn.click(); // mutually exclusive with reconstruction mode
+    if (digitalTwinToggleBtn.classList.contains("active")) digitalTwinToggleBtn.click(); // mutually exclusive with digital twin view
+    await liveAttack.enter();
+  } else {
+    liveAttack.exit();
+  }
+});
+
+const digitalTwinToggleBtn = document.getElementById("digital-twin-toggle-btn");
+digitalTwinToggleBtn.addEventListener("click", async () => {
+  const willShow = !digitalTwinToggleBtn.classList.contains("active");
+  digitalTwinToggleBtn.classList.toggle("active", willShow);
+  if (willShow) {
+    if (reconBar.classList.contains("visible")) reconToggleBtn.click(); // mutually exclusive with reconstruction mode
+    if (liveAttackToggleBtn.classList.contains("active")) liveAttackToggleBtn.click(); // mutually exclusive with live attack view
+    await digitalTwin.enter();
+  } else {
+    digitalTwin.exit();
+  }
+});
+
+// Deep link from forensic_twin.html's "Open 3D Digital Twin View" button
+// (?view=digital-twin) -- lets that 2D control panel jump straight into this
+// mode instead of requiring a manual click here every time.
+if (new URLSearchParams(window.location.search).get("view") === "digital-twin") {
+  digitalTwinToggleBtn.click();
+}
+
+// Campaign Failure Forensics (2026-10-11) -- a FAILED job rarely has a
+// clean, fully-played-out beat timeline to replay (that's the whole point:
+// it died partway through), so instead of forcing it through the normal
+// playback UI, picking one in this same dropdown shows a real,
+// evidence-grounded account of why it actually stopped -- reusing data
+// this platform already records (the job's own log, including real
+// load/mem/swap readings, and the orchestrator server's own independent
+// memory watchdog), never a guess. See
+// campaign_failure_forensics/README.md for the full design and the real
+// false-positive it was caught and fixed against before shipping.
+function renderFailureForensics(r) {
+  if (!r || !r.ok) {
+    return `<div class="detail-empty">${esc((r && r.error) || "Could not load failure forensics for this job.")}</div>`;
+  }
+  const toneByCause = {
+    undetermined: "mixed",
+    scenario_vm_resource_exhaustion: "mixed",
+    server_resource_exhaustion: "bad",
+    host_and_server_resource_exhaustion: "bad",
+  };
+  let html = "";
+  html += kv("Phase at failure", esc(r.phase_at_failure));
+  html += kv("Declared error (the watchdog's own symptom message)", esc(r.declared_error));
+  html += sectionHeading("Real timeline reconstructed from this job's own log");
+  html += kv("Last real activity", `${esc(fmt(r.last_real_activity?.ts))} -- ${esc(r.last_real_activity?.msg)}`);
+  html += kv("Declared failed at", esc(fmt(r.declared_failed_at)));
+  html += kv("Silence before being declared dead", r.silence_seconds != null ? fmtElapsed(r.silence_seconds) : "—");
+  const snap = r.scenario_vm_host_snapshot;
+  if (snap) {
+    html += sectionHeading("Scenario VM's own last resource reading before the silence");
+    html += kv("Load", `${esc(fmt(snap.load_1m))} / ${esc(fmt(snap.cpu_count))} cores (ratio ${esc(fmt(snap.load_ratio))}) -- ${severityBadge(snap.load_severity)}`);
+    html += kv("Memory used", `${esc(fmt(snap.mem_used_pct))}% -- ${severityBadge(snap.mem_severity)}`);
+    html += kv("Swap used", `${esc(fmt(snap.swap_used_pct))}% -- ${severityBadge(snap.swap_severity)}`);
+  }
+  const mw = r.server_memory_watchdog;
+  if (mw) {
+    html += sectionHeading("Orchestrator server's own independent memory watchdog, same window");
+    html += kv("Events in this window", `${mw.events?.length ?? 0} (${esc(fmt(mw.window_rate_per_min))}/min)`);
+    html += kv("Baseline rate (preceding 3h)", `${esc(fmt(mw.baseline_rate_per_min))}/min`);
+    html += kv("Assessment", mw.is_spike
+      ? `<span style="color:var(--red);">real spike -- meaningfully above the baseline rate</span>`
+      : mw.chronic
+        ? `<span style="color:var(--text-dim);">chronic background rate -- NOT a spike tied to this failure, weak evidence</span>`
+        : `<span style="color:var(--green);">no unusual activity</span>`);
+  }
+  html += interpretationBox(
+    toneByCause[r.probable_cause] || "mixed",
+    `Probable cause: ${(r.probable_cause || "undetermined").replace(/_/g, " ")} (confidence: ${r.confidence}). ${r.explanation}`
+  );
+  return html;
+}
+
+// Real data-loss bug found 2026-10-11: a failed campaign that completed
+// some repetitions before dying can have real scenario snapshots on disk
+// (proven by its own log: "Snapshot captured: SS-...") that never got
+// linked into job_state.json's level_c_snapshot_ids -- without them,
+// monitor3d has no host/machine data to draw at all for those repetitions,
+// which is exactly what looked like "no reconstruye nada visualmente" to
+// the user. Narrow, evidence-based, one-field repair -- see
+// recover_missing_snapshot_ids's own docstring in service.py. Tried
+// silently before every timeline load for a failed job; a no-op (and
+// invisible) when there's nothing to repair.
+async function tryRecoverSnapshotIds(jobId) {
+  try {
+    const res = await fetch(`/api/campaign-failure-forensics/${encodeURIComponent(jobId)}/recover-snapshot-ids`, { method: "POST" });
+    return await res.json();
+  } catch (e) {
+    return { ok: false, error: String(e) };
+  }
+}
+
 reconSelect.addEventListener("change", async () => {
   const jobId = reconSelect.value;
+  const status = reconSelect.selectedOptions[0]?.dataset.status;
   setTransportEnabled(false);
   reconBeatLabel.textContent = "";
   reconProgress.textContent = "";
   reconStageBody.innerHTML = `<div class="detail-empty">Nothing played yet.</div>`;
   reconStageSubtitle.textContent = "Current beat";
+  // Deliberately NOT shown immediately on selection, even for a failed
+  // campaign -- user's own correction, 2026-10-12: the real "why it failed"
+  // account should appear exactly when playback reaches that moment (its
+  // own real "campaign_failed" beat, see reconstruction.js::handleCampaignFailed
+  // and this file's own "campaign_failed" branch in renderReconStageDetail),
+  // not as a spoiler shown before pressing Play. This panel only gets
+  // un-hidden and filled in, as a persistent pinned copy, once that beat is
+  // actually reached -- see the onBeatChange callback below.
+  reconFailurePanel.hidden = true;
   if (!jobId) return;
+  // Silent, invisible data repair (see tryRecoverSnapshotIds's own comment)
+  // -- never shown as a message, since even announcing "real data was
+  // recovered for this campaign" would itself hint that it's the failed
+  // one before the user has pressed Play.
+  if (status === "failed") await tryRecoverSnapshotIds(jobId);
+  // Timeline loading is identical for every job regardless of status -- a
+  // failed campaign still has real beats for whatever it completed before
+  // dying (deployment, maybe an attack/detection), and plays back through
+  // this exact same flow, Stage Detail panel included.
   reconBeatLabel.textContent = "Loading timeline…";
   try {
     const { totalBeats } = await reconstruction.loadTimeline(jobId);
@@ -1256,6 +1825,14 @@ reconSpeedInput.addEventListener("input", () => {
 
 reconPlayBtn.addEventListener("click", () => reconstruction.play());
 reconPauseBtn.addEventListener("click", () => reconstruction.pause());
+// VCR-style scrubbing (2026-10-12): pause-and-go-back for investigating a
+// moment just before something, without losing the whole replay position
+// the way Reset would. reconstruction.stepBack/stepForward already pause
+// and rebuild the scene up to the exact target beat; onBeatChange (already
+// wired) re-renders Stage Detail/the left progress panel for wherever it
+// lands, same as normal playback.
+reconStepBackBtn.addEventListener("click", () => reconstruction.stepBack());
+reconStepFwdBtn.addEventListener("click", () => reconstruction.stepForward());
 reconResetBtn.addEventListener("click", () => {
   reconstruction.reset();
   renderReconProgress();
@@ -1269,4 +1846,5 @@ reconExitBtn.addEventListener("click", () => {
   reconBar.classList.remove("visible");
   reconToggleBtn.classList.remove("active");
   setReconPanelsVisible(false);
+  reconFailurePanel.hidden = true;
 });

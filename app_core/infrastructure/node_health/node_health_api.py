@@ -27,6 +27,7 @@ CLEANUP_SCRIPT_PATH = REPO_ROOT / "pre_memory_cleanup_inside_node.sh"
 TIME_SYNC_SCRIPT_PATH = REPO_ROOT / "app_core" / "infrastructure" / "forensics" / "scripts" / "time_sync_preflight.sh"
 OPENSTACK_HEALTH_DIR = Path(__file__).resolve().parent / "openstack_health"
 OPENSTACK_RESTART_SCRIPT_PATH = OPENSTACK_HEALTH_DIR / "restart_openstack_services.sh"
+FREE_HOST_MEMORY_SCRIPT_PATH = Path(__file__).resolve().parent / "scripts" / "free_host_memory.sh"
 TOOLS_INSTALLED_DIR = REPO_ROOT / "tools-installer" / "installed"
 TOOLS_TMP_DIR = REPO_ROOT / "tools-installer-tmp"
 NODE_HEALTH_TIME_SYNC_DIR = REPO_ROOT / "runtime" / "time_sync" / "node_health"
@@ -152,7 +153,13 @@ def _read_active_case_dir() -> Path | None:
     try:
         if not ACTIVE_CASE_PTR.is_file():
             return None
-        candidate = Path((ACTIVE_CASE_PTR.read_text(encoding="utf-8").splitlines() or [""])[0]).expanduser().resolve()
+        raw = (ACTIVE_CASE_PTR.read_text(encoding="utf-8").splitlines() or [""])[0].strip()
+        if not raw:
+            # Pointer present but empty (no active case) -- Path("").resolve()
+            # would return the process's cwd, whose "is_dir()" is always True,
+            # falsely reporting the project's root directory as "active case".
+            return None
+        candidate = Path(raw).expanduser().resolve()
         return candidate if candidate.is_dir() else None
     except Exception:
         return None
@@ -319,6 +326,86 @@ def power_on_stopped_nodes() -> dict:
             pass
 
 
+def free_host_memory() -> dict:
+    """Frees reclaimable OS memory on THIS host -- the OpenStack
+    controller/gunicorn server itself, never the scenario's SSH-probed VMs
+    (fuxa/plc/victim/attacker/monitor), which are an entirely separate,
+    unrelated code path in this module.
+
+    Motivated directly by a real incident this session: `regenerate_foc()`
+    during Level B/C analysis drove real system free memory from 33GB down
+    to 423MB with swap 100% full, which is what killed gunicorn workers.
+    This gives the operator an on-demand way to reclaim what CAN be safely
+    reclaimed, without deleting or breaking anything:
+      - `gc.collect()` inside THIS worker process (Python-level garbage --
+        note: gunicorn runs 4 sync workers, each with its own memory, so
+        this only affects whichever worker happens to serve this request,
+        not the other 3).
+      - `sync` + `echo 1 > /proc/sys/vm/drop_caches` on the host (kernel
+        page cache/dentries/inodes -- documented by the kernel as always
+        safe: rebuilt on demand, no user data ever deleted). Requires the
+        NOPASSWD sudoers rule installed by start_dashboard.sh's
+        "[2.9/6]" step; if that rule is missing, `sudo -n` fails fast
+        (no password prompt) and this reports it explicitly instead of
+        silently doing nothing.
+    Deliberately does NOT touch swap (swapoff/swapon) -- that needs enough
+    free RAM to hold everything currently swapped out, and an automatic
+    button doing it blindly could itself trigger the exact OOM this is
+    meant to prevent. That stays a manual, confirmed action (see
+    node_health/README.md for the exact commands used this session).
+    """
+    import gc
+
+    before = _parse_free_m(_run_local_text(["free", "-m"]).splitlines())
+    collected_objects = gc.collect()
+
+    script_attempted = FREE_HOST_MEMORY_SCRIPT_PATH.exists()
+    script_ok = False
+    script_output = ""
+    script_error = None
+    if script_attempted:
+        try:
+            proc = subprocess.run(
+                ["bash", str(FREE_HOST_MEMORY_SCRIPT_PATH)],
+                capture_output=True,
+                text=True,
+                timeout=20,
+            )
+            script_output = ((proc.stdout or "") + (proc.stderr or "")).strip()
+            script_ok = proc.returncode == 0
+            if not script_ok:
+                script_error = f"exit_code={proc.returncode}"
+        except Exception as exc:
+            script_error = str(exc)
+    else:
+        script_error = "script_not_found"
+
+    after = _parse_free_m(_run_local_text(["free", "-m"]).splitlines())
+
+    mem_avail_delta = None
+    if before.get("mem_avail_mb") is not None and after.get("mem_avail_mb") is not None:
+        mem_avail_delta = after["mem_avail_mb"] - before["mem_avail_mb"]
+
+    return {
+        "generated_at": _utc_now(),
+        "gc_collected_objects": collected_objects,
+        "drop_caches": {
+            "attempted": script_attempted,
+            "ok": script_ok,
+            "error": script_error,
+            "output": script_output,
+        },
+        "before": before,
+        "after": after,
+        "mem_avail_mb_delta": mem_avail_delta,
+        "note": (
+            "gc.collect() only frees memory in this one gunicorn worker process, not all 4. "
+            "Swap is intentionally left untouched -- see node_health/README.md for the manual "
+            "swapoff/swapon procedure if swap itself needs reducing."
+        ),
+    }
+
+
 def _find_node(instance_id: str) -> dict | None:
     for node in _list_nodes():
         if node["id"] == instance_id:
@@ -358,6 +445,40 @@ def _run_local_text(cmd: list[str]) -> str:
         return ""
 
 
+def _parse_free_m(mem_lines: list[str]) -> dict:
+    """Parses `free -m` output into MB ints. Shared by `_local_host_summary`
+    (fleet table row) and `free_host_memory` (before/after snapshot), so the
+    two never disagree on how they read the same command's output."""
+    result: dict[str, int | None] = {
+        "mem_total_mb": None,
+        "mem_used_mb": None,
+        "mem_avail_mb": None,
+        "swap_total_mb": None,
+        "swap_used_mb": None,
+        "swap_free_mb": None,
+    }
+    for line in mem_lines:
+        if line.startswith("Mem:"):
+            cols = line.split()
+            if len(cols) >= 7:
+                try:
+                    result["mem_total_mb"] = int(cols[1])
+                    result["mem_used_mb"] = int(cols[2])
+                    result["mem_avail_mb"] = int(cols[6])
+                except Exception:
+                    pass
+        elif line.startswith("Swap:"):
+            cols = line.split()
+            if len(cols) >= 4:
+                try:
+                    result["swap_total_mb"] = int(cols[1])
+                    result["swap_used_mb"] = int(cols[2])
+                    result["swap_free_mb"] = int(cols[3])
+                except Exception:
+                    pass
+    return result
+
+
 def _local_host_summary(nodes: list[dict]) -> dict:
     root_df = _run_local_text(["df", "-P", "-B1", "/"]).splitlines()
     mem_lines = _run_local_text(["free", "-m"]).splitlines()
@@ -375,19 +496,7 @@ def _local_host_summary(nodes: list[dict]) -> dict:
             except Exception:
                 pass
 
-    mem_total = mem_used = mem_avail = None
-    if mem_lines:
-        for line in mem_lines:
-            if line.startswith("Mem:"):
-                cols = line.split()
-                if len(cols) >= 7:
-                    try:
-                        mem_total = int(cols[1])
-                        mem_used = int(cols[2])
-                        mem_avail = int(cols[6])
-                    except Exception:
-                        pass
-                break
+    mem_swap = _parse_free_m(mem_lines)
 
     role_counts: dict[str, int] = {}
     status_counts: dict[str, int] = {}
@@ -406,9 +515,12 @@ def _local_host_summary(nodes: list[dict]) -> dict:
             "root_used_bytes": root_used,
             "root_avail_bytes": root_avail,
             "root_use_pct": root_use_pct,
-            "mem_total_mb": mem_total,
-            "mem_used_mb": mem_used,
-            "mem_avail_mb": mem_avail,
+            "mem_total_mb": mem_swap["mem_total_mb"],
+            "mem_used_mb": mem_swap["mem_used_mb"],
+            "mem_avail_mb": mem_swap["mem_avail_mb"],
+            "swap_total_mb": mem_swap["swap_total_mb"],
+            "swap_used_mb": mem_swap["swap_used_mb"],
+            "swap_free_mb": mem_swap["swap_free_mb"],
         },
         "scenario": {
             "node_count": len(nodes),
@@ -1110,6 +1222,12 @@ def _parse_probe_output(stdout: str) -> dict:
             "top_cpu": sections.get("top_cpu", []),
             "top_mem": sections.get("top_mem", []),
             "largest_var": sections.get("largest_var", []),
+            # NIST SP 800-86 Section 5.1.2 "Volatile Data" -- "Network
+            # Connections" (ports/addresses the system is listening on) and
+            # "Login Sessions" (currently logged-in users), collected via the
+            # same SSH session as everything else above, never cached.
+            "listening_ports": sections.get("listening_ports", []),
+            "login_sessions": sections.get("login_sessions", []),
         },
     }
 
@@ -1976,6 +2094,29 @@ def node_health_power_on_stopped():
     except Exception as exc:
         return jsonify({"error": str(exc)}), 500
     return jsonify(result)
+
+
+@node_health_bp.route("/api/node-health/host/free-memory", methods=["POST"])
+def node_health_free_host_memory():
+    try:
+        result = free_host_memory()
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+    return jsonify(result)
+
+
+@node_health_bp.route("/api/node-health/host/memory-pressure", methods=["GET"])
+def node_health_memory_pressure():
+    try:
+        from app_core.infrastructure.memory_watchdog.service import (
+            get_memory_pressure_snapshot,
+            get_recent_watchdog_events,
+        )
+        snapshot = get_memory_pressure_snapshot()
+        snapshot["recent_watchdog_events"] = get_recent_watchdog_events(limit=20)
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+    return jsonify(snapshot)
 
 
 @node_health_bp.route("/api/node-health/nodes", methods=["GET"])
