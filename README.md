@@ -583,6 +583,69 @@ Every failure surfaces with a concrete reason drawn from the underlying executio
 
 ![Campaign Repetitions Center](Images_readme/Repetitions_Center_Rep_Level_c.png)
 
+Completed campaigns can then be replayed as a fully navigable 3D reconstruction.
+
+---
+
+### 4.15 3D Campaign Reconstruction View
+
+The **3D Campaign Reconstruction View** replays an already-completed campaign as a chronologically accurate, fully navigable 3D scene, built progressively from the same real execution records exposed elsewhere in the platform — never a live view, and never able to affect a real machine.
+
+The replay follows the real sequence of a campaign from the ground up: instance deployment, tool installation, controlled attacks, detection outcomes, forensic case creation, evidence preservation, multilayer analysis, causal reconstruction, case sealing, and the final cross-run comparison — each stage materializing in the scene as it is reached, with the camera following the current stage so the user never loses track of what is being shown.
+
+The view includes:
+
+- a navigable 3D hierarchy from campaign, to repetition, to case, to host, matching the real execution structure;
+- real-time traveling indicators along the connections between stages, representing data, evidence, or control flow moving between them;
+- a dedicated **Alert Center**, in both the side panel and the 3D scene itself, that highlights the campaign's most significant real events — attacks, detections, fault-injection outcomes, and computed metrics — each with a brief camera visit and a plain-language explanation;
+- per-repetition and per-campaign **report cards**, summarizing reconstruction confidence, reproducibility, and evidence-coverage metrics in a dedicated, readable area of the scene;
+- playback controls (play, pause, step, reset, seek, and adjustable speed) for inspecting any point in the replay at the user's own pace.
+
+![3D Campaign Reconstruction View](Images_readme/3d_compaing.png)
+
+This view is paired with a **digital twin watcher**, a persistent on-screen presence that follows the replay and reports, in real time and in plain language, whether the platform's own digital twin genuinely noticed each real divergence it is shown — and whether that divergence was later resolved.
+
+![3D Campaign Reconstruction View - Two-Repetition Campaign Replay](Images_readme/3D_Campaign_Reconstruction_View.png)
+
+The next section introduces the live digital twin monitor.
+
+---
+
+### 4.16 Digital Twin View
+
+The **Digital Twin View** is the platform's live, continuously running monitor for the currently deployed scenario. Unlike the reconstruction view above, it reflects the real, present state of the deployed environment, not a replay of a past campaign.
+
+It compares the expected behavior of each monitored node against what is actually observed, and surfaces any divergence as soon as it is detected — covering configuration integrity, service availability, clock synchronization, network exposure, resource usage, and industrial process state where applicable.
+
+The view supports:
+
+- a continuous, read-only monitoring loop over every live node in scope;
+- real divergence events, each tied to the specific check that produced it;
+- severity-aware presentation, distinguishing a resolved deviation from a still-unresolved discrepancy;
+- a running history of past observations for each node, independent of the current state.
+
+The digital twin never takes corrective action on its own — it only observes, records, and reports, so that every divergence it surfaces remains independently verifiable against the platform's other evidence sources.
+
+The next section introduces the controlled fault-injection capability.
+
+---
+
+### 4.17 Fault Injection Dashboard
+
+The **Fault Injection Dashboard** supports controlled, reversible fault injection against deployed nodes, as a complementary experimental capability to the attack and detection workflow described earlier.
+
+Where the attack layer models an adversary's actions, fault injection models real operational or environmental failures — a configuration drift, a stopped detection service, a clock skew, a resource exhaustion condition — so that the platform's detection and reconstruction capabilities can be evaluated against both intentional attacks and incidental failures.
+
+The dashboard supports:
+
+- a catalog of reversible fault types, each with a documented safety profile and rollback behavior;
+- launching a fault either attached to a running campaign or applied directly, on demand, against a selected node;
+- an alternating control/treatment launch design, so a fault's real effect can be assessed against a genuine baseline rather than a single uncontrolled run;
+- a real effectiveness view, reporting whether each applied fault measurably took hold, whether the digital twin detected it, and whether supporting evidence was linked to it;
+- automatic reversal of every injected fault once its evaluation window closes.
+
+Every fault type is scoped and sandboxed so that its effect is confined, reversible, and never capable of compromising the platform's own orchestration or a real campaign's own data.
+
 The next section describes the evidence model used by the forensic services.
 
 ---
