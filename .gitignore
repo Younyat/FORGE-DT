@@ -1,5 +1,9 @@
 tf_out/
 last_deployment.pid
+
+# === Research/novelty notes -- personal, never pushed ===
+/investigacion_y_novedad/
+/investigaciones_y_implementacion/
 admin-openrc.sh
 \ cleanup_remoto.sh
 start_dashboard copy.sh
@@ -119,8 +123,22 @@ app_core/infrastructure/attack/outputs/
 *.img
 *.dd
 foc-reconstruction/indexes/relationships_index.json
+foc-reconstruction/indexes/artifacts_index.json
+foc-reconstruction/indexes/sources_index.json
+foc-reconstruction/attestations/detection_attestation.json
 
 /foc-reconstruction/cache/foc_events.jsonl
+
+# Generated runtime state (scenario snapshots, Level B/C job state, node-health
+# checks, time-sync logs) -- grows unbounded with every real run, never source.
+# Found tracked (141 scenario_snapshot manifests alone, 268 MB) despite being
+# pure generated output, same category already excluded for evidence_store/
+# foc-reconstruction's own generated files above. Anchored to the repo ROOT
+# (leading slash) on purpose -- an unanchored "runtime/" also matched real,
+# versioned config data living under unrelated nested "runtime" directories
+# (e.g. app_core/infrastructure/attack/runtime/'s industrial asset maps),
+# caught live before committing this.
+/runtime/
 
 /set-password.yml
 

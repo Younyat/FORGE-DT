@@ -1,7 +1,0 @@
-               Local time: Tue 2026-09-15 09:35:48 UTC
-           Universal time: Tue 2026-09-15 09:35:48 UTC
-                 RTC time: Tue 2026-09-15 09:35:48
-                Time zone: Etc/UTC (UTC, +0000)
-System clock synchronized: yes
-              NTP service: active
-          RTC in local TZ: no

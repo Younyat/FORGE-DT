@@ -1,7 +1,0 @@
-{
-    "status": "success",
-    "message": "\u2705 Entorno destruido correctamente.",
-    "stdout": "===============================================\n\u26a0\ufe0f  LIMPIEZA COMPLETA DE OPENSTACK\n===============================================\n\n\ud83e\uddf1 Eliminando instancias (servers)...\n\n\ud83d\udcbe Eliminando vol\u00famenes...\n\n\ud83c\udf10 Eliminando routers...\n\n\ud83d\udce1 Eliminando subredes...\n\n\ud83c\udf0d Eliminando redes...\n\n\ud83d\udd12 Eliminando grupos de seguridad...\n\u23ed\ufe0f  Saltando grupo default (ed6466ca-9926-4d47-8f33-7d6800cfe8d4)\n\n\ud83d\uddbc\ufe0f Eliminando im\u00e1genes...\n\n\u2699\ufe0f Eliminando sabores (flavors)...\n\n\u2705 Limpieza completada. Entorno OpenStack vac\u00edo.\n",
-    "stderr": "public endpoint for volumev3 service in RegionOne region not found\n",
-    "pid": 3680867
-}

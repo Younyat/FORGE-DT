@@ -1,7 +1,0 @@
-{
-  "job_id": "openstack-restart-3748a4e63ec2",
-  "generated_at": "2026-07-02T09:01:13.637677Z",
-  "script_path": "app_core/infrastructure/node_health/openstack_health/restart_openstack_services.sh",
-  "job_dir": "runtime/node_health/openstack_health/restart_jobs/openstack-restart-3748a4e63ec2",
-  "purpose": "Restart OpenStack services from the Node Health dashboard when control-plane health is degraded."
-}

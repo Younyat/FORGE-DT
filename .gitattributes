@@ -1,0 +1,13 @@
+# Git LFS -- large but legitimately-versioned binary/data assets.
+# Anything generated/confidential (forensic evidence, runtime state, foc-
+# reconstruction caches) is excluded entirely via .gitignore instead -- LFS
+# is only for real, wanted project data that's simply heavy.
+
+# ML dataset/result pickles (ciberia_lab, adv_detection)
+*.pkl filter=lfs diff=lfs merge=lfs -text
+
+# Volatility memory-forensics symbol tables (large JSON, legitimately versioned)
+forensic_volatility/memory_dumps/symbols/**/*.json filter=lfs diff=lfs merge=lfs -text
+
+# Spreadsheet data assets
+*.xlsx filter=lfs diff=lfs merge=lfs -text
