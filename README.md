@@ -6,11 +6,12 @@ It is also supported by the **Programa Global de Innovación en Seguridad** for 
 
 ---
 
-# FORGE-VI
 
-## Forensic Reproducibility and Grounded Experimentation for Virtualized Infrastructures
+# FORGE-DT
 
-**FORGE-VI** is an open virtualized platform for reproducible **Digital Forensics and Incident Response (DFIR)** experimentation in **IT/OT** environments.
+## Forensic Digital Twin Evolution of FORGE-VI
+
+**FORGE-DT** evolves from FORGE-VI, an open virtualized platform for reproducible **Digital Forensics and Incident Response (DFIR)** experimentation in **IT/OT** environments.
 
 It links controlled scenario deployment, incident execution, detection, volatility-aware acquisition, verifiable preservation, post-acquisition analysis, forensic reconstruction, and cross-run comparison inside a single auditable workflow.
 
@@ -33,6 +34,12 @@ Scenario declaration
   -> forensic reconstruction
   -> cross-run comparison
 ```
+
+## Research evolution
+
+**FORGE-DT** is the evolution of [FORGE-VI](https://github.com/nicslabdev/FORGE-VI). It retains the original IT/OT digital-forensic experimentation and evidence-preservation workflow while extending the research direction toward **forensic digital twins**, including comparisons between expected and observed states, analysis of state divergence, and evidence-grounded incident reconstruction.
+
+Further evolutions are [FORGE-HI](https://github.com/Younyat/FORGE-RI), focused on real and hybrid industrial infrastructure, and [FORGE-RFDT](https://github.com/Younyat/FORGE-RFDT), which extends that setting with RF acquisition and forensic analysis.
 
 The next section describes the infrastructure required to run this workflow.
 
